@@ -1,2 +1,2 @@
-# RESTful-requests-axios-Reactjs
+# RESTful-requests-Nodejs-Reactjs
 HTTP requests
