@@ -136,4 +136,4 @@ prod_db  =  dj_database_url.config(conn_max_age=500)
 DATABASES['default'].update(prod_db)
 
 
-ALLOWED_HOSTS = ['https://ecommerce-auth-service-dj.herokuapp.com/']
+ALLOWED_HOSTS = ['ecommerce-auth-service-dj.herokuapp.com']
