@@ -1,0 +1,5 @@
+[build]
+  base    = "packages/web"
+  functions = "out_functions"
+  publish   = "out_publish"
+  command   = "yarn build"

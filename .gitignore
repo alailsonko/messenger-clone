@@ -1,2 +1,3 @@
 ENV
 .env
+node_modules
