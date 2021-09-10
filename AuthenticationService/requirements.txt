@@ -10,7 +10,7 @@ mccabe==0.6.1
 pylint==2.6.0
 pytz==2020.4
 six==1.15.0
-sqlparse==0.4.1
+sqlparse==0.4.2
 toml==0.10.2
 whitenoise==5.2.0
 wrapt==1.12.1
