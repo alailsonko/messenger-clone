@@ -1,0 +1,21 @@
+{
+  "name": "messenger-clone",
+  "version": "1.0.0",
+  "main": "index.js",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "repository": "git@github.com:alailsonko/messenger-clone.git",
+  "author": "alailson <aalailson3@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "mono:start:dev": "concurrently \"yarn mono:start:dev:client\" \"yarn mono:start:dev:server\"",
+    "mono:start:dev:server": "yarn workspace @messenger-clone/server start:dev",
+    "mono:start:dev:client": "yarn workspace @messenger-clone/client dev"
+  },
+  "dependencies": {
+    "concurrently": "^8.0.1",
+    "typescript": "^5.0.4"
+  }
+}
