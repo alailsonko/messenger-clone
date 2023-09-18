@@ -1,0 +1,23 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Users {
+  createdAt: String!
+  updatedAt: String!
+  id: ID!
+  username: String!
+  email: String!
+  passwordHash: String!
+  profileImageUrl: String!
+}
+
+type Query {
+  getUser(input: getUserDTO!): Users!
+}
+
+input getUserDTO {
+  id: ID = null
+  email: String = null
+  username: String = null
+}
