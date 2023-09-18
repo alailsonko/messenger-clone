@@ -13,10 +13,10 @@ type Users {
 }
 
 type Query {
-  getUser(input: getUserDTO!): Users!
+  getUser(input: getUserInputDTO!): Users!
 }
 
-input getUserDTO {
+input getUserInputDTO {
   id: ID = null
   email: String = null
   username: String = null

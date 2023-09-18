@@ -1,13 +1,13 @@
 import { Resolver, Args, Query } from '@nestjs/graphql';
 import { Users } from 'src/domain/models/users';
-import { getUserDTO } from './dto';
+import { getUserInputDTO } from './dto';
 
 @Resolver(() => Users)
 export class UsersResolver {
   constructor() {}
 
   @Query(() => Users)
-  async getUser(@Args('input') input: getUserDTO) {
+  async getUser(@Args('input') input: getUserInputDTO) {
     return {
       input,
     };
