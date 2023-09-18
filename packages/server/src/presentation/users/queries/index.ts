@@ -3,7 +3,7 @@ import { Users } from 'src/domain/models/users';
 import { getUserInputDTO } from './dto';
 
 @Resolver(() => Users)
-export class UsersResolver {
+export class UsersQueryResolver {
   constructor() {}
 
   @Query(() => Users)

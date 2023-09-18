@@ -13,8 +13,5 @@ export class Users extends BaseModel {
   email: string;
 
   @Field({ nullable: false })
-  passwordHash: string;
-
-  @Field({ nullable: false })
   profileImageUrl: string;
 }

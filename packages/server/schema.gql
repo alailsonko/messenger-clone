@@ -8,7 +8,6 @@ type Users {
   id: ID!
   username: String!
   email: String!
-  passwordHash: String!
   profileImageUrl: String!
 }
 
@@ -20,4 +19,14 @@ input getUserInputDTO {
   id: ID = null
   email: String = null
   username: String = null
+}
+
+type Mutation {
+  registerUser(input: registerUserInputDTO!): Users!
+}
+
+input registerUserInputDTO {
+  email: String!
+  username: String!
+  password: String!
 }
