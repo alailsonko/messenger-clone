@@ -1,0 +1,106 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                Int                @id @default(autoincrement())
+  username          String
+  email             String             @unique
+  password_hash     String
+  profile_image_url String?
+  created_at        DateTime           @default(now())
+  updated_at        DateTime           @updatedAt
+  conversations     UserConversation[]
+  sent_messages     Message[]
+  reactions         MessageReaction[]
+  friendships       Friendship[]
+  blocked_users     BlockedUsers[]
+  devices           UserDevice[]
+  sessions          UserSession[]
+}
+
+model Conversation {
+  id         Int                @id @default(autoincrement())
+  name       String?
+  created_at DateTime           @default(now())
+  updated_at DateTime           @updatedAt
+  users      UserConversation[]
+  messages   Message[]
+}
+
+model UserConversation {
+  id              Int          @id @default(autoincrement())
+  user_id         Int
+  conversation_id Int
+  is_admin        Boolean?
+  joined_at       DateTime     @default(now())
+  User            User         @relation(fields: [user_id], references: [id])
+  Conversation    Conversation @relation(fields: [conversation_id], references: [id])
+  messages        Message[]
+}
+
+model Message {
+  id                 Int               @id @default(autoincrement())
+  user_id            Int
+  conversation_id    Int
+  content            String
+  timestamp          DateTime          @default(now())
+  User               User              @relation(fields: [user_id], references: [id])
+  Conversation       Conversation      @relation(fields: [conversation_id], references: [id])
+  reactions          MessageReaction[]
+  UserConversation   UserConversation? @relation(fields: [userConversationId], references: [id])
+  userConversationId Int?
+}
+
+model MessageReaction {
+  id            Int      @id @default(autoincrement())
+  user_id       Int
+  message_id    Int
+  reaction_type String
+  created_at    DateTime @default(now())
+  User          User     @relation(fields: [user_id], references: [id])
+  Message       Message  @relation(fields: [message_id], references: [id])
+}
+
+model Friendship {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  friend_id  Int
+  status     String
+  created_at DateTime @default(now())
+  Friend     User     @relation(fields: [friend_id], references: [id])
+}
+
+model BlockedUsers {
+  id              Int      @id @default(autoincrement())
+  user_id         Int
+  blocked_user_id Int
+  created_at      DateTime @default(now())
+  BlockedUser     User     @relation(fields: [blocked_user_id], references: [id])
+}
+
+model UserDevice {
+  id                 Int     @id @default(autoincrement())
+  user_id            Int
+  device_id          String  @unique
+  device_type        String
+  registration_token String?
+  User               User    @relation(fields: [user_id], references: [id])
+}
+
+model UserSession {
+  id             Int      @id @default(autoincrement())
+  user_id        Int
+  session_token  String   @unique
+  last_active_at DateTime @default(now())
+  expires_at     DateTime
+  User           User     @relation(fields: [user_id], references: [id])
+}
