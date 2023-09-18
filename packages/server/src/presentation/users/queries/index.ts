@@ -9,7 +9,7 @@ export class UsersResolver {
   @Query(() => Users)
   async getUser(@Args('input') input: getUserInputDTO) {
     return {
-      input,
+      id: input.id,
     };
   }
 }
