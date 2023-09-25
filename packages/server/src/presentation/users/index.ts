@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { UsersQueryResolver } from './queries';
 import { UsersMutationResolver } from './mutations';
-import { ApplicationModule } from 'src/application';
+import { UsersApplicationModule } from 'src/application/users';
 
 @Module({
-  imports: [ApplicationModule],
+  imports: [UsersApplicationModule],
   exports: [UsersQueryResolver, UsersMutationResolver],
   providers: [UsersQueryResolver, UsersMutationResolver],
 })

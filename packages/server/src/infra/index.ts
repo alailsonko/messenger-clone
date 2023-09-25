@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { DatabaseModule } from './db';
 import { CryptographyModule } from './cryptography';
+import { DatabaseModule } from './db';
 
 @Module({
-  exports: [DatabaseModule, CryptographyModule],
-  imports: [DatabaseModule, CryptographyModule],
+  exports: [CryptographyModule, DatabaseModule],
+  imports: [CryptographyModule, DatabaseModule],
 })
 export class InfraModule {}

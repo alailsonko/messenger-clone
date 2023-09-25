@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { UsersRepository } from './users';
-import { DatabaseModule } from 'src/infra/db';
+import { InfraModule } from 'src/infra';
 
 @Module({
-  imports: [DatabaseModule],
+  imports: [InfraModule],
   providers: [UsersRepository],
   exports: [UsersRepository],
 })
