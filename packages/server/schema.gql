@@ -3,12 +3,12 @@
 # ------------------------------------------------------
 
 type Users {
-  createdAt: String!
-  updatedAt: String!
+  created_at: String!
+  updated_at: String!
   id: ID!
   username: String!
   email: String!
-  profileImageUrl: String!
+  profileImageUrl: String
 }
 
 type Query {
@@ -22,10 +22,17 @@ input getUserInputDTO {
 }
 
 type Mutation {
-  registerUser(input: registerUserInputDTO!): Users!
+  signUpUser(input: signUpUserInputDTO!): Users!
+  signInUser(input: signInUserInputDTO!): Users!
 }
 
-input registerUserInputDTO {
+input signUpUserInputDTO {
+  email: String!
+  username: String!
+  password: String!
+}
+
+input signInUserInputDTO {
   email: String!
   username: String!
   password: String!
