@@ -1,13 +1,19 @@
 import { Resolver, Args, Mutation } from '@nestjs/graphql';
-import { Users } from 'src/domain/models/users';
-import { registerUserInputDTO } from './dto';
+import { signInUserInputDTO, signUpUserInputDTO } from './dto';
+import { UsersService } from 'src/application/users/users.service';
+import { Users } from 'src/domain/users/users.model';
 
 @Resolver(() => Users)
 export class UsersMutationResolver {
-  constructor() {}
+  constructor(private readonly usersService: UsersService) {}
 
   @Mutation(() => Users)
-  async registerUser(@Args('input') input: registerUserInputDTO) {
+  async signUpUser(@Args('input') input: signUpUserInputDTO) {
+    return this.usersService.signUp(input);
+  }
+
+  @Mutation(() => Users)
+  async signInUser(@Args('input') input: signInUserInputDTO) {
     return {
       id: input.email,
     };

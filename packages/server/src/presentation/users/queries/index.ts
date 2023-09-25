@@ -1,6 +1,6 @@
 import { Resolver, Args, Query } from '@nestjs/graphql';
-import { Users } from 'src/domain/models/users';
 import { getUserInputDTO } from './dto';
+import { Users } from 'src/domain/users/users.model';
 
 @Resolver(() => Users)
 export class UsersQueryResolver {

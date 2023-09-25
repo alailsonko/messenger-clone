@@ -12,6 +12,16 @@ export class Users extends BaseModel {
   @Field({ nullable: false })
   email: string;
 
-  @Field({ nullable: false })
+  @Field({ nullable: true })
   profileImageUrl: string;
+}
+
+export interface UsersEntity {
+  id: string;
+  username: string;
+  email: string;
+  password_hash: string;
+  profile_image_url: string;
+  created_at: Date;
+  updated_at: Date;
 }
