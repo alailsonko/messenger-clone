@@ -11,6 +11,10 @@ type Users {
   profileImageUrl: String
 }
 
+type AccessToken {
+  access_token: String
+}
+
 type Query {
   getUser(input: getUserInputDTO!): Users!
 }
@@ -23,7 +27,7 @@ input getUserInputDTO {
 
 type Mutation {
   signUpUser(input: signUpUserInputDTO!): Users!
-  signInUser(input: signInUserInputDTO!): Users!
+  signInUser(loginUserInput: signInUserInputDTO!): AccessToken!
 }
 
 input signUpUserInputDTO {

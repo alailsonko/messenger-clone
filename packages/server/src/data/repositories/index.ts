@@ -1,9 +1,9 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { UsersRepository } from './users';
 import { InfraModule } from 'src/infra';
 
 @Module({
-  imports: [InfraModule],
+  imports: [forwardRef(() => InfraModule)],
   providers: [UsersRepository],
   exports: [UsersRepository],
 })

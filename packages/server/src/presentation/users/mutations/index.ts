@@ -1,7 +1,9 @@
-import { Resolver, Args, Mutation } from '@nestjs/graphql';
+import { Resolver, Args, Mutation, Context } from '@nestjs/graphql';
 import { signInUserInputDTO, signUpUserInputDTO } from './dto';
 import { UsersService } from 'src/application/users/users.service';
-import { Users } from 'src/domain/users/users.model';
+import { AccessToken, Users } from 'src/domain/users/users.model';
+import { UseGuards } from '@nestjs/common';
+import { GqlAuthGuard } from 'src/infra/auth/guards/gql.guard';
 
 @Resolver(() => Users)
 export class UsersMutationResolver {
@@ -12,10 +14,17 @@ export class UsersMutationResolver {
     return this.usersService.signUp(input);
   }
 
-  @Mutation(() => Users)
-  async signInUser(@Args('input') input: signInUserInputDTO) {
-    return {
-      id: input.email,
-    };
+  @Mutation(() => AccessToken)
+  @UseGuards(GqlAuthGuard)
+  async signInUser(
+    @Args('loginUserInput') _loginUserInput: signInUserInputDTO,
+    @Context({
+      transform(ctx) {
+        return ctx.user;
+      },
+    })
+    user,
+  ) {
+    return this.usersService.signIn(user);
   }
 }

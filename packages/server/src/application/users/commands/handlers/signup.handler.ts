@@ -1,9 +1,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { SignUpCommand } from '../impl';
 import { UsersRepository } from 'src/data/repositories/users';
-import { Prisma } from '@prisma/client';
 import { CryptographyService } from 'src/infra/cryptography/cryptography.service';
-import { UsersEntity } from 'src/domain/users/users.model';
+import { UsersEntity } from 'src/domain/users/users.entity';
+import { plainToClass } from 'class-transformer';
 
 @CommandHandler(SignUpCommand)
 export class SignUpHandler implements ICommandHandler<SignUpCommand> {
@@ -11,9 +11,7 @@ export class SignUpHandler implements ICommandHandler<SignUpCommand> {
     private readonly usersRepository: UsersRepository,
     private readonly cryptographyService: CryptographyService,
   ) {}
-  async execute(
-    command: SignUpCommand,
-  ): Promise<Prisma.Prisma__UserClient<UsersEntity>> {
+  async execute(command: SignUpCommand): Promise<UsersEntity> {
     const { userCreateInput } = command;
 
     userCreateInput.password_hash = await this.cryptographyService.hash(
@@ -22,6 +20,6 @@ export class SignUpHandler implements ICommandHandler<SignUpCommand> {
 
     const user = await this.usersRepository.create(userCreateInput);
 
-    return user;
+    return plainToClass(UsersEntity, user);
   }
 }

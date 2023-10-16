@@ -5,9 +5,17 @@ import { join } from 'path';
 import { cwd } from 'process';
 import { PresentationModule } from './presentation';
 import { DevtoolsModule } from '@nestjs/devtools-integration';
+import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
+import { jwtConstants } from './common/constants';
 
 @Module({
   imports: [
+    PassportModule.register({ defaultStrategy: 'local' }),
+    JwtModule.register({
+      secret: jwtConstants.secret,
+      signOptions: { expiresIn: '3600s' },
+    }),
     DevtoolsModule.register({
       http: true,
     }),

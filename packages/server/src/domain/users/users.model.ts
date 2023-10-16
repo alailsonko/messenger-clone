@@ -16,12 +16,8 @@ export class Users extends BaseModel {
   profileImageUrl: string;
 }
 
-export interface UsersEntity {
-  id: string;
-  username: string;
-  email: string;
-  password_hash: string;
-  profile_image_url: string;
-  created_at: Date;
-  updated_at: Date;
+@ObjectType()
+export class AccessToken {
+  @Field({ nullable: true })
+  access_token: string;
 }

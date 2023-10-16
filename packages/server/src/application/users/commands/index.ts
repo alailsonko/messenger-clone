@@ -1,3 +1,3 @@
-import { SignUpHandler } from './handlers';
+import { SignInHandler, SignUpHandler } from './handlers';
 
-export const CommandHandlers = [SignUpHandler];
+export const CommandHandlers = [SignUpHandler, SignInHandler];

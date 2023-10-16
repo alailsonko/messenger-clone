@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { SignUpCommand } from './commands/impl';
+import { SignInCommand, SignUpCommand } from './commands/impl';
 
 @Injectable()
 export class UsersService {
@@ -9,14 +9,28 @@ export class UsersService {
     private readonly queryBus: QueryBus,
   ) {}
 
-  async signUp(data: { email: string; password: string; username: string }) {
-    const user = await this.commandBus.execute<SignUpCommand>(
+  signUp(data: { email: string; password: string; username: string }) {
+    return this.commandBus.execute<SignUpCommand>(
       new SignUpCommand({
         email: data.email,
         username: data.username,
         password_hash: data.password,
       }),
     );
-    return user;
+  }
+
+  signIn(data: { email: string; id: string; username: string }) {
+    return this.commandBus.execute<
+      SignInCommand,
+      {
+        access_token: string;
+      }
+    >(
+      new SignInCommand({
+        email: data.email,
+        username: data.username,
+        id: data.id,
+      }),
+    );
   }
 }
