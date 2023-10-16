@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { UsersRepository } from 'src/data/repositories/users';
 import { CryptographyService } from '../cryptography/cryptography.service';
-import { Prisma } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
+import { UsersAttrs } from 'src/domain/users/users.entity';
 
 @Injectable()
 export class AuthService {
@@ -15,16 +15,7 @@ export class AuthService {
   async validateUser(
     email: string,
     pass: string,
-  ): Promise<
-    Prisma.Prisma__UserClient<{
-      id: string;
-      username: string;
-      email: string;
-      profile_image_url: string;
-      created_at: Date;
-      updated_at: Date;
-    }>
-  > {
+  ): Promise<Omit<UsersAttrs, 'password_hash'>> {
     const { password_hash, ...result } = await this.usersRepository.findUnique({
       email,
     });
