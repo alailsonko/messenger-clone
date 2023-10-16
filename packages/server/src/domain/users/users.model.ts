@@ -4,7 +4,7 @@ import { BaseModel } from 'src/common';
 @ObjectType()
 export class Users extends BaseModel {
   @Field(() => ID)
-  id: number;
+  id: string;
 
   @Field({ nullable: false })
   username: string;

@@ -4,10 +4,11 @@ import { Users } from 'src/domain/users/users.model';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/infra/auth/guards/jwt.guard';
 import { CurrentUser } from 'src/infra/auth/decorators/current-user.decorator';
+import { UsersService } from 'src/application/users/users.service';
 
 @Resolver(() => Users)
 export class UsersQueryResolver {
-  constructor() {}
+  constructor(private readonly usersService: UsersService) {}
 
   @Query(() => Users)
   @UseGuards(JwtAuthGuard)
@@ -20,11 +21,7 @@ export class UsersQueryResolver {
       email: string;
     },
   ) {
-    console.log({
-      executedBy,
-    });
-    return {
-      id: input.id,
-    };
+    console.log(executedBy);
+    return this.usersService.getUser(input);
   }
 }

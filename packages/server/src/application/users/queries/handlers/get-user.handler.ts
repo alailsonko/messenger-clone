@@ -10,7 +10,11 @@ export class GetUserhandler implements IQueryHandler<GetUserQuery> {
   async execute(query: GetUserQuery): Promise<UsersEntity> {
     const { findOpts } = query;
 
-    const user = await this.usersRepository.findUnique(findOpts);
+    const user = await this.usersRepository.findUnique({
+      id: findOpts.id ?? undefined,
+      email: findOpts.email ?? undefined,
+      username: findOpts.username ?? undefined,
+    });
 
     return new UsersEntity(user);
   }

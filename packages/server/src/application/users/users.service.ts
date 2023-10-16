@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { SignInCommand, SignUpCommand } from './commands/impl';
+import { GetUserQuery } from './queries';
+import { UsersEntity } from 'src/domain/users/users.entity';
+import * as R from 'ramda';
 
 @Injectable()
 export class UsersService {
@@ -31,6 +34,15 @@ export class UsersService {
         username: data.username,
         id: data.id,
       }),
+    );
+  }
+
+  getUser(findOpts: { id?: string; email?: string; username?: string }) {
+    if (R.isEmpty(findOpts)) {
+      throw new Error('missing parameter: id or email or username');
+    }
+    return this.queryBus.execute<GetUserQuery, UsersEntity>(
+      new GetUserQuery(findOpts),
     );
   }
 }
