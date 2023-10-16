@@ -4,10 +4,11 @@ import { CommandHandlers } from './commands';
 import { CqrsModule } from '@nestjs/cqrs';
 import { DataModule } from 'src/data';
 import { InfraModule } from 'src/infra';
+import { QueryHandlers } from './queries';
 
 @Module({
   imports: [CqrsModule, DataModule, InfraModule],
   exports: [UsersService],
-  providers: [UsersService, ...CommandHandlers],
+  providers: [UsersService, ...CommandHandlers, ...QueryHandlers],
 })
 export class UsersApplicationModule {}
