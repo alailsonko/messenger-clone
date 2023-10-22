@@ -5,7 +5,6 @@ export default function SignUpLayout({
   }) {
     return (
       <section>
-        <nav>navbar</nav>
         {children}
       </section>
     )
