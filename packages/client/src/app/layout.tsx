@@ -1,3 +1,4 @@
+import RecoilRootWrapper from '@/components/recoil/RecoilRootWrapper';
 import './globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
@@ -16,7 +17,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className='h-full bg-white'>
-      <body className={`${inter.className} h-full`}>{children}</body>
+      <body className={`${inter.className} h-full`}>
+        <RecoilRootWrapper >{children}</RecoilRootWrapper>
+      </body>
     </html>
   )
 }
