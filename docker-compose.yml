@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  backend:
+    container_name: backend
+    build:
+      context: ./server
+    image: messenger-clone/backend
+    depends_on:
+      - database-mc
+    command: ["yarn", "start:dev"]
+    volumes:
+      - ./server:/app
+
+  frontend:
+    container_name: frontend
+    build:
+      context: ./web
+    image: messenger-clone/frontend
+    ports:
+      - "3000:3000"
+    command: ["yarn", "start"]
+    depends_on:
+      - backend
+    volumes:
+      - ./web:/app
+
+  database-mc:
+    container_name: database-mc
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+volumes:
+  pg_data:
