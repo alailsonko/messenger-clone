@@ -1,3 +1,4 @@
+import { Injectable } from '@nestjs/common';
 import { Type, plainToClass } from 'class-transformer';
 import {
   IsNotEmpty,
@@ -21,7 +22,16 @@ export enum USER_OPERATIONS {
 /**
  * Represents a user entity with validation using class-validator.
  */
+@Injectable()
 class UsersEntity {
+  private _id: string;
+  private _username: string;
+  private _password: string;
+  private _email: string;
+  private _createdAt: Date;
+  private _updatedAt: Date;
+  private _lastLogin: Date | null;
+
   /**
    * User ID (UUID format).
    */
@@ -32,7 +42,13 @@ class UsersEntity {
     message: 'Invalid UUID format',
     groups: [USER_OPERATIONS.READ],
   })
-  id: string;
+  get id(): string {
+    return this._id;
+  }
+
+  set id(value: string) {
+    this._id = value;
+  }
 
   /**
    * User's username.
@@ -48,7 +64,13 @@ class UsersEntity {
       USER_OPERATIONS.UPDATE,
     ],
   })
-  username: string;
+  get username(): string {
+    return this._username;
+  }
+
+  set username(value: string) {
+    this._username = value;
+  }
 
   /**
    * User's password.
@@ -72,7 +94,13 @@ class UsersEntity {
       USER_OPERATIONS.UPDATE,
     ],
   })
-  password: string;
+  get password(): string {
+    return this._password;
+  }
+
+  set password(value: string) {
+    this._password = value;
+  }
 
   /**
    * User's email address.
@@ -99,7 +127,13 @@ class UsersEntity {
       ],
     },
   )
-  email: string;
+  get email(): string {
+    return this._email;
+  }
+
+  set email(value: string) {
+    this._email = value;
+  }
 
   /**
    * User's creation date.
@@ -111,7 +145,13 @@ class UsersEntity {
   @IsDate({
     groups: [USER_OPERATIONS.READ],
   })
-  createdAt: Date;
+  get createdAt(): Date {
+    return this._createdAt;
+  }
+
+  set createdAt(value: Date) {
+    this._createdAt = value;
+  }
 
   /**
    * User's last update date.
@@ -123,7 +163,13 @@ class UsersEntity {
   @IsDate({
     groups: [USER_OPERATIONS.READ],
   })
-  updatedAt: Date;
+  get updatedAt(): Date {
+    return this._updatedAt;
+  }
+
+  set updatedAt(value: Date) {
+    this._updatedAt = value;
+  }
 
   /**
    * User's last login date.
@@ -139,66 +185,12 @@ class UsersEntity {
   @IsDate({
     groups: [USER_OPERATIONS.READ],
   })
-  lastLogin: Date | null;
-
-  /**
-   * Constructor to create an instance of UsersEntity.
-   *
-   * @param id - User ID (UUID format).
-   * @param username - User's username.
-   * @param password - User's password.
-   * @param email - User's email address.
-   * @param createdAt - User's creation date.
-   * @param updatedAt - User's last update date.
-   * @param lastLogin - User's last login date.
-   */
-  constructor(
-    id: string,
-    username: string,
-    password: string,
-    email: string,
-    createdAt: Date,
-    updatedAt: Date,
-    lastLogin: Date | null,
-  ) {
-    this.id = id;
-    this.username = username;
-    this.password = password;
-    this.email = email;
-    this.createdAt = createdAt;
-    this.updatedAt = updatedAt;
-    this.lastLogin = lastLogin;
+  get lastLogin(): Date | null {
+    return this._lastLogin;
   }
 
-  /**
-   * Converts an array of plain user objects to an array of UsersEntity instances.
-   *
-   * @param list - Array of plain user objects.
-   * @returns Array of UsersEntity instances.
-   */
-  static toArray(
-    list: {
-      id: string;
-      username: string;
-      password: string;
-      email: string;
-      createdAt: Date;
-      updatedAt: Date;
-      lastLogin: Date | null;
-    }[],
-  ) {
-    return list.map(
-      ({ createdAt, email, id, lastLogin, password, updatedAt, username }) =>
-        new UsersEntity(
-          id,
-          username,
-          password,
-          email,
-          createdAt,
-          updatedAt,
-          lastLogin,
-        ),
-    );
+  set lastLogin(value: Date | null) {
+    this._lastLogin = value;
   }
 
   /**
@@ -207,7 +199,7 @@ class UsersEntity {
    * @param user - Partial user object.
    * @returns UsersEntity instance.
    */
-  static plainToClass(user: Partial<UsersEntity>) {
+  plainToClass(user: Partial<UsersEntity>) {
     return plainToClass(UsersEntity, user);
   }
 
@@ -218,7 +210,7 @@ class UsersEntity {
    * @param operation - User operation (CREATE, UPDATE, READ).
    * @returns Validation errors, if any.
    */
-  static async validate(
+  async validate(
     user: Partial<UsersEntity>,
     operation: USER_OPERATIONS,
   ): Promise<{ [type: string]: string }[]> {
