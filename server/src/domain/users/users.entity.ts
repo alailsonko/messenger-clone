@@ -164,7 +164,7 @@ class UsersEntity {
       groups: [operation],
     });
 
-    return errors.length ? errors.map((error) => error.constraints) : [];
+    return errors.map((error) => error.constraints);
   }
 
   toObject() {
