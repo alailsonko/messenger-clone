@@ -1,4 +1,4 @@
-import { plainToClass } from 'class-transformer';
+import { Type, plainToClass } from 'class-transformer';
 import {
   IsNotEmpty,
   MinLength,
@@ -86,6 +86,7 @@ class UsersEntity {
   @IsOptional({
     groups: [USER_OPERATIONS.UPDATE, USER_OPERATIONS.CREATE],
   })
+  @Type(() => Date)
   @IsDate({
     groups: [USER_OPERATIONS.READ],
   })
@@ -94,6 +95,7 @@ class UsersEntity {
   @IsOptional({
     groups: [USER_OPERATIONS.UPDATE, USER_OPERATIONS.CREATE],
   })
+  @Type(() => Date)
   @IsDate({
     groups: [USER_OPERATIONS.READ],
   })
@@ -106,6 +108,7 @@ class UsersEntity {
       USER_OPERATIONS.READ,
     ],
   })
+  @Type(() => Date)
   @IsDate({
     groups: [USER_OPERATIONS.READ],
   })
