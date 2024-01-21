@@ -9,13 +9,22 @@ import {
   IsDate,
 } from 'class-validator';
 
+/**
+ * Enumeration representing different user operations.
+ */
 export enum USER_OPERATIONS {
   CREATE = 'CREATE',
   UPDATE = 'UPDATE',
   READ = 'READ',
 }
 
+/**
+ * Represents a user entity with validation using class-validator.
+ */
 class UsersEntity {
+  /**
+   * User ID (UUID format).
+   */
   @IsOptional({
     groups: [USER_OPERATIONS.UPDATE, USER_OPERATIONS.CREATE],
   })
@@ -25,6 +34,9 @@ class UsersEntity {
   })
   id: string;
 
+  /**
+   * User's username.
+   */
   @IsOptional({
     groups: [USER_OPERATIONS.UPDATE],
   })
@@ -38,6 +50,9 @@ class UsersEntity {
   })
   username: string;
 
+  /**
+   * User's password.
+   */
   @IsOptional({
     groups: [USER_OPERATIONS.UPDATE],
   })
@@ -59,6 +74,9 @@ class UsersEntity {
   })
   password: string;
 
+  /**
+   * User's email address.
+   */
   @IsOptional({
     groups: [USER_OPERATIONS.UPDATE],
   })
@@ -83,6 +101,9 @@ class UsersEntity {
   )
   email: string;
 
+  /**
+   * User's creation date.
+   */
   @IsOptional({
     groups: [USER_OPERATIONS.UPDATE, USER_OPERATIONS.CREATE],
   })
@@ -92,6 +113,9 @@ class UsersEntity {
   })
   createdAt: Date;
 
+  /**
+   * User's last update date.
+   */
   @IsOptional({
     groups: [USER_OPERATIONS.UPDATE, USER_OPERATIONS.CREATE],
   })
@@ -101,6 +125,9 @@ class UsersEntity {
   })
   updatedAt: Date;
 
+  /**
+   * User's last login date.
+   */
   @IsOptional({
     groups: [
       USER_OPERATIONS.UPDATE,
@@ -114,6 +141,17 @@ class UsersEntity {
   })
   lastLogin: Date | null;
 
+  /**
+   * Constructor to create an instance of UsersEntity.
+   *
+   * @param id - User ID (UUID format).
+   * @param username - User's username.
+   * @param password - User's password.
+   * @param email - User's email address.
+   * @param createdAt - User's creation date.
+   * @param updatedAt - User's last update date.
+   * @param lastLogin - User's last login date.
+   */
   constructor(
     id: string,
     username: string,
@@ -132,6 +170,12 @@ class UsersEntity {
     this.lastLogin = lastLogin;
   }
 
+  /**
+   * Converts an array of plain user objects to an array of UsersEntity instances.
+   *
+   * @param list - Array of plain user objects.
+   * @returns Array of UsersEntity instances.
+   */
   static toArray(
     list: {
       id: string;
@@ -157,11 +201,28 @@ class UsersEntity {
     );
   }
 
+  /**
+   * Converts a plain user object to a UsersEntity instance.
+   *
+   * @param user - Partial user object.
+   * @returns UsersEntity instance.
+   */
+  static plainToClass(user: Partial<UsersEntity>) {
+    return plainToClass(UsersEntity, user);
+  }
+
+  /**
+   * Validates a partial user object based on the specified operation.
+   *
+   * @param user - Partial user object.
+   * @param operation - User operation (CREATE, UPDATE, READ).
+   * @returns Validation errors, if any.
+   */
   static async validate(
     user: Partial<UsersEntity>,
     operation: USER_OPERATIONS,
   ): Promise<{ [type: string]: string }[]> {
-    const parsedUserEntity = plainToClass(UsersEntity, user);
+    const parsedUserEntity = this.plainToClass(user);
 
     const errors = await validateClassValidator(parsedUserEntity, {
       groups: [operation],
@@ -170,6 +231,11 @@ class UsersEntity {
     return errors.map((error) => error.constraints);
   }
 
+  /**
+   * Returns a plain object representation of the UsersEntity instance.
+   *
+   * @returns Plain object representation.
+   */
   toObject() {
     return {
       id: this.id,
