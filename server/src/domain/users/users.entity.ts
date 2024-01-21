@@ -1,30 +1,114 @@
-// user.entity.ts
-
+import { plainToClass } from 'class-transformer';
 import {
   IsNotEmpty,
   MinLength,
   IsEmail,
   validate as validateClassValidator,
   IsUUID,
+  IsOptional,
+  IsDate,
 } from 'class-validator';
 
-class UserEntity {
-  @IsUUID('4', { message: 'Invalid UUID format' })
+export enum USER_OPERATIONS {
+  CREATE = 'CREATE',
+  UPDATE = 'UPDATE',
+  READ = 'READ',
+}
+
+class UsersEntity {
+  @IsOptional({
+    groups: [USER_OPERATIONS.UPDATE, USER_OPERATIONS.CREATE],
+  })
+  @IsUUID('4', {
+    message: 'Invalid UUID format',
+    groups: [USER_OPERATIONS.READ],
+  })
   id: string;
 
-  @IsNotEmpty({ message: 'Username cannot be empty' })
+  @IsOptional({
+    groups: [USER_OPERATIONS.UPDATE],
+  })
+  @IsNotEmpty({
+    message: 'Username cannot be empty',
+    groups: [
+      USER_OPERATIONS.READ,
+      USER_OPERATIONS.CREATE,
+      USER_OPERATIONS.UPDATE,
+    ],
+  })
   username: string;
 
-  @IsNotEmpty({ message: 'Password cannot be empty' })
-  @MinLength(6, { message: 'Password must be at least 6 characters long' })
+  @IsOptional({
+    groups: [USER_OPERATIONS.UPDATE],
+  })
+  @IsNotEmpty({
+    message: 'Password cannot be empty',
+    groups: [
+      USER_OPERATIONS.READ,
+      USER_OPERATIONS.CREATE,
+      USER_OPERATIONS.UPDATE,
+    ],
+  })
+  @MinLength(6, {
+    message: 'Password must be at least 6 characters long',
+    groups: [
+      USER_OPERATIONS.READ,
+      USER_OPERATIONS.CREATE,
+      USER_OPERATIONS.UPDATE,
+    ],
+  })
   password: string;
 
-  @IsNotEmpty({ message: 'Email cannot be empty' })
-  @IsEmail({}, { message: 'Invalid email format' })
+  @IsOptional({
+    groups: [USER_OPERATIONS.UPDATE],
+  })
+  @IsNotEmpty({
+    message: 'Email cannot be empty',
+    groups: [
+      USER_OPERATIONS.READ,
+      USER_OPERATIONS.CREATE,
+      USER_OPERATIONS.UPDATE,
+    ],
+  })
+  @IsEmail(
+    {},
+    {
+      message: 'Invalid email format',
+      groups: [
+        USER_OPERATIONS.READ,
+        USER_OPERATIONS.CREATE,
+        USER_OPERATIONS.UPDATE,
+      ],
+    },
+  )
   email: string;
 
+  @IsOptional({
+    groups: [USER_OPERATIONS.UPDATE, USER_OPERATIONS.CREATE],
+  })
+  @IsDate({
+    groups: [USER_OPERATIONS.READ],
+  })
   createdAt: Date;
+
+  @IsOptional({
+    groups: [USER_OPERATIONS.UPDATE, USER_OPERATIONS.CREATE],
+  })
+  @IsDate({
+    groups: [USER_OPERATIONS.READ],
+  })
   updatedAt: Date;
+
+  @IsOptional({
+    groups: [
+      USER_OPERATIONS.UPDATE,
+      USER_OPERATIONS.CREATE,
+      USER_OPERATIONS.READ,
+    ],
+  })
+  @IsDate({
+    groups: [USER_OPERATIONS.READ],
+  })
   lastLogin: Date | null;
 
   constructor(
@@ -45,9 +129,42 @@ class UserEntity {
     this.lastLogin = lastLogin;
   }
 
-  async validate(): Promise<string[]> {
-    const errors = await validateClassValidator(this);
-    return errors.map((error) => Object.values(error.constraints)).flat();
+  static toArray(
+    list: {
+      id: string;
+      username: string;
+      password: string;
+      email: string;
+      createdAt: Date;
+      updatedAt: Date;
+      lastLogin: Date | null;
+    }[],
+  ) {
+    return list.map(
+      ({ createdAt, email, id, lastLogin, password, updatedAt, username }) =>
+        new UsersEntity(
+          id,
+          username,
+          password,
+          email,
+          createdAt,
+          updatedAt,
+          lastLogin,
+        ),
+    );
+  }
+
+  static async validate(
+    user: Partial<UsersEntity>,
+    operation: USER_OPERATIONS,
+  ): Promise<{ [type: string]: string }[]> {
+    const parsedUserEntity = plainToClass(UsersEntity, user);
+
+    const errors = await validateClassValidator(parsedUserEntity, {
+      groups: [operation],
+    });
+
+    return errors.length ? errors.map((error) => error.constraints) : [];
   }
 
   toObject() {
@@ -63,4 +180,4 @@ class UserEntity {
   }
 }
 
-export { UserEntity };
+export { UsersEntity };
