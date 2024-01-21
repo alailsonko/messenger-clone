@@ -1,11 +1,29 @@
+import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { USER_OPERATIONS, UsersEntity } from 'src/domain/users/users.entity';
 import { PrismaService } from 'src/infra/db/prisma/prisma.service';
 
+/**
+ * Repository class for handling user-related database operations.
+ */
+@Injectable()
 class UsersRepository {
+  /**
+   * Constructor for UsersRepository class.
+   *
+   * @param prisma - PrismaService instance for database interactions.
+   */
   constructor(private prisma: PrismaService) {}
 
-  async findUnique(userWhereUniqueInput: Prisma.UserWhereUniqueInput) {
+  /**
+   * Retrieves a unique user based on the provided unique input.
+   *
+   * @param userWhereUniqueInput - Unique input to find a user.
+   * @returns A UsersEntity instance representing the found user.
+   */
+  async findUnique(
+    userWhereUniqueInput: Prisma.UserWhereUniqueInput,
+  ): Promise<UsersEntity> {
     const { createdAt, email, id, lastLogin, password, updatedAt, username } =
       await this.prisma.user.findUnique({
         where: userWhereUniqueInput,
@@ -22,6 +40,12 @@ class UsersRepository {
     );
   }
 
+  /**
+   * Retrieves a list of users based on specified parameters.
+   *
+   * @param params - Parameters for filtering and pagination.
+   * @returns An array of UsersEntity instances representing the found users.
+   */
   async findAll(params: {
     skip?: number;
     take?: number;
@@ -41,6 +65,13 @@ class UsersRepository {
     return UsersEntity.toArray(users);
   }
 
+  /**
+   * Creates a new user with the provided data.
+   *
+   * @param data - User creation data.
+   * @returns A UsersEntity instance representing the newly created user.
+   * @throws Error if validation fails.
+   */
   async create(data: Prisma.UserCreateInput): Promise<UsersEntity> {
     const errors = await UsersEntity.validate(
       {
@@ -71,6 +102,13 @@ class UsersRepository {
     );
   }
 
+  /**
+   * Updates an existing user based on the provided parameters.
+   *
+   * @param params - Update parameters including where condition and data.
+   * @returns A UsersEntity instance representing the updated user.
+   * @throws Error if validation fails.
+   */
   async update(params: {
     where: Prisma.UserWhereUniqueInput;
     data: Prisma.UserUpdateInput;
@@ -107,6 +145,12 @@ class UsersRepository {
     );
   }
 
+  /**
+   * Deletes a user based on the provided unique input.
+   *
+   * @param where - Unique input to identify the user to be deleted.
+   * @returns A UsersEntity instance representing the deleted user.
+   */
   async delete(where: Prisma.UserWhereUniqueInput): Promise<UsersEntity> {
     const { createdAt, email, id, lastLogin, password, updatedAt, username } =
       await this.prisma.user.delete({
