@@ -13,7 +13,10 @@ class UsersRepository {
    *
    * @param prisma - PrismaService instance for database interactions.
    */
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private usersEntity: UsersEntity,
+  ) {}
 
   /**
    * Retrieves a unique user based on the provided unique input.
@@ -24,20 +27,11 @@ class UsersRepository {
   async findUnique(
     userWhereUniqueInput: Prisma.UserWhereUniqueInput,
   ): Promise<UsersEntity> {
-    const { createdAt, email, id, lastLogin, password, updatedAt, username } =
-      await this.prisma.user.findUnique({
-        where: userWhereUniqueInput,
-      });
+    const user = await this.prisma.user.findUnique({
+      where: userWhereUniqueInput,
+    });
 
-    return new UsersEntity(
-      id,
-      username,
-      password,
-      email,
-      createdAt,
-      updatedAt,
-      lastLogin,
-    );
+    return this.usersEntity.plainToClass(user);
   }
 
   /**
@@ -62,7 +56,7 @@ class UsersRepository {
       orderBy,
     });
 
-    return UsersEntity.toArray(users);
+    return users.map((user) => this.usersEntity.plainToClass(user));
   }
 
   /**
@@ -73,7 +67,7 @@ class UsersRepository {
    * @throws Error if validation fails.
    */
   async create(data: Prisma.UserCreateInput): Promise<UsersEntity> {
-    const errors = await UsersEntity.validate(
+    const errors = await this.usersEntity.validate(
       {
         email: data.email,
         username: data.username,
@@ -86,20 +80,11 @@ class UsersRepository {
       throw new Error(errors.toString());
     }
 
-    const { createdAt, email, id, lastLogin, password, updatedAt, username } =
-      await this.prisma.user.create({
-        data,
-      });
+    const user = await this.prisma.user.create({
+      data,
+    });
 
-    return new UsersEntity(
-      id,
-      username,
-      password,
-      email,
-      createdAt,
-      updatedAt,
-      lastLogin,
-    );
+    return this.usersEntity.plainToClass(user);
   }
 
   /**
@@ -114,7 +99,7 @@ class UsersRepository {
     data: Prisma.UserUpdateInput;
   }): Promise<UsersEntity> {
     const { where, data } = params;
-    const errors = await UsersEntity.validate(
+    const errors = await this.usersEntity.validate(
       {
         email: data.email && data.email.toString(),
         username: data.username && data.username.toString(),
@@ -128,21 +113,12 @@ class UsersRepository {
       throw new Error(errors.toString());
     }
 
-    const { createdAt, email, id, lastLogin, password, updatedAt, username } =
-      await this.prisma.user.update({
-        data,
-        where,
-      });
+    const user = await this.prisma.user.update({
+      data,
+      where,
+    });
 
-    return new UsersEntity(
-      id,
-      username,
-      password,
-      email,
-      createdAt,
-      updatedAt,
-      lastLogin,
-    );
+    return this.usersEntity.plainToClass(user);
   }
 
   /**
@@ -152,20 +128,11 @@ class UsersRepository {
    * @returns A UsersEntity instance representing the deleted user.
    */
   async delete(where: Prisma.UserWhereUniqueInput): Promise<UsersEntity> {
-    const { createdAt, email, id, lastLogin, password, updatedAt, username } =
-      await this.prisma.user.delete({
-        where,
-      });
+    const user = await this.prisma.user.delete({
+      where,
+    });
 
-    return new UsersEntity(
-      id,
-      username,
-      password,
-      email,
-      createdAt,
-      updatedAt,
-      lastLogin,
-    );
+    return this.usersEntity.plainToClass(user);
   }
 }
 
