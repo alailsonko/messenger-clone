@@ -7,4 +7,4 @@ import { DataModule } from 'src/data/data.module';
   imports: [CqrsModule, DataModule],
   providers: [...CommandHandlers],
 })
-export class UsersModule {}
+export class UsersApplicationModule {}
