@@ -1,243 +1,196 @@
-import { Injectable } from '@nestjs/common';
-import { Type, plainToClass } from 'class-transformer';
+import { Type } from 'class-transformer';
 import {
   IsNotEmpty,
   MinLength,
   IsEmail,
-  validate as validateClassValidator,
   IsUUID,
   IsOptional,
   IsDate,
 } from 'class-validator';
+import { UserAbstract } from './users.abstract';
+import { IAdminLog } from '../adminLogs/adminLogs.interface';
+import { IUserGroup } from '../usersGroups/usersGroups.interface';
+import { IUserPermission } from '../usersPermissions/usersPermissions.interface';
+import { OPERATIONS } from 'src/common/enums/operations.enum';
 
-/**
- * Enumeration representing different user operations.
- */
-export enum USER_OPERATIONS {
-  CREATE = 'CREATE',
-  UPDATE = 'UPDATE',
-  READ = 'READ',
-}
-
-/**
- * Represents a user entity with validation using class-validator.
- */
-@Injectable()
-class UsersEntity {
-  private _id: string;
-  private _username: string;
-  private _password: string;
-  private _email: string;
-  private _createdAt: Date;
-  private _updatedAt: Date;
-  private _lastLogin: Date | null;
-
-  /**
-   * User ID (UUID format).
-   */
-  @IsOptional({
-    groups: [USER_OPERATIONS.UPDATE, USER_OPERATIONS.CREATE],
-  })
+class UsersEntity extends UserAbstract {
+  @IsOptional({ groups: [OPERATIONS.UPDATE, OPERATIONS.CREATE] })
   @IsUUID('4', {
     message: 'Invalid UUID format',
-    groups: [USER_OPERATIONS.READ],
+    groups: [OPERATIONS.READ],
   })
   get id(): string {
-    return this._id;
+    return super.id;
   }
 
   set id(value: string) {
-    this._id = value;
+    super.id = value;
   }
 
-  /**
-   * User's username.
-   */
   @IsOptional({
-    groups: [USER_OPERATIONS.UPDATE],
+    groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE, OPERATIONS.READ],
   })
-  @IsNotEmpty({
-    message: 'Username cannot be empty',
-    groups: [
-      USER_OPERATIONS.READ,
-      USER_OPERATIONS.CREATE,
-      USER_OPERATIONS.UPDATE,
-    ],
+  get isSuperUser(): boolean {
+    return super.isSuperUser;
+  }
+
+  set isSuperUser(value: boolean) {
+    super.isSuperUser = value;
+  }
+
+  @IsOptional({
+    groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE, OPERATIONS.READ],
   })
+  get firstName(): string {
+    return super.firstName;
+  }
+
+  set firstName(value: string) {
+    super.firstName = value;
+  }
+
+  @IsOptional({
+    groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE, OPERATIONS.READ],
+  })
+  get lastName(): string {
+    return super.lastName;
+  }
+
+  set lastName(value: string) {
+    super.lastName = value;
+  }
+
+  @IsOptional({
+    groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE, OPERATIONS.READ],
+  })
+  get isStaff(): boolean {
+    return super.isStaff;
+  }
+
+  set isStaff(value: boolean) {
+    super.isStaff = value;
+  }
+
+  @IsOptional({
+    groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE, OPERATIONS.READ],
+  })
+  get isActive(): boolean {
+    return super.isActive;
+  }
+
+  set isActive(value: boolean) {
+    super.isActive = value;
+  }
+
+  @IsOptional({
+    groups: [OPERATIONS.UPDATE],
+  })
+  @IsNotEmpty({ groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE] })
+  @MinLength(4, { groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE] })
   get username(): string {
-    return this._username;
+    return super.username;
   }
 
   set username(value: string) {
-    this._username = value;
+    super.username = value;
   }
 
-  /**
-   * User's password.
-   */
   @IsOptional({
-    groups: [USER_OPERATIONS.UPDATE],
+    groups: [OPERATIONS.UPDATE],
   })
-  @IsNotEmpty({
-    message: 'Password cannot be empty',
-    groups: [
-      USER_OPERATIONS.READ,
-      USER_OPERATIONS.CREATE,
-      USER_OPERATIONS.UPDATE,
-    ],
-  })
-  @MinLength(6, {
-    message: 'Password must be at least 6 characters long',
-    groups: [
-      USER_OPERATIONS.READ,
-      USER_OPERATIONS.CREATE,
-      USER_OPERATIONS.UPDATE,
-    ],
-  })
+  @IsNotEmpty({ groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE] })
+  @MinLength(8, { groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE] })
   get password(): string {
-    return this._password;
+    return super.password;
   }
 
   set password(value: string) {
-    this._password = value;
+    super.password = value;
   }
 
-  /**
-   * User's email address.
-   */
   @IsOptional({
-    groups: [USER_OPERATIONS.UPDATE],
+    groups: [OPERATIONS.UPDATE],
   })
-  @IsNotEmpty({
-    message: 'Email cannot be empty',
-    groups: [
-      USER_OPERATIONS.READ,
-      USER_OPERATIONS.CREATE,
-      USER_OPERATIONS.UPDATE,
-    ],
-  })
-  @IsEmail(
-    {},
-    {
-      message: 'Invalid email format',
-      groups: [
-        USER_OPERATIONS.READ,
-        USER_OPERATIONS.CREATE,
-        USER_OPERATIONS.UPDATE,
-      ],
-    },
-  )
+  @IsNotEmpty({ groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE] })
+  @IsEmail({}, { groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE] })
   get email(): string {
-    return this._email;
+    return super.email;
   }
 
   set email(value: string) {
-    this._email = value;
+    super.email = value;
   }
 
-  /**
-   * User's creation date.
-   */
   @IsOptional({
-    groups: [USER_OPERATIONS.UPDATE, USER_OPERATIONS.CREATE],
+    groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE, OPERATIONS.READ],
   })
+  @IsDate({ groups: [OPERATIONS.READ] })
   @Type(() => Date)
-  @IsDate({
-    groups: [USER_OPERATIONS.READ],
-  })
   get createdAt(): Date {
-    return this._createdAt;
+    return super.createdAt;
   }
 
   set createdAt(value: Date) {
-    this._createdAt = value;
+    super.createdAt = value;
   }
 
-  /**
-   * User's last update date.
-   */
   @IsOptional({
-    groups: [USER_OPERATIONS.UPDATE, USER_OPERATIONS.CREATE],
+    groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE, OPERATIONS.READ],
   })
+  @IsDate({ groups: [OPERATIONS.READ] })
   @Type(() => Date)
-  @IsDate({
-    groups: [USER_OPERATIONS.READ],
-  })
   get updatedAt(): Date {
-    return this._updatedAt;
+    return super.updatedAt;
   }
 
   set updatedAt(value: Date) {
-    this._updatedAt = value;
+    super.updatedAt = value;
   }
 
-  /**
-   * User's last login date.
-   */
   @IsOptional({
-    groups: [
-      USER_OPERATIONS.UPDATE,
-      USER_OPERATIONS.CREATE,
-      USER_OPERATIONS.READ,
-    ],
+    groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE, OPERATIONS.READ],
   })
+  @IsDate({ groups: [OPERATIONS.READ] })
   @Type(() => Date)
-  @IsDate({
-    groups: [USER_OPERATIONS.READ],
-  })
   get lastLogin(): Date | null {
-    return this._lastLogin;
+    return super.lastLogin;
   }
 
   set lastLogin(value: Date | null) {
-    this._lastLogin = value;
+    super.lastLogin = value;
   }
 
-  /**
-   * Converts a plain user object to a UsersEntity instance.
-   *
-   * @param user - Partial user object.
-   * @returns UsersEntity instance.
-   */
-  plainToClass(user: Partial<UsersEntity>) {
-    return plainToClass(UsersEntity, user);
+  @IsOptional({
+    groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE, OPERATIONS.READ],
+  })
+  get userPermissions(): IUserPermission[] {
+    return super.userPermissions;
   }
 
-  /**
-   * Validates a partial user object based on the specified operation.
-   *
-   * @param user - Partial user object.
-   * @param operation - User operation (CREATE, UPDATE, READ).
-   * @returns Validation errors, if any.
-   */
-  async validate(
-    user: Partial<UsersEntity>,
-    operation: USER_OPERATIONS,
-  ): Promise<{ [type: string]: string }[]> {
-    const parsedUserEntity = this.plainToClass(user);
-
-    const errors = await validateClassValidator(parsedUserEntity, {
-      groups: [operation],
-    });
-
-    return errors.map((error) => error.constraints);
+  set userPermissions(value: IUserPermission[]) {
+    super.userPermissions = value;
   }
 
-  /**
-   * Returns a plain object representation of the UsersEntity instance.
-   *
-   * @returns Plain object representation.
-   */
-  toObject() {
-    return {
-      id: this.id,
-      username: this.username,
-      password: this.password,
-      email: this.email,
-      createdAt: this.createdAt,
-      updatedAt: this.updatedAt,
-      lastLogin: this.lastLogin,
-    };
+  @IsOptional({
+    groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE, OPERATIONS.READ],
+  })
+  get userGroup(): IUserGroup[] {
+    return super.userGroup;
+  }
+
+  set userGroup(value: IUserGroup[]) {
+    super.userGroup = value;
+  }
+
+  @IsOptional({
+    groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE, OPERATIONS.READ],
+  })
+  get adminLog(): IAdminLog[] {
+    return super.adminLog;
+  }
+
+  set adminLog(value: IAdminLog[]) {
+    super.adminLog = value;
   }
 }
 
