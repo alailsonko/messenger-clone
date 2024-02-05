@@ -7,6 +7,16 @@ import { OPERATIONS } from 'src/common/enums/operations.enum';
 import { AdminLogsEntity } from '../adminLogs/adminLogs.entity';
 
 export class ContentTypeEntity extends ContentTypeAbstract {
+  protected _id: string;
+  protected _appLabel: string;
+  protected _model: string;
+  protected _name: string;
+  protected _createdAt: Date;
+  protected _updatedAt: Date;
+  protected _permission: IPermission | null;
+  protected _permissionId: string | null;
+  protected _adminLog: IAdminLog[];
+
   @IsUUID('4', { groups: [OPERATIONS.READ] })
   get id(): string {
     return this._id;

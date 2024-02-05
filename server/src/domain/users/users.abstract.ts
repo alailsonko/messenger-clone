@@ -4,141 +4,50 @@ import { IUserPermission } from '../usersPermissions/usersPermissions.interface'
 import { IUser } from './users.interface';
 
 abstract class UserAbstract implements IUser {
-  protected _isSuperUser: boolean;
-  protected _firstName: string;
-  protected _lastName: string;
-  protected _isStaff: boolean;
-  protected _isActive: boolean;
-  protected _userPermissions: IUserPermission[];
-  protected _userGroup: IUserGroup[];
-  protected _adminLog: IAdminLog[];
-  protected _id: string;
-  protected _username: string;
-  protected _password: string;
-  protected _email: string;
-  protected _createdAt: Date;
-  protected _updatedAt: Date;
-  protected _lastLogin: Date | null;
+  abstract get isSuperUser(): boolean;
+  abstract set isSuperUser(value: boolean);
 
-  get isSuperUser(): boolean {
-    return this._isSuperUser;
-  }
+  abstract get firstName(): string;
+  abstract set firstName(value: string);
 
-  set isSuperUser(value: boolean) {
-    this._isSuperUser = value;
-  }
+  abstract get lastName(): string;
+  abstract set lastName(value: string);
 
-  get firstName(): string {
-    return this._firstName;
-  }
+  abstract get isStaff(): boolean;
+  abstract set isStaff(value: boolean);
 
-  set firstName(value: string) {
-    this._firstName = value;
-  }
+  abstract get isActive(): boolean;
+  abstract set isActive(value: boolean);
 
-  get lastName(): string {
-    return this._lastName;
-  }
+  abstract get userPermissions(): IUserPermission[];
+  abstract set userPermissions(value: IUserPermission[]);
 
-  set lastName(value: string) {
-    this._lastName = value;
-  }
+  abstract get userGroup(): IUserGroup[];
+  abstract set userGroup(value: IUserGroup[]);
 
-  get isStaff(): boolean {
-    return this._isStaff;
-  }
+  abstract get adminLog(): IAdminLog[];
+  abstract set adminLog(value: IAdminLog[]);
 
-  set isStaff(value: boolean) {
-    this._isStaff = value;
-  }
+  abstract get id(): string;
+  abstract set id(value: string);
 
-  get isActive(): boolean {
-    return this._isActive;
-  }
+  abstract get username(): string;
+  abstract set username(value: string);
 
-  set isActive(value: boolean) {
-    this._isActive = value;
-  }
+  abstract get password(): string;
+  abstract set password(value: string);
 
-  get userPermissions(): IUserPermission[] {
-    return this._userPermissions;
-  }
+  abstract get email(): string;
+  abstract set email(value: string);
 
-  set userPermissions(value: IUserPermission[]) {
-    this._userPermissions = value;
-  }
+  abstract get createdAt(): Date;
+  abstract set createdAt(value: Date);
 
-  get userGroup(): IUserGroup[] {
-    return this._userGroup;
-  }
+  abstract get updatedAt(): Date;
+  abstract set updatedAt(value: Date);
 
-  set userGroup(value: IUserGroup[]) {
-    this._userGroup = value;
-  }
-
-  get adminLog(): IAdminLog[] {
-    return this._adminLog;
-  }
-
-  set adminLog(value: IAdminLog[]) {
-    this._adminLog = value;
-  }
-
-  get id(): string {
-    return this._id;
-  }
-
-  set id(value: string) {
-    this._id = value;
-  }
-
-  get username(): string {
-    return this._username;
-  }
-
-  set username(value: string) {
-    this._username = value;
-  }
-
-  get password(): string {
-    return this._password;
-  }
-
-  set password(value: string) {
-    this._password = value;
-  }
-
-  get email(): string {
-    return this._email;
-  }
-
-  set email(value: string) {
-    this._email = value;
-  }
-
-  get createdAt(): Date {
-    return this._createdAt;
-  }
-
-  set createdAt(value: Date) {
-    this._createdAt = value;
-  }
-
-  get updatedAt(): Date {
-    return this._updatedAt;
-  }
-
-  set updatedAt(value: Date) {
-    this._updatedAt = value;
-  }
-
-  get lastLogin(): Date | null {
-    return this._lastLogin;
-  }
-
-  set lastLogin(value: Date | null) {
-    this._lastLogin = value;
-  }
+  abstract get lastLogin(): Date | null;
+  abstract set lastLogin(value: Date | null);
 }
 
 export { UserAbstract };

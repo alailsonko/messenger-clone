@@ -7,6 +7,14 @@ import { IUserGroup } from '../usersGroups/usersGroups.interface';
 import { OPERATIONS } from 'src/common/enums/operations.enum';
 
 export class GroupEntity extends GroupAbstract {
+  protected _id: string;
+  protected _name: string;
+  protected _permissions: IPermission[];
+  protected _createdAt: Date;
+  protected _updatedAt: Date;
+  protected _groupPermission: IGroupPermission[];
+  protected _userGroup: IUserGroup[];
+
   @IsUUID('4', { groups: [OPERATIONS.READ] })
   get id(): string {
     return this._id;

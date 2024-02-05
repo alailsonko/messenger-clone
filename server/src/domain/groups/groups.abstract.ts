@@ -3,14 +3,6 @@ import { IPermission } from '../permissions/permissions.interface';
 import { IUserGroup } from '../usersGroups/usersGroups.interface';
 
 export abstract class GroupAbstract {
-  protected _id: string;
-  protected _name: string;
-  protected _permissions: IPermission[];
-  protected _createdAt: Date;
-  protected _updatedAt: Date;
-  protected _groupPermission: IGroupPermission[];
-  protected _userGroup: IUserGroup[];
-
   abstract get id(): string;
   abstract set id(value: string);
 

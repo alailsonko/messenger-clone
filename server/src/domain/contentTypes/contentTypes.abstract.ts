@@ -2,16 +2,6 @@ import { IAdminLog } from '../adminLogs/adminLogs.interface';
 import { IPermission } from '../permissions/permissions.interface';
 
 export abstract class ContentTypeAbstract {
-  protected _id: string;
-  protected _appLabel: string;
-  protected _model: string;
-  protected _name: string;
-  protected _createdAt: Date;
-  protected _updatedAt: Date;
-  protected _permission: IPermission | null;
-  protected _permissionId: string | null;
-  protected _adminLog: IAdminLog[];
-
   abstract get id(): string;
   abstract set id(value: string);
 

@@ -14,72 +14,88 @@ import { IUserPermission } from '../usersPermissions/usersPermissions.interface'
 import { OPERATIONS } from 'src/common/enums/operations.enum';
 
 class UsersEntity extends UserAbstract {
+  protected _isSuperUser: boolean;
+  protected _firstName: string;
+  protected _lastName: string;
+  protected _isStaff: boolean;
+  protected _isActive: boolean;
+  protected _userPermissions: IUserPermission[];
+  protected _userGroup: IUserGroup[];
+  protected _adminLog: IAdminLog[];
+  protected _id: string;
+  protected _username: string;
+  protected _password: string;
+  protected _email: string;
+  protected _createdAt: Date;
+  protected _updatedAt: Date;
+  protected _lastLogin: Date | null;
+
   @IsOptional({ groups: [OPERATIONS.UPDATE, OPERATIONS.CREATE] })
   @IsUUID('4', {
     message: 'Invalid UUID format',
     groups: [OPERATIONS.READ],
   })
   get id(): string {
-    return super.id;
+    return this._id;
   }
 
   set id(value: string) {
-    super.id = value;
+    this._id = value;
   }
 
   @IsOptional({
     groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE, OPERATIONS.READ],
   })
   get isSuperUser(): boolean {
-    return super.isSuperUser;
+    return this._isSuperUser;
   }
 
   set isSuperUser(value: boolean) {
-    super.isSuperUser = value;
+    this._isSuperUser = value;
   }
 
   @IsOptional({
     groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE, OPERATIONS.READ],
   })
   get firstName(): string {
-    return super.firstName;
+    return this._firstName;
   }
 
   set firstName(value: string) {
-    super.firstName = value;
+    this._firstName = value;
   }
 
   @IsOptional({
     groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE, OPERATIONS.READ],
   })
   get lastName(): string {
-    return super.lastName;
+    return this._lastName;
   }
 
   set lastName(value: string) {
-    super.lastName = value;
+    this._lastName = value;
   }
 
   @IsOptional({
     groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE, OPERATIONS.READ],
   })
   get isStaff(): boolean {
-    return super.isStaff;
+    return this._isStaff;
   }
 
   set isStaff(value: boolean) {
-    super.isStaff = value;
+    this._isStaff = value;
   }
 
   @IsOptional({
     groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE, OPERATIONS.READ],
   })
   get isActive(): boolean {
-    return super.isActive;
+    return this._isActive;
   }
 
   set isActive(value: boolean) {
-    super.isActive = value;
+    this._isActive = value;
   }
 
   @IsOptional({
@@ -88,11 +104,11 @@ class UsersEntity extends UserAbstract {
   @IsNotEmpty({ groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE] })
   @MinLength(4, { groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE] })
   get username(): string {
-    return super.username;
+    return this._username;
   }
 
   set username(value: string) {
-    super.username = value;
+    this._username = value;
   }
 
   @IsOptional({
@@ -101,11 +117,11 @@ class UsersEntity extends UserAbstract {
   @IsNotEmpty({ groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE] })
   @MinLength(8, { groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE] })
   get password(): string {
-    return super.password;
+    return this._password;
   }
 
   set password(value: string) {
-    super.password = value;
+    this._password = value;
   }
 
   @IsOptional({
@@ -114,11 +130,11 @@ class UsersEntity extends UserAbstract {
   @IsNotEmpty({ groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE] })
   @IsEmail({}, { groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE] })
   get email(): string {
-    return super.email;
+    return this._email;
   }
 
   set email(value: string) {
-    super.email = value;
+    this._email = value;
   }
 
   @IsOptional({
@@ -127,11 +143,11 @@ class UsersEntity extends UserAbstract {
   @IsDate({ groups: [OPERATIONS.READ] })
   @Type(() => Date)
   get createdAt(): Date {
-    return super.createdAt;
+    return this._createdAt;
   }
 
   set createdAt(value: Date) {
-    super.createdAt = value;
+    this._createdAt = value;
   }
 
   @IsOptional({
@@ -140,11 +156,11 @@ class UsersEntity extends UserAbstract {
   @IsDate({ groups: [OPERATIONS.READ] })
   @Type(() => Date)
   get updatedAt(): Date {
-    return super.updatedAt;
+    return this._updatedAt;
   }
 
   set updatedAt(value: Date) {
-    super.updatedAt = value;
+    this._updatedAt = value;
   }
 
   @IsOptional({
@@ -153,44 +169,44 @@ class UsersEntity extends UserAbstract {
   @IsDate({ groups: [OPERATIONS.READ] })
   @Type(() => Date)
   get lastLogin(): Date | null {
-    return super.lastLogin;
+    return this._lastLogin;
   }
 
   set lastLogin(value: Date | null) {
-    super.lastLogin = value;
+    this._lastLogin = value;
   }
 
   @IsOptional({
     groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE, OPERATIONS.READ],
   })
   get userPermissions(): IUserPermission[] {
-    return super.userPermissions;
+    return this._userPermissions;
   }
 
   set userPermissions(value: IUserPermission[]) {
-    super.userPermissions = value;
+    this._userPermissions = value;
   }
 
   @IsOptional({
     groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE, OPERATIONS.READ],
   })
   get userGroup(): IUserGroup[] {
-    return super.userGroup;
+    return this._userGroup;
   }
 
   set userGroup(value: IUserGroup[]) {
-    super.userGroup = value;
+    this._userGroup = value;
   }
 
   @IsOptional({
     groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE, OPERATIONS.READ],
   })
   get adminLog(): IAdminLog[] {
-    return super.adminLog;
+    return this._adminLog;
   }
 
   set adminLog(value: IAdminLog[]) {
-    super.adminLog = value;
+    this._adminLog = value;
   }
 }
 

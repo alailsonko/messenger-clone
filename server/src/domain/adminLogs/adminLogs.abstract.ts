@@ -3,103 +3,36 @@ import { IUser } from '../users/users.interface';
 import { IAdminLog } from './adminLogs.interface';
 
 export abstract class AdminLogsAbstract implements IAdminLog {
-  protected _id: string;
-  protected _action: string;
-  protected _objectId: string;
-  protected _objectRepr: string;
-  protected _changeMessage: string;
-  protected _createdAt: Date;
-  protected _updatedAt: Date;
-  protected _user: IUser;
-  protected _userId: string;
-  protected _contentType: IContentType;
-  protected _contentTypeId: string;
+  abstract get id(): string;
+  abstract set id(value: string);
 
-  get id(): string {
-    return this._id;
-  }
+  abstract get action(): string;
+  abstract set action(value: string);
 
-  set id(value: string) {
-    this._id = value;
-  }
+  abstract get objectId(): string;
+  abstract set objectId(value: string);
 
-  get action(): string {
-    return this._action;
-  }
+  abstract get objectRepr(): string;
+  abstract set objectRepr(value: string);
 
-  set action(value: string) {
-    this._action = value;
-  }
+  abstract get changeMessage(): string;
+  abstract set changeMessage(value: string);
 
-  get objectId(): string {
-    return this._objectId;
-  }
+  abstract get createdAt(): Date;
+  abstract set createdAt(value: Date);
 
-  set objectId(value: string) {
-    this._objectId = value;
-  }
+  abstract get updatedAt(): Date;
+  abstract set updatedAt(value: Date);
 
-  get objectRepr(): string {
-    return this._objectRepr;
-  }
+  abstract get user(): IUser;
+  abstract set user(value: IUser);
 
-  set objectRepr(value: string) {
-    this._objectRepr = value;
-  }
+  abstract get userId(): string;
+  abstract set userId(value: string);
 
-  get changeMessage(): string {
-    return this._changeMessage;
-  }
+  abstract get contentType(): IContentType;
+  abstract set contentType(value: IContentType);
 
-  set changeMessage(value: string) {
-    this._changeMessage = value;
-  }
-
-  get createdAt(): Date {
-    return this._createdAt;
-  }
-
-  set createdAt(value: Date) {
-    this._createdAt = value;
-  }
-
-  get updatedAt(): Date {
-    return this._updatedAt;
-  }
-
-  set updatedAt(value: Date) {
-    this._updatedAt = value;
-  }
-
-  get user(): IUser {
-    return this._user;
-  }
-
-  set user(value: IUser) {
-    this._user = value;
-  }
-
-  get userId(): string {
-    return this._userId;
-  }
-
-  set userId(value: string) {
-    this._userId = value;
-  }
-
-  get contentType(): IContentType {
-    return this._contentType;
-  }
-
-  set contentType(value: IContentType) {
-    this._contentType = value;
-  }
-
-  get contentTypeId(): string {
-    return this._contentTypeId;
-  }
-
-  set contentTypeId(value: string) {
-    this._contentTypeId = value;
-  }
+  abstract get contentTypeId(): string;
+  abstract set contentTypeId(value: string);
 }

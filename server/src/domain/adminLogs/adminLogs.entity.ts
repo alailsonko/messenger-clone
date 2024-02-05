@@ -6,6 +6,18 @@ import { IUser } from '../users/users.interface';
 import { OPERATIONS } from 'src/common/enums/operations.enum';
 
 export class AdminLogsEntity extends AdminLogsAbstract {
+  protected _id: string;
+  protected _action: string;
+  protected _objectId: string;
+  protected _objectRepr: string;
+  protected _changeMessage: string;
+  protected _createdAt: Date;
+  protected _updatedAt: Date;
+  protected _user: IUser;
+  protected _userId: string;
+  protected _contentType: IContentType;
+  protected _contentTypeId: string;
+
   @IsUUID('4', { groups: [OPERATIONS.READ] })
   get id(): string {
     return this._id;
