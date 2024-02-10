@@ -1,17 +1,17 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Prisma, User } from '@prisma/client';
+import { Prisma, GroupPermission } from '@prisma/client';
 import { PrismaService } from 'src/infra/db/prisma/prisma.service';
 
 @Injectable()
-class UsersRepository {
+export class GroupsPermissionsRepository {
   constructor(private prisma: PrismaService) {}
 
   async findUnique(
-    userWhereUniqueInput: Prisma.UserWhereUniqueInput,
-  ): Promise<User | null> {
-    return this.prisma.user
+    groupPermissionWhereUniqueInput: Prisma.GroupPermissionWhereUniqueInput,
+  ): Promise<GroupPermission | null> {
+    return this.prisma.groupPermission
       .findUnique({
-        where: userWhereUniqueInput,
+        where: groupPermissionWhereUniqueInput,
       })
       .catch((error) => {
         throw new BadRequestException(error);
@@ -21,12 +21,12 @@ class UsersRepository {
   async findAll(params: {
     skip?: number;
     take?: number;
-    cursor?: Prisma.UserWhereUniqueInput;
-    where?: Prisma.UserWhereInput;
-    orderBy?: Prisma.UserOrderByWithRelationInput;
-  }): Promise<User[]> {
+    cursor?: Prisma.GroupPermissionWhereUniqueInput;
+    where?: Prisma.GroupPermissionWhereInput;
+    orderBy?: Prisma.GroupPermissionOrderByWithRelationInput;
+  }): Promise<GroupPermission[]> {
     const { skip, take, cursor, where, orderBy } = params;
-    return this.prisma.user
+    return this.prisma.groupPermission
       .findMany({
         skip,
         take,
@@ -39,8 +39,10 @@ class UsersRepository {
       });
   }
 
-  async create(data: Prisma.UserCreateInput): Promise<User> {
-    return this.prisma.user
+  async create(
+    data: Prisma.GroupPermissionCreateInput,
+  ): Promise<GroupPermission> {
+    return this.prisma.groupPermission
       .create({
         data,
       })
@@ -50,11 +52,11 @@ class UsersRepository {
   }
 
   async update(params: {
-    where: Prisma.UserWhereUniqueInput;
-    data: Prisma.UserUpdateInput;
-  }): Promise<User> {
+    where: Prisma.GroupPermissionWhereUniqueInput;
+    data: Prisma.GroupPermissionUpdateInput;
+  }): Promise<GroupPermission> {
     const { where, data } = params;
-    return this.prisma.user
+    return this.prisma.groupPermission
       .update({
         data,
         where,
@@ -64,8 +66,10 @@ class UsersRepository {
       });
   }
 
-  async delete(where: Prisma.UserWhereUniqueInput): Promise<User> {
-    return this.prisma.user
+  async delete(
+    where: Prisma.GroupPermissionWhereUniqueInput,
+  ): Promise<GroupPermission> {
+    return this.prisma.groupPermission
       .delete({
         where,
       })
@@ -74,5 +78,3 @@ class UsersRepository {
       });
   }
 }
-
-export { UsersRepository };

@@ -12,3 +12,11 @@ export const sessionsDomain = [
   SessionMapper,
   SessionValidator,
 ];
+
+export {
+  SessionAbstract,
+  SessionEntity,
+  SessionModel,
+  SessionMapper,
+  SessionValidator,
+};

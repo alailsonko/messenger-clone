@@ -6,11 +6,15 @@ services:
     build:
       context: ./server
     image: messenger-clone/backend
+    ports:
+      - "4000:3000"
     depends_on:
       - database-mc
     command: ["yarn", "start:dev"]
     volumes:
       - ./server:/app
+    env_file:
+      - ./server/.env.docker
 
   frontend:
     container_name: frontend

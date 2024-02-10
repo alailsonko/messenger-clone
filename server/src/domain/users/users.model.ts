@@ -1,7 +1,7 @@
 import { createHmac } from 'node:crypto';
 import { UsersEntity } from './users.entity';
 
-class UserModel extends UsersEntity {
+class UsersModel extends UsersEntity {
   constructor() {
     super();
   }
@@ -88,4 +88,4 @@ class UserModel extends UsersEntity {
   }
 }
 
-export { UserModel };
+export { UsersModel };

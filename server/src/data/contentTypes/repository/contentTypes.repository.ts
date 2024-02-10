@@ -1,17 +1,17 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Prisma, User } from '@prisma/client';
+import { Prisma, ContentType } from '@prisma/client';
 import { PrismaService } from 'src/infra/db/prisma/prisma.service';
 
 @Injectable()
-class UsersRepository {
+export class ContentTypesRepository {
   constructor(private prisma: PrismaService) {}
 
   async findUnique(
-    userWhereUniqueInput: Prisma.UserWhereUniqueInput,
-  ): Promise<User | null> {
-    return this.prisma.user
+    contentTypeWhereUniqueInput: Prisma.ContentTypeWhereUniqueInput,
+  ): Promise<ContentType | null> {
+    return this.prisma.contentType
       .findUnique({
-        where: userWhereUniqueInput,
+        where: contentTypeWhereUniqueInput,
       })
       .catch((error) => {
         throw new BadRequestException(error);
@@ -21,12 +21,12 @@ class UsersRepository {
   async findAll(params: {
     skip?: number;
     take?: number;
-    cursor?: Prisma.UserWhereUniqueInput;
-    where?: Prisma.UserWhereInput;
-    orderBy?: Prisma.UserOrderByWithRelationInput;
-  }): Promise<User[]> {
+    cursor?: Prisma.ContentTypeWhereUniqueInput;
+    where?: Prisma.ContentTypeWhereInput;
+    orderBy?: Prisma.ContentTypeOrderByWithRelationInput;
+  }): Promise<ContentType[]> {
     const { skip, take, cursor, where, orderBy } = params;
-    return this.prisma.user
+    return this.prisma.contentType
       .findMany({
         skip,
         take,
@@ -39,8 +39,8 @@ class UsersRepository {
       });
   }
 
-  async create(data: Prisma.UserCreateInput): Promise<User> {
-    return this.prisma.user
+  async create(data: Prisma.ContentTypeCreateInput): Promise<ContentType> {
+    return this.prisma.contentType
       .create({
         data,
       })
@@ -50,11 +50,11 @@ class UsersRepository {
   }
 
   async update(params: {
-    where: Prisma.UserWhereUniqueInput;
-    data: Prisma.UserUpdateInput;
-  }): Promise<User> {
+    where: Prisma.ContentTypeWhereUniqueInput;
+    data: Prisma.ContentTypeUpdateInput;
+  }): Promise<ContentType> {
     const { where, data } = params;
-    return this.prisma.user
+    return this.prisma.contentType
       .update({
         data,
         where,
@@ -64,8 +64,10 @@ class UsersRepository {
       });
   }
 
-  async delete(where: Prisma.UserWhereUniqueInput): Promise<User> {
-    return this.prisma.user
+  async delete(
+    where: Prisma.ContentTypeWhereUniqueInput,
+  ): Promise<ContentType> {
+    return this.prisma.contentType
       .delete({
         where,
       })
@@ -74,5 +76,3 @@ class UsersRepository {
       });
   }
 }
-
-export { UsersRepository };

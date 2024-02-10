@@ -12,3 +12,5 @@ export const groupsDomain = [
   GroupMapper,
   GroupValidator,
 ];
+
+export { GroupAbstract, GroupEntity, GroupModel, GroupMapper, GroupValidator };

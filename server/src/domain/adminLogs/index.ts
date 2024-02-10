@@ -12,3 +12,11 @@ export const adminLogsDomain = [
   AdminLogsMapper,
   AdminLogValidator,
 ];
+
+export {
+  AdminLogsAbstract,
+  AdminLogsEntity,
+  AdminLogModel,
+  AdminLogsMapper,
+  AdminLogValidator,
+};

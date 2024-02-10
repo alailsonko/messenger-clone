@@ -12,3 +12,11 @@ export const contentTypesDomain = [
   ContentTypeMapper,
   ContentTypeValidator,
 ];
+
+export {
+  ContentTypeAbstract,
+  ContentTypeEntity,
+  ContentTypeModel,
+  ContentTypeMapper,
+  ContentTypeValidator,
+};

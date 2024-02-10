@@ -12,3 +12,11 @@ export const permissionsDomain = [
   PermissionMapper,
   PermissionValidator,
 ];
+
+export {
+  PermissionAbstract,
+  PermissionEntity,
+  PermissionModel,
+  PermissionMapper,
+  PermissionValidator,
+};

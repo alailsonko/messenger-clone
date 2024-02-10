@@ -1,17 +1,17 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Prisma, User } from '@prisma/client';
+import { Prisma, AdminLog } from '@prisma/client';
 import { PrismaService } from 'src/infra/db/prisma/prisma.service';
 
 @Injectable()
-class UsersRepository {
+export class AdminLogsRepository {
   constructor(private prisma: PrismaService) {}
 
   async findUnique(
-    userWhereUniqueInput: Prisma.UserWhereUniqueInput,
-  ): Promise<User | null> {
-    return this.prisma.user
+    adminLogWhereUniqueInput: Prisma.AdminLogWhereUniqueInput,
+  ): Promise<AdminLog | null> {
+    return this.prisma.adminLog
       .findUnique({
-        where: userWhereUniqueInput,
+        where: adminLogWhereUniqueInput,
       })
       .catch((error) => {
         throw new BadRequestException(error);
@@ -21,12 +21,12 @@ class UsersRepository {
   async findAll(params: {
     skip?: number;
     take?: number;
-    cursor?: Prisma.UserWhereUniqueInput;
-    where?: Prisma.UserWhereInput;
-    orderBy?: Prisma.UserOrderByWithRelationInput;
-  }): Promise<User[]> {
+    cursor?: Prisma.AdminLogWhereUniqueInput;
+    where?: Prisma.AdminLogWhereInput;
+    orderBy?: Prisma.AdminLogOrderByWithRelationInput;
+  }): Promise<AdminLog[]> {
     const { skip, take, cursor, where, orderBy } = params;
-    return this.prisma.user
+    return this.prisma.adminLog
       .findMany({
         skip,
         take,
@@ -39,8 +39,8 @@ class UsersRepository {
       });
   }
 
-  async create(data: Prisma.UserCreateInput): Promise<User> {
-    return this.prisma.user
+  async create(data: Prisma.AdminLogCreateInput): Promise<AdminLog> {
+    return this.prisma.adminLog
       .create({
         data,
       })
@@ -50,11 +50,11 @@ class UsersRepository {
   }
 
   async update(params: {
-    where: Prisma.UserWhereUniqueInput;
-    data: Prisma.UserUpdateInput;
-  }): Promise<User> {
+    where: Prisma.AdminLogWhereUniqueInput;
+    data: Prisma.AdminLogUpdateInput;
+  }): Promise<AdminLog> {
     const { where, data } = params;
-    return this.prisma.user
+    return this.prisma.adminLog
       .update({
         data,
         where,
@@ -64,8 +64,8 @@ class UsersRepository {
       });
   }
 
-  async delete(where: Prisma.UserWhereUniqueInput): Promise<User> {
-    return this.prisma.user
+  async delete(where: Prisma.AdminLogWhereUniqueInput): Promise<AdminLog> {
+    return this.prisma.adminLog
       .delete({
         where,
       })
@@ -74,5 +74,3 @@ class UsersRepository {
       });
   }
 }
-
-export { UsersRepository };

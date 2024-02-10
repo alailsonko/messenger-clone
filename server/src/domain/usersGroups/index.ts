@@ -12,3 +12,11 @@ export const usersGroupsDomain = [
   UserGroupMapper,
   UserGroupValidator,
 ];
+
+export {
+  UserGroupAbstract,
+  UserGroupEntity,
+  UserGroupModel,
+  UserGroupMapper,
+  UserGroupValidator,
+};

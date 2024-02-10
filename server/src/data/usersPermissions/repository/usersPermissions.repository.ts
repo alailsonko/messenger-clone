@@ -1,17 +1,17 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Prisma, User } from '@prisma/client';
+import { Prisma, UserPermission } from '@prisma/client';
 import { PrismaService } from 'src/infra/db/prisma/prisma.service';
 
 @Injectable()
-class UsersRepository {
+export class UsersPermissionsRepository {
   constructor(private prisma: PrismaService) {}
 
   async findUnique(
-    userWhereUniqueInput: Prisma.UserWhereUniqueInput,
-  ): Promise<User | null> {
-    return this.prisma.user
+    usersPermissionWhereUniqueInput: Prisma.UserPermissionWhereUniqueInput,
+  ): Promise<UserPermission | null> {
+    return this.prisma.userPermission
       .findUnique({
-        where: userWhereUniqueInput,
+        where: usersPermissionWhereUniqueInput,
       })
       .catch((error) => {
         throw new BadRequestException(error);
@@ -21,12 +21,12 @@ class UsersRepository {
   async findAll(params: {
     skip?: number;
     take?: number;
-    cursor?: Prisma.UserWhereUniqueInput;
-    where?: Prisma.UserWhereInput;
-    orderBy?: Prisma.UserOrderByWithRelationInput;
-  }): Promise<User[]> {
+    cursor?: Prisma.UserPermissionWhereUniqueInput;
+    where?: Prisma.UserPermissionWhereInput;
+    orderBy?: Prisma.UserPermissionOrderByWithRelationInput;
+  }): Promise<UserPermission[]> {
     const { skip, take, cursor, where, orderBy } = params;
-    return this.prisma.user
+    return this.prisma.userPermission
       .findMany({
         skip,
         take,
@@ -39,8 +39,10 @@ class UsersRepository {
       });
   }
 
-  async create(data: Prisma.UserCreateInput): Promise<User> {
-    return this.prisma.user
+  async create(
+    data: Prisma.UserPermissionCreateInput,
+  ): Promise<UserPermission> {
+    return this.prisma.userPermission
       .create({
         data,
       })
@@ -50,11 +52,11 @@ class UsersRepository {
   }
 
   async update(params: {
-    where: Prisma.UserWhereUniqueInput;
-    data: Prisma.UserUpdateInput;
-  }): Promise<User> {
+    where: Prisma.UserPermissionWhereUniqueInput;
+    data: Prisma.UserPermissionUpdateInput;
+  }): Promise<UserPermission> {
     const { where, data } = params;
-    return this.prisma.user
+    return this.prisma.userPermission
       .update({
         data,
         where,
@@ -64,8 +66,10 @@ class UsersRepository {
       });
   }
 
-  async delete(where: Prisma.UserWhereUniqueInput): Promise<User> {
-    return this.prisma.user
+  async delete(
+    where: Prisma.UserPermissionWhereUniqueInput,
+  ): Promise<UserPermission> {
+    return this.prisma.userPermission
       .delete({
         where,
       })
@@ -74,5 +78,3 @@ class UsersRepository {
       });
   }
 }
-
-export { UsersRepository };

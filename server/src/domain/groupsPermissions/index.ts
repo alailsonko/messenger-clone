@@ -12,3 +12,11 @@ export const groupPermissionsDomain = [
   GroupPermissionMapper,
   GroupPermissionValidator,
 ];
+
+export {
+  GroupPermissionAbstract,
+  GroupPermissionEntity,
+  GroupPermissionModel,
+  GroupPermissionMapper,
+  GroupPermissionValidator,
+};

@@ -1,17 +1,17 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Prisma, User } from '@prisma/client';
+import { Prisma, UserGroup } from '@prisma/client';
 import { PrismaService } from 'src/infra/db/prisma/prisma.service';
 
 @Injectable()
-class UsersRepository {
+export class UsersGroupsRepository {
   constructor(private prisma: PrismaService) {}
 
   async findUnique(
-    userWhereUniqueInput: Prisma.UserWhereUniqueInput,
-  ): Promise<User | null> {
-    return this.prisma.user
+    usersGroupWhereUniqueInput: Prisma.UserGroupWhereUniqueInput,
+  ): Promise<UserGroup | null> {
+    return this.prisma.userGroup
       .findUnique({
-        where: userWhereUniqueInput,
+        where: usersGroupWhereUniqueInput,
       })
       .catch((error) => {
         throw new BadRequestException(error);
@@ -21,12 +21,12 @@ class UsersRepository {
   async findAll(params: {
     skip?: number;
     take?: number;
-    cursor?: Prisma.UserWhereUniqueInput;
-    where?: Prisma.UserWhereInput;
-    orderBy?: Prisma.UserOrderByWithRelationInput;
-  }): Promise<User[]> {
+    cursor?: Prisma.UserGroupWhereUniqueInput;
+    where?: Prisma.UserGroupWhereInput;
+    orderBy?: Prisma.UserGroupOrderByWithRelationInput;
+  }): Promise<UserGroup[]> {
     const { skip, take, cursor, where, orderBy } = params;
-    return this.prisma.user
+    return this.prisma.userGroup
       .findMany({
         skip,
         take,
@@ -39,8 +39,8 @@ class UsersRepository {
       });
   }
 
-  async create(data: Prisma.UserCreateInput): Promise<User> {
-    return this.prisma.user
+  async create(data: Prisma.UserGroupCreateInput): Promise<UserGroup> {
+    return this.prisma.userGroup
       .create({
         data,
       })
@@ -50,11 +50,11 @@ class UsersRepository {
   }
 
   async update(params: {
-    where: Prisma.UserWhereUniqueInput;
-    data: Prisma.UserUpdateInput;
-  }): Promise<User> {
+    where: Prisma.UserGroupWhereUniqueInput;
+    data: Prisma.UserGroupUpdateInput;
+  }): Promise<UserGroup> {
     const { where, data } = params;
-    return this.prisma.user
+    return this.prisma.userGroup
       .update({
         data,
         where,
@@ -64,8 +64,8 @@ class UsersRepository {
       });
   }
 
-  async delete(where: Prisma.UserWhereUniqueInput): Promise<User> {
-    return this.prisma.user
+  async delete(where: Prisma.UserGroupWhereUniqueInput): Promise<UserGroup> {
+    return this.prisma.userGroup
       .delete({
         where,
       })
@@ -74,5 +74,3 @@ class UsersRepository {
       });
   }
 }
-
-export { UsersRepository };

@@ -12,6 +12,7 @@ import { IAdminLog } from '../adminLogs/adminLogs.interface';
 import { IUserGroup } from '../usersGroups/usersGroups.interface';
 import { IUserPermission } from '../usersPermissions/usersPermissions.interface';
 import { OPERATIONS } from 'src/common/enums/operations.enum';
+import { ApiProperty } from '@nestjs/swagger';
 
 class UsersEntity extends UserAbstract {
   protected _isSuperUser: boolean;
@@ -30,6 +31,10 @@ class UsersEntity extends UserAbstract {
   protected _updatedAt: Date;
   protected _lastLogin: Date | null;
 
+  @ApiProperty({
+    type: 'string',
+    format: 'uuid',
+  })
   @IsOptional({ groups: [OPERATIONS.UPDATE, OPERATIONS.CREATE] })
   @IsUUID('4', {
     message: 'Invalid UUID format',
@@ -43,6 +48,9 @@ class UsersEntity extends UserAbstract {
     this._id = value;
   }
 
+  @ApiProperty({
+    type: 'boolean',
+  })
   @IsOptional({
     groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE, OPERATIONS.READ],
   })
@@ -54,6 +62,9 @@ class UsersEntity extends UserAbstract {
     this._isSuperUser = value;
   }
 
+  @ApiProperty({
+    type: 'string',
+  })
   @IsOptional({
     groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE, OPERATIONS.READ],
   })
@@ -65,6 +76,9 @@ class UsersEntity extends UserAbstract {
     this._firstName = value;
   }
 
+  @ApiProperty({
+    type: 'string',
+  })
   @IsOptional({
     groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE, OPERATIONS.READ],
   })
@@ -76,6 +90,9 @@ class UsersEntity extends UserAbstract {
     this._lastName = value;
   }
 
+  @ApiProperty({
+    type: 'boolean',
+  })
   @IsOptional({
     groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE, OPERATIONS.READ],
   })
@@ -87,6 +104,9 @@ class UsersEntity extends UserAbstract {
     this._isStaff = value;
   }
 
+  @ApiProperty({
+    type: 'boolean',
+  })
   @IsOptional({
     groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE, OPERATIONS.READ],
   })
@@ -98,6 +118,9 @@ class UsersEntity extends UserAbstract {
     this._isActive = value;
   }
 
+  @ApiProperty({
+    type: 'string',
+  })
   @IsOptional({
     groups: [OPERATIONS.UPDATE],
   })
@@ -111,6 +134,9 @@ class UsersEntity extends UserAbstract {
     this._username = value;
   }
 
+  @ApiProperty({
+    type: 'string',
+  })
   @IsOptional({
     groups: [OPERATIONS.UPDATE],
   })
@@ -124,6 +150,10 @@ class UsersEntity extends UserAbstract {
     this._password = value;
   }
 
+  @ApiProperty({
+    type: 'string',
+    format: 'email',
+  })
   @IsOptional({
     groups: [OPERATIONS.UPDATE],
   })
@@ -137,6 +167,9 @@ class UsersEntity extends UserAbstract {
     this._email = value;
   }
 
+  @ApiProperty({
+    type: Date,
+  })
   @IsOptional({
     groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE, OPERATIONS.READ],
   })
@@ -150,6 +183,9 @@ class UsersEntity extends UserAbstract {
     this._createdAt = value;
   }
 
+  @ApiProperty({
+    type: Date,
+  })
   @IsOptional({
     groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE, OPERATIONS.READ],
   })
@@ -163,6 +199,9 @@ class UsersEntity extends UserAbstract {
     this._updatedAt = value;
   }
 
+  @ApiProperty({
+    type: Date,
+  })
   @IsOptional({
     groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE, OPERATIONS.READ],
   })

@@ -1,9 +1,5 @@
+import { CreateUserParameterType } from '../types/create-user.types';
+
 export class CreateUserCommand {
-  constructor(
-    public readonly user: {
-      username: string;
-      email: string;
-      password: string;
-    },
-  ) {}
+  constructor(public readonly user: CreateUserParameterType) {}
 }
