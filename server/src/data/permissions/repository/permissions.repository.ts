@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Prisma, Permission } from '@prisma/client';
 import { PrismaService } from 'src/infra/db/prisma/prisma.service';
 
@@ -9,13 +9,9 @@ export class PermissionsRepository {
   async findUnique(
     permissionWhereUniqueInput: Prisma.PermissionWhereUniqueInput,
   ): Promise<Permission | null> {
-    return this.prisma.permission
-      .findUnique({
-        where: permissionWhereUniqueInput,
-      })
-      .catch((error) => {
-        throw new BadRequestException(error);
-      });
+    return this.prisma.permission.findUnique({
+      where: permissionWhereUniqueInput,
+    });
   }
 
   async findAll(params: {
@@ -26,27 +22,19 @@ export class PermissionsRepository {
     orderBy?: Prisma.PermissionOrderByWithRelationInput;
   }): Promise<Permission[]> {
     const { skip, take, cursor, where, orderBy } = params;
-    return this.prisma.permission
-      .findMany({
-        skip,
-        take,
-        cursor,
-        where,
-        orderBy,
-      })
-      .catch((error) => {
-        throw new BadRequestException(error);
-      });
+    return this.prisma.permission.findMany({
+      skip,
+      take,
+      cursor,
+      where,
+      orderBy,
+    });
   }
 
   async create(data: Prisma.PermissionCreateInput): Promise<Permission> {
-    return this.prisma.permission
-      .create({
-        data,
-      })
-      .catch((error) => {
-        throw new BadRequestException(error);
-      });
+    return this.prisma.permission.create({
+      data,
+    });
   }
 
   async update(params: {
@@ -54,23 +42,15 @@ export class PermissionsRepository {
     data: Prisma.PermissionUpdateInput;
   }): Promise<Permission> {
     const { where, data } = params;
-    return this.prisma.permission
-      .update({
-        data,
-        where,
-      })
-      .catch((error) => {
-        throw new BadRequestException(error);
-      });
+    return this.prisma.permission.update({
+      data,
+      where,
+    });
   }
 
   async delete(where: Prisma.PermissionWhereUniqueInput): Promise<Permission> {
-    return this.prisma.permission
-      .delete({
-        where,
-      })
-      .catch((error) => {
-        throw new BadRequestException(error);
-      });
+    return this.prisma.permission.delete({
+      where,
+    });
   }
 }

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Prisma, Group } from '@prisma/client';
 import { PrismaService } from 'src/infra/db/prisma/prisma.service';
 
@@ -9,13 +9,9 @@ export class GroupsRepository {
   async findUnique(
     groupWhereUniqueInput: Prisma.GroupWhereUniqueInput,
   ): Promise<Group | null> {
-    return this.prisma.group
-      .findUnique({
-        where: groupWhereUniqueInput,
-      })
-      .catch((error) => {
-        throw new BadRequestException(error);
-      });
+    return this.prisma.group.findUnique({
+      where: groupWhereUniqueInput,
+    });
   }
 
   async findAll(params: {
@@ -26,27 +22,19 @@ export class GroupsRepository {
     orderBy?: Prisma.GroupOrderByWithRelationInput;
   }): Promise<Group[]> {
     const { skip, take, cursor, where, orderBy } = params;
-    return this.prisma.group
-      .findMany({
-        skip,
-        take,
-        cursor,
-        where,
-        orderBy,
-      })
-      .catch((error) => {
-        throw new BadRequestException(error);
-      });
+    return this.prisma.group.findMany({
+      skip,
+      take,
+      cursor,
+      where,
+      orderBy,
+    });
   }
 
   async create(data: Prisma.GroupCreateInput): Promise<Group> {
-    return this.prisma.group
-      .create({
-        data,
-      })
-      .catch((error) => {
-        throw new BadRequestException(error);
-      });
+    return this.prisma.group.create({
+      data,
+    });
   }
 
   async update(params: {
@@ -54,23 +42,15 @@ export class GroupsRepository {
     data: Prisma.GroupUpdateInput;
   }): Promise<Group> {
     const { where, data } = params;
-    return this.prisma.group
-      .update({
-        data,
-        where,
-      })
-      .catch((error) => {
-        throw new BadRequestException(error);
-      });
+    return this.prisma.group.update({
+      data,
+      where,
+    });
   }
 
   async delete(where: Prisma.GroupWhereUniqueInput): Promise<Group> {
-    return this.prisma.group
-      .delete({
-        where,
-      })
-      .catch((error) => {
-        throw new BadRequestException(error);
-      });
+    return this.prisma.group.delete({
+      where,
+    });
   }
 }

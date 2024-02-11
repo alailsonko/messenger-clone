@@ -1,12 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import { CommandBus } from '@nestjs/cqrs';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { CreateUserCommand } from './commands/impl';
 import { UsersEntity } from 'src/domain/users/users.entity';
 import { CreateUserType } from './users.types';
+import { FindUniqueUserQuery } from './queries/impl';
+import { UsersModel } from 'src/domain/users';
 
 @Injectable()
 export class UsersService {
-  constructor(private commandBus: CommandBus) {}
+  constructor(
+    private commandBus: CommandBus,
+    private queryBus: QueryBus,
+  ) {}
 
   createUser(data: CreateUserType) {
     return this.commandBus.execute<CreateUserCommand, UsersEntity>(
@@ -16,6 +21,15 @@ export class UsersService {
         username: data.username,
         firstName: data.firstName,
         lastName: data.lastName,
+      }),
+    );
+  }
+
+  findUniqueUser(data: { email?: string; username?: string }) {
+    return this.queryBus.execute<FindUniqueUserQuery, UsersModel>(
+      new FindUniqueUserQuery({
+        email: data.email,
+        username: data.username,
       }),
     );
   }

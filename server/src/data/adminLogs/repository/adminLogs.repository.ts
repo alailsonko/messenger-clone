@@ -9,13 +9,9 @@ export class AdminLogsRepository {
   async findUnique(
     adminLogWhereUniqueInput: Prisma.AdminLogWhereUniqueInput,
   ): Promise<AdminLog | null> {
-    return this.prisma.adminLog
-      .findUnique({
-        where: adminLogWhereUniqueInput,
-      })
-      .catch((error) => {
-        throw new BadRequestException(error);
-      });
+    return this.prisma.adminLog.findUnique({
+      where: adminLogWhereUniqueInput,
+    });
   }
 
   async findAll(params: {
@@ -40,13 +36,9 @@ export class AdminLogsRepository {
   }
 
   async create(data: Prisma.AdminLogCreateInput): Promise<AdminLog> {
-    return this.prisma.adminLog
-      .create({
-        data,
-      })
-      .catch((error) => {
-        throw new BadRequestException(error);
-      });
+    return this.prisma.adminLog.create({
+      data,
+    });
   }
 
   async update(params: {
@@ -54,23 +46,15 @@ export class AdminLogsRepository {
     data: Prisma.AdminLogUpdateInput;
   }): Promise<AdminLog> {
     const { where, data } = params;
-    return this.prisma.adminLog
-      .update({
-        data,
-        where,
-      })
-      .catch((error) => {
-        throw new BadRequestException(error);
-      });
+    return this.prisma.adminLog.update({
+      data,
+      where,
+    });
   }
 
   async delete(where: Prisma.AdminLogWhereUniqueInput): Promise<AdminLog> {
-    return this.prisma.adminLog
-      .delete({
-        where,
-      })
-      .catch((error) => {
-        throw new BadRequestException(error);
-      });
+    return this.prisma.adminLog.delete({
+      where,
+    });
   }
 }

@@ -1,13 +1,12 @@
 // userPermission.mapper.ts
+import { UserPermission } from '@prisma/client';
 import { IUserPermission } from './usersPermissions.interface';
 import { UserPermissionModel } from './usersPermissions.model';
 
 export class UserPermissionMapper {
-  static toDomain(raw: IUserPermission): UserPermissionModel {
+  static toDomain(raw: UserPermission): UserPermissionModel {
     const model = new UserPermissionModel();
     model.id = raw.id;
-    model.user = raw.user;
-    model.permission = raw.permission;
     model.createdAt = raw.createdAt;
     model.updatedAt = raw.updatedAt;
     model.userId = raw.userId;

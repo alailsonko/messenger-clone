@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
+import { DefaultArgs } from '@prisma/client/runtime/library';
 import { PrismaService } from 'src/infra/db/prisma/prisma.service';
 
 @Injectable()
@@ -8,14 +9,12 @@ class UsersRepository {
 
   async findUnique(
     userWhereUniqueInput: Prisma.UserWhereUniqueInput,
-  ): Promise<User | null> {
-    return this.prisma.user
-      .findUnique({
-        where: userWhereUniqueInput,
-      })
-      .catch((error) => {
-        throw new BadRequestException(error);
-      });
+    include?: Prisma.UserInclude<DefaultArgs>,
+  ) {
+    return this.prisma.user.findUnique({
+      where: userWhereUniqueInput,
+      include,
+    });
   }
 
   async findAll(params: {
@@ -26,17 +25,13 @@ class UsersRepository {
     orderBy?: Prisma.UserOrderByWithRelationInput;
   }): Promise<User[]> {
     const { skip, take, cursor, where, orderBy } = params;
-    return this.prisma.user
-      .findMany({
-        skip,
-        take,
-        cursor,
-        where,
-        orderBy,
-      })
-      .catch((error) => {
-        throw new BadRequestException(error);
-      });
+    return this.prisma.user.findMany({
+      skip,
+      take,
+      cursor,
+      where,
+      orderBy,
+    });
   }
 
   async create(data: Prisma.UserCreateInput): Promise<User> {
@@ -65,13 +60,9 @@ class UsersRepository {
   }
 
   async delete(where: Prisma.UserWhereUniqueInput): Promise<User> {
-    return this.prisma.user
-      .delete({
-        where,
-      })
-      .catch((error) => {
-        throw new BadRequestException(error);
-      });
+    return this.prisma.user.delete({
+      where,
+    });
   }
 }
 

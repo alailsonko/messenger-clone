@@ -1,13 +1,12 @@
 // userGroup.mapper.ts
+import { UserGroup } from '@prisma/client';
 import { IUserGroup } from './usersGroups.interface';
 import { UserGroupModel } from './usersGroups.model';
 
 export class UserGroupMapper {
-  static toDomain(raw: IUserGroup): UserGroupModel {
+  static toDomain(raw: UserGroup): UserGroupModel {
     const model = new UserGroupModel();
     model.id = raw.id;
-    model.user = raw.user;
-    model.group = raw.group;
     model.createdAt = raw.createdAt;
     model.updatedAt = raw.updatedAt;
     model.userId = raw.userId;

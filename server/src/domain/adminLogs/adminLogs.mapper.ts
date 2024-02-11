@@ -1,8 +1,9 @@
 import { IAdminLog } from './adminLogs.interface';
 import { AdminLogsEntity } from './adminLogs.entity';
+import { AdminLog } from '@prisma/client';
 
 class AdminLogsMapper {
-  static toDomain(raw: IAdminLog): AdminLogsEntity {
+  static toDomain(raw: AdminLog): AdminLogsEntity {
     const entity = new AdminLogsEntity();
 
     entity.id = raw.id;
@@ -12,9 +13,7 @@ class AdminLogsMapper {
     entity.changeMessage = raw.changeMessage;
     entity.createdAt = raw.createdAt;
     entity.updatedAt = raw.updatedAt;
-    entity.user = raw.user;
     entity.userId = raw.userId;
-    entity.contentType = raw.contentType;
     entity.contentTypeId = raw.contentTypeId;
 
     return entity;
