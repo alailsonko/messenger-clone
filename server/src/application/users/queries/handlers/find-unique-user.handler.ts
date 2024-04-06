@@ -1,55 +1,97 @@
 import { QueryHandler } from '@nestjs/cqrs';
 import { FindUniqueUserQuery } from '../impl';
-import { UsersRepository } from 'src/data/users/repository/users.repository';
 import { UsersMapper, UsersModel } from 'src/domain/users';
 import { BadRequestException } from '@nestjs/common';
 import { AdminLogsMapper } from 'src/domain/adminLogs';
-import { UserPermissionMapper } from 'src/domain/usersPermissions';
-import { UserGroupMapper } from 'src/domain/usersGroups';
+import { PermissionMapper } from 'src/domain/permissions';
+import { GroupMapper } from 'src/domain/groups';
+import { AdminLogsRepository } from 'src/domain/adminLogs/adminLogs.repository';
+import { LoggerService } from 'src/infra/logger/logger.service';
+import { GroupsRepository } from 'src/domain/groups/groups.repository';
+import { PermissionsRepository } from 'src/domain/permissions/permissions.repository';
+import { UsersRepository } from 'src/domain/users/users.repository';
 
 @QueryHandler(FindUniqueUserQuery)
 export class FindUniqueUserHandler {
-  constructor(private readonly repository: UsersRepository) {}
+  constructor(
+    private readonly repository: UsersRepository,
+    private readonly adminLogRepository: AdminLogsRepository,
+    private readonly permissionRepository: PermissionsRepository,
+    private readonly groupRepository: GroupsRepository,
+    private readonly logger: LoggerService,
+  ) {
+    this.logger.setContext(FindUniqueUserHandler.name);
+  }
 
   async execute(query: FindUniqueUserQuery): Promise<UsersModel> {
-    try {
-      const { findOptions, include } = query;
+    const { findOptions, include } = query;
 
-      const response = await this.repository.findUnique(
-        {
-          username: findOptions.username && findOptions.username,
-          OR: findOptions.email && [{ email: findOptions.email }],
-        },
+    this.logger.log(
+      `Finding user: ${findOptions.username ?? findOptions.email ?? findOptions.id}`,
+      {
+        findOptions,
         include,
-      );
+      },
+    );
 
-      if (!response) {
-        throw new BadRequestException('User not found');
-      }
+    const response = await this.repository.findUnique({
+      email: findOptions.email,
+      username: findOptions.username,
+      id: findOptions.id,
+    });
 
-      const model = UsersMapper.toModel(response);
-
-      if (response.AdminLog && response.AdminLog.length) {
-        model.adminLog = response.AdminLog.map((log) => {
-          return AdminLogsMapper.toDomain(log);
-        });
-      }
-
-      if (response.userPermissions && response.userPermissions.length) {
-        model.userPermissions = response.userPermissions.map((permission) => {
-          return UserPermissionMapper.toDomain(permission);
-        });
-      }
-
-      if (response.UserGroup && response.UserGroup.length) {
-        model.userGroup = response.UserGroup.map((group) => {
-          return UserGroupMapper.toDomain(group);
-        });
-      }
-
-      return UsersMapper.toModel(response);
-    } catch (error) {
-      throw new BadRequestException(error);
+    if (!response) {
+      throw new BadRequestException('User not found');
     }
+
+    const model = UsersMapper.toModel(response);
+
+    model.adminLogs = [];
+    model.permissions = [];
+    model.groups = [];
+
+    if (include.AdminLogs) {
+      const AdminLogs = await this.adminLogRepository.findAll({
+        where: {
+          userId: model.id,
+        },
+      });
+      model.adminLogs = AdminLogs.map((log) => {
+        return AdminLogsMapper.toDomain(log);
+      });
+    }
+
+    if (include.permissions) {
+      const permissions = await this.permissionRepository.findAll({
+        where: {
+          UserPermission: {
+            some: {
+              userId: model.id,
+            },
+          },
+        },
+      });
+      model.permissions = permissions.map((permission) => {
+        return PermissionMapper.toDomain(permission);
+      });
+    }
+
+    if (include.groups) {
+      const groups = await this.groupRepository.findAll({
+        where: {
+          UserGroup: {
+            some: {
+              userId: model.id,
+            },
+          },
+        },
+      });
+
+      model.groups = groups.map((group) => {
+        return GroupMapper.toDomain(group);
+      });
+    }
+
+    return model;
   }
 }

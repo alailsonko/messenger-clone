@@ -1,20 +1,16 @@
-// permission.entity.ts
-import { IContentType } from '../contentTypes/contentTypes.interface';
 import { IGroup } from '../groups/groups.interface';
-import { IGroupPermission } from '../groupsPermissions/groupsPermissions.interface';
-import { IUserPermission } from '../usersPermissions/usersPermissions.interface';
+import { IUser } from '../users';
 import { PermissionAbstract } from './permissions.abstract';
 
 export class PermissionEntity extends PermissionAbstract {
   protected _id: string;
   protected _name: string;
   protected _codename: string;
-  protected _contentTypes: IContentType[];
-  protected _groups: IGroup[];
+  protected _contentTypeId: string;
+  protected _groups?: IGroup[];
   protected _createdAt: Date;
   protected _updatedAt: Date;
-  protected _userPermission: IUserPermission[];
-  protected _groupPermission: IGroupPermission[];
+  protected _users?: IUser[];
 
   get id(): string {
     return this._id;
@@ -37,11 +33,11 @@ export class PermissionEntity extends PermissionAbstract {
     this._codename = value;
   }
 
-  get contentTypes(): IContentType[] {
-    return this._contentTypes;
+  get contentTypeId(): string {
+    return this._contentTypeId;
   }
-  set contentTypes(value: IContentType[]) {
-    this._contentTypes = value;
+  set contentTypeId(value: string) {
+    this._contentTypeId = value;
   }
 
   get groups(): IGroup[] {
@@ -65,17 +61,10 @@ export class PermissionEntity extends PermissionAbstract {
     this._updatedAt = value;
   }
 
-  get userPermission(): IUserPermission[] {
-    return this._userPermission;
+  get users(): IUser[] {
+    return this._users;
   }
-  set userPermission(value: IUserPermission[]) {
-    this._userPermission = value;
-  }
-
-  get groupPermission(): IGroupPermission[] {
-    return this._groupPermission;
-  }
-  set groupPermission(value: IGroupPermission[]) {
-    this._groupPermission = value;
+  set users(value: IUser[]) {
+    this._users = value;
   }
 }

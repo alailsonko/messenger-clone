@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
+import { IUser, UsersModel } from 'src/domain/users';
+import { jwtConstants } from './auth.constants';
+import { AuthenticatePayload } from './auth.types';
+import { UsersMapper } from 'src/domain/users/users.mapper';
 
 @Injectable()
 export class AuthService {
@@ -9,21 +13,66 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(username: string, pass: string): Promise<any> {
-    const user = await this.usersService.findUniqueUser({ username });
-    if (user && user.password === pass) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { password, ...result } = user;
+  async validateUser(email: string, pass: string): Promise<UsersModel | null> {
+    const user = await this.usersService.findUniqueUser(
+      { email },
+      {
+        groups: true,
+        permissions: true,
+      },
+    );
 
-      return result;
+    if (user && user.password === pass) {
+      user.password = null;
+
+      return user;
     }
+
     return null;
   }
 
-  async login(user: any) {
-    const payload = { username: user.username, sub: user.userId };
+  async userWithGroupsAndPermissions(id: string): Promise<IUser> {
+    const user = await this.usersService.findUniqueUser(
+      { id },
+      {
+        permissions: true,
+        groups: true,
+      },
+    );
+
+    return UsersMapper.toObject(user);
+  }
+
+  async createAccessToken(user: UsersModel) {
+    const payload: AuthenticatePayload = {
+      email: user.email,
+      id: user.id,
+      groups: user.groups.length ? user.groups.map((group) => group.id) : [],
+    };
+
+    return this.jwtService.sign(payload, {
+      expiresIn: '15m',
+      secret: jwtConstants.secret,
+    });
+  }
+
+  async createRefreshToken(user: UsersModel) {
+    const payload: AuthenticatePayload = {
+      email: user.email,
+      id: user.id,
+      groups: user.groups.length ? user.groups.map((group) => group.id) : [],
+    };
+
+    return this.jwtService.sign(payload, {
+      expiresIn: '7d',
+      secret: jwtConstants.secret,
+    });
+  }
+
+  async login(user: UsersModel) {
     return {
-      access_token: this.jwtService.sign(payload),
+      accessToken: await this.createAccessToken(user),
+      refreshToken: await this.createRefreshToken(user),
     };
   }
 }

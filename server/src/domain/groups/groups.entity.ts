@@ -1,19 +1,17 @@
 import { IsUUID, IsString, IsDate, IsArray } from 'class-validator';
 import { Type } from 'class-transformer';
 import { GroupAbstract } from './groups.abstract';
-import { IGroupPermission } from '../groupsPermissions/groupsPermissions.interface';
 import { IPermission } from '../permissions/permissions.interface';
-import { IUserGroup } from '../usersGroups/usersGroups.interface';
 import { OPERATIONS } from 'src/common/enums/operations.enum';
+import { IUser } from '../users';
 
 export class GroupEntity extends GroupAbstract {
   protected _id: string;
   protected _name: string;
-  protected _permissions: IPermission[];
+  protected _permissions?: IPermission[];
   protected _createdAt: Date;
   protected _updatedAt: Date;
-  protected _groupPermission: IGroupPermission[];
-  protected _userGroup: IUserGroup[];
+  protected _users?: IUser[];
 
   @IsUUID('4', { groups: [OPERATIONS.READ] })
   get id(): string {
@@ -32,7 +30,6 @@ export class GroupEntity extends GroupAbstract {
   }
 
   @IsArray({ groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE] })
-  //   @Type(() => IPermission)
   get permissions(): IPermission[] {
     return this._permissions;
   }
@@ -59,20 +56,10 @@ export class GroupEntity extends GroupAbstract {
   }
 
   @IsArray({ groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE] })
-  //   @Type(() => IGroupPermission)
-  get groupPermission(): IGroupPermission[] {
-    return this._groupPermission;
+  get users(): IUser[] {
+    return this._users;
   }
-  set groupPermission(value: IGroupPermission[]) {
-    this._groupPermission = value;
-  }
-
-  @IsArray({ groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE] })
-  //   @Type(() => IUserGroup)
-  get userGroup(): IUserGroup[] {
-    return this._userGroup;
-  }
-  set userGroup(value: IUserGroup[]) {
-    this._userGroup = value;
+  set users(value: IUser[]) {
+    this._users = value;
   }
 }

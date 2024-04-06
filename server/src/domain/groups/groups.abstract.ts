@@ -1,6 +1,5 @@
-import { IGroupPermission } from '../groupsPermissions/groupsPermissions.interface';
 import { IPermission } from '../permissions/permissions.interface';
-import { IUserGroup } from '../usersGroups/usersGroups.interface';
+import { IUser } from '../users';
 
 export abstract class GroupAbstract {
   abstract get id(): string;
@@ -18,9 +17,6 @@ export abstract class GroupAbstract {
   abstract get updatedAt(): Date;
   abstract set updatedAt(value: Date);
 
-  abstract get groupPermission(): IGroupPermission[];
-  abstract set groupPermission(value: IGroupPermission[]);
-
-  abstract get userGroup(): IUserGroup[];
-  abstract set userGroup(value: IUserGroup[]);
+  abstract get users(): IUser[];
+  abstract set users(value: IUser[]);
 }

@@ -25,4 +25,14 @@ export class UserPermissionMapper {
       permissionId: entity.permissionId,
     };
   }
+
+  static toObejct(entity: UserPermissionModel): UserPermission {
+    return {
+      id: entity.id,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      userId: entity.userId,
+      permissionId: entity.permissionId,
+    };
+  }
 }

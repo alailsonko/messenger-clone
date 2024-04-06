@@ -1,22 +1,53 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CreateUserCommand } from '../impl';
-import { UsersRepository } from 'src/data/users/repository/users.repository';
 import { UsersMapper, UsersEntity } from 'src/domain/users';
-import { BadRequestException } from '@nestjs/common';
+import { LoggerService } from 'src/infra/logger/logger.service';
+import { UsersRepository } from 'src/domain/users/users.repository';
+import { UsersGroupsRepository } from 'src/domain/usersGroups/usersGroups.repository';
+import { GroupsRepository } from 'src/domain/groups/groups.repository';
+import { Groups } from 'src/domain/groups/groups.default';
 
 @CommandHandler(CreateUserCommand)
 export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
-  constructor(private readonly repository: UsersRepository) {}
+  constructor(
+    private readonly repository: UsersRepository,
+    private readonly groupsRepository: GroupsRepository,
+    private readonly UserGroupsRepository: UsersGroupsRepository,
+    private readonly logger: LoggerService,
+  ) {
+    this.logger.setContext(CreateUserHandler.name);
+  }
 
   async execute(command: CreateUserCommand): Promise<UsersEntity> {
-    try {
-      const { user } = command;
+    const { user } = command;
 
-      const response = await this.repository.create(user);
+    this.logger.log(`Creating user: ${user.username}`, {
+      user,
+    });
 
-      return UsersMapper.toDomain(response);
-    } catch (error) {
-      throw new BadRequestException(error);
+    const response = await this.repository.create(user);
+
+    const group = await this.groupsRepository.findUnique({
+      name: Groups.USER,
+    });
+
+    if (!group) {
+      throw new Error('Default group not found');
     }
+
+    await this.UserGroupsRepository.create({
+      user: {
+        connect: {
+          id: response.id,
+        },
+      },
+      group: {
+        connect: {
+          id: group.id,
+        },
+      },
+    });
+
+    return UsersMapper.toDomain(response);
   }
 }

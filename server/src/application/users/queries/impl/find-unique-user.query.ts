@@ -3,11 +3,12 @@ export class FindUniqueUserQuery {
     public readonly findOptions: {
       email?: string;
       username?: string;
+      id?: string;
     },
     public readonly include?: {
-      userPermissions?: boolean;
-      UserGroup?: boolean;
-      AdminLog?: boolean;
+      permissions?: boolean;
+      groups?: boolean;
+      AdminLogs?: boolean;
     },
   ) {}
 }

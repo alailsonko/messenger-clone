@@ -34,6 +34,20 @@ class AdminLogsMapper {
       contentTypeId: entity.contentTypeId,
     };
   }
+
+  static toObject(entity: AdminLogsEntity): IAdminLog {
+    return {
+      id: entity.id,
+      action: entity.action,
+      objectId: entity.objectId,
+      objectRepr: entity.objectRepr,
+      changeMessage: entity.changeMessage,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      userId: entity.userId,
+      contentTypeId: entity.contentTypeId,
+    };
+  }
 }
 
 export { AdminLogsMapper };

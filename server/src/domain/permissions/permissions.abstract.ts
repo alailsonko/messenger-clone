@@ -1,8 +1,5 @@
-// permission.abstract.ts
-import { IContentType } from '../contentTypes/contentTypes.interface';
 import { IGroup } from '../groups/groups.interface';
-import { IGroupPermission } from '../groupsPermissions/groupsPermissions.interface';
-import { IUserPermission } from '../usersPermissions/usersPermissions.interface';
+import { IUser } from '../users';
 
 export abstract class PermissionAbstract {
   abstract get id(): string;
@@ -14,8 +11,8 @@ export abstract class PermissionAbstract {
   abstract get codename(): string;
   abstract set codename(value: string);
 
-  abstract get contentTypes(): IContentType[];
-  abstract set contentTypes(value: IContentType[]);
+  abstract get contentTypeId(): string;
+  abstract set contentTypeId(value: string);
 
   abstract get groups(): IGroup[];
   abstract set groups(value: IGroup[]);
@@ -26,9 +23,6 @@ export abstract class PermissionAbstract {
   abstract get updatedAt(): Date;
   abstract set updatedAt(value: Date);
 
-  abstract get userPermission(): IUserPermission[];
-  abstract set userPermission(value: IUserPermission[]);
-
-  abstract get groupPermission(): IGroupPermission[];
-  abstract set groupPermission(value: IGroupPermission[]);
+  abstract get users(): IUser[];
+  abstract set users(value: IUser[]);
 }

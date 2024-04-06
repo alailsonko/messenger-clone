@@ -27,6 +27,13 @@ model User {
   userPermissions UserPermission[]
   UserGroup       UserGroup[]
   AdminLog        AdminLog[]
+  Message         Message[]
+  UserChatRoom    UserChatRoom[]
+  Reaction        Reaction[]
+  Post            Post[]
+  Comment         Comment[]
+  Like            Like[]
+  Share           Share[]
 }
 
 model UserPermission {
@@ -39,16 +46,6 @@ model UserPermission {
   permissionId String
 }
 
-model GroupPermission {
-  id           String     @id @default(dbgenerated("public.uuid_generate_v4()"))
-  group        Group      @relation(fields: [groupId], references: [id])
-  permission   Permission @relation(fields: [permissionId], references: [id])
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  groupId      String
-  permissionId String
-}
-
 model UserGroup {
   id        String   @id @default(dbgenerated("public.uuid_generate_v4()"))
   user      User     @relation(fields: [userId], references: [id])
@@ -57,6 +54,16 @@ model UserGroup {
   updatedAt DateTime @updatedAt
   userId    String
   groupId   String
+}
+
+model GroupPermission {
+  id           String     @id @default(dbgenerated("public.uuid_generate_v4()"))
+  group        Group      @relation(fields: [groupId], references: [id])
+  permission   Permission @relation(fields: [permissionId], references: [id])
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  groupId      String
+  permissionId String
 }
 
 model Group {
@@ -73,7 +80,8 @@ model Permission {
   id              String            @id @default(dbgenerated("public.uuid_generate_v4()"))
   name            String            @unique
   codename        String            @unique
-  contentTypes    ContentType[]
+  contentTypeId   String?
+  contentType     ContentType?      @relation(fields: [contentTypeId], references: [id])
   groups          Group[]
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
@@ -82,15 +90,14 @@ model Permission {
 }
 
 model ContentType {
-  id           String      @id @default(dbgenerated("public.uuid_generate_v4()"))
-  appLabel     String
-  model        String
-  name         String
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-  Permission   Permission? @relation(fields: [permissionId], references: [id])
-  permissionId String?
-  AdminLog     AdminLog[]
+  id         String       @id @default(dbgenerated("public.uuid_generate_v4()"))
+  appLabel   String
+  model      String
+  name       String
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  Permission Permission[]
+  AdminLog   AdminLog[]
 }
 
 model AdminLog {
@@ -114,4 +121,103 @@ model Session {
   expireDate  DateTime
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model Message {
+  id          String       @id @default(dbgenerated("public.uuid_generate_v4()"))
+  content     String
+  senderId    String
+  chatRoomId  String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  sender      User         @relation(fields: [senderId], references: [id])
+  chatRoom    ChatRoom     @relation(fields: [chatRoomId], references: [id])
+  attachments Attachment[]
+  reactions   Reaction[]
+}
+
+model ChatRoom {
+  id        String         @id @default(dbgenerated("public.uuid_generate_v4()"))
+  name      String
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  messages  Message[]
+  users     UserChatRoom[]
+}
+
+model UserChatRoom {
+  userId     String
+  chatRoomId String
+  user       User     @relation(fields: [userId], references: [id])
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
+
+  @@id([userId, chatRoomId])
+}
+
+model Attachment {
+  id        String   @id @default(dbgenerated("public.uuid_generate_v4()"))
+  file      String
+  messageId String?
+  postId    String?
+  commentId String?
+  message   Message? @relation(fields: [messageId], references: [id])
+  post      Post?    @relation(fields: [postId], references: [id])
+  comment   Comment? @relation(fields: [commentId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Reaction {
+  id        String  @id @default(dbgenerated("public.uuid_generate_v4()"))
+  type      String
+  userId    String
+  messageId String
+  user      User    @relation(fields: [userId], references: [id])
+  message   Message @relation(fields: [messageId], references: [id])
+}
+
+model Post {
+  id         String       @id @default(dbgenerated("public.uuid_generate_v4()"))
+  content    String
+  userId     String
+  user       User         @relation(fields: [userId], references: [id])
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  comments   Comment[]
+  likes      Like[]
+  shares     Share[]
+  Attachment Attachment[]
+}
+
+model Comment {
+  id         String       @id @default(dbgenerated("public.uuid_generate_v4()"))
+  content    String
+  userId     String
+  postId     String
+  user       User         @relation(fields: [userId], references: [id])
+  post       Post         @relation(fields: [postId], references: [id])
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  likes      Like[]
+  Attachment Attachment[]
+}
+
+model Like {
+  id        String   @id @default(dbgenerated("public.uuid_generate_v4()"))
+  userId    String
+  postId    String?
+  commentId String?
+  user      User     @relation(fields: [userId], references: [id])
+  post      Post?    @relation(fields: [postId], references: [id])
+  comment   Comment? @relation(fields: [commentId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Share {
+  id        String   @id @default(dbgenerated("public.uuid_generate_v4()"))
+  userId    String
+  postId    String
+  user      User     @relation(fields: [userId], references: [id])
+  post      Post     @relation(fields: [postId], references: [id])
+  createdAt DateTime @default(now())
 }

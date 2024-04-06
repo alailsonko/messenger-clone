@@ -1,6 +1,6 @@
 import { IAdminLog } from '../adminLogs/adminLogs.interface';
-import { IUserGroup } from '../usersGroups/usersGroups.interface';
-import { IUserPermission } from '../usersPermissions/usersPermissions.interface';
+import { IGroup } from '../groups';
+import { IPermission } from '../permissions';
 import { IUser } from './users.interface';
 
 abstract class UserAbstract implements IUser {
@@ -19,14 +19,14 @@ abstract class UserAbstract implements IUser {
   abstract get isActive(): boolean;
   abstract set isActive(value: boolean);
 
-  abstract get userPermissions(): IUserPermission[];
-  abstract set userPermissions(value: IUserPermission[]);
+  abstract get permissions(): IPermission[];
+  abstract set permissions(value: IPermission[]);
 
-  abstract get userGroup(): IUserGroup[];
-  abstract set userGroup(value: IUserGroup[]);
+  abstract get groups(): IGroup[];
+  abstract set groups(value: IGroup[]);
 
-  abstract get adminLog(): IAdminLog[];
-  abstract set adminLog(value: IAdminLog[]);
+  abstract get adminLogs(): IAdminLog[];
+  abstract set adminLogs(value: IAdminLog[]);
 
   abstract get id(): string;
   abstract set id(value: string);

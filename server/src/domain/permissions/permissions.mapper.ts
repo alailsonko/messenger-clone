@@ -8,12 +8,12 @@ export class PermissionMapper {
     entity.id = raw.id;
     entity.name = raw.name;
     entity.codename = raw.codename;
-    entity.contentTypes = raw.contentTypes;
+    entity.contentTypeId = raw.contentTypeId;
     entity.groups = raw.groups;
     entity.createdAt = raw.createdAt;
     entity.updatedAt = raw.updatedAt;
-    entity.userPermission = raw.userPermission;
-    entity.groupPermission = raw.groupPermission;
+    entity.users = raw.users;
+
     return entity;
   }
 
@@ -22,12 +22,24 @@ export class PermissionMapper {
       id: entity.id,
       name: entity.name,
       codename: entity.codename,
-      contentTypes: entity.contentTypes,
+      contentTypeId: entity.contentTypeId,
       groups: entity.groups,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
-      userPermission: entity.userPermission,
-      groupPermission: entity.groupPermission,
+      users: entity.users,
+    };
+  }
+
+  static toObject(entity: PermissionEntity): IPermission {
+    return {
+      id: entity.id,
+      name: entity.name,
+      codename: entity.codename,
+      contentTypeId: entity.contentTypeId,
+      groups: entity.groups,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      users: entity.users,
     };
   }
 }

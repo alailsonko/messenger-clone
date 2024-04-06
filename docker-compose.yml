@@ -7,7 +7,7 @@ services:
       context: ./server
     image: messenger-clone/backend
     ports:
-      - "4000:3000"
+      - "4000:4000"
     depends_on:
       - database-mc
     command: ["yarn", "start:dev"]

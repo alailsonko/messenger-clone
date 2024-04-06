@@ -40,16 +40,16 @@ class UsersModel extends UsersEntity {
     return super.password !== '';
   }
 
-  getUserPermissions(): any[] {
-    return super.userPermissions;
+  getPermissions(): any[] {
+    return super.permissions;
   }
 
-  getGroupPermissions(): any[] {
-    return super.userGroup;
+  getGroups(): any[] {
+    return super.groups;
   }
 
   getAllPermissions(): any[] {
-    return [...super.userPermissions, ...super.userGroup];
+    return [...super.permissions, ...super.groups];
   }
 
   hasPerm(perm: string): boolean {

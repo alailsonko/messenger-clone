@@ -8,28 +8,28 @@ import {
   IsDate,
 } from 'class-validator';
 import { UserAbstract } from './users.abstract';
-import { IAdminLog } from '../adminLogs/adminLogs.interface';
-import { IUserGroup } from '../usersGroups/usersGroups.interface';
-import { IUserPermission } from '../usersPermissions/usersPermissions.interface';
 import { OPERATIONS } from 'src/common/enums/operations.enum';
 import { ApiProperty } from '@nestjs/swagger';
+import { AdminLogModel } from '../adminLogs';
+import { GroupModel } from '../groups';
+import { PermissionModel } from '../permissions';
 
 class UsersEntity extends UserAbstract {
-  protected _isSuperUser: boolean;
-  protected _firstName: string;
-  protected _lastName: string;
-  protected _isStaff: boolean;
-  protected _isActive: boolean;
-  protected _userPermissions: IUserPermission[];
-  protected _userGroup: IUserGroup[];
-  protected _adminLog: IAdminLog[];
-  protected _id: string;
-  protected _username: string;
-  protected _password: string;
-  protected _email: string;
-  protected _createdAt: Date;
-  protected _updatedAt: Date;
-  protected _lastLogin: Date | null;
+  private _isSuperUser: boolean;
+  private _firstName: string;
+  private _lastName: string;
+  private _isStaff: boolean;
+  private _isActive: boolean;
+  private _permissions: PermissionModel[];
+  private _groups: GroupModel[];
+  private _adminLogs: AdminLogModel[];
+  private _id: string;
+  private _username: string;
+  private _password: string;
+  private _email: string;
+  private _createdAt: Date;
+  private _updatedAt: Date;
+  private _lastLogin: Date | null;
 
   @ApiProperty({
     type: 'string',
@@ -218,34 +218,34 @@ class UsersEntity extends UserAbstract {
   @IsOptional({
     groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE, OPERATIONS.READ],
   })
-  get userPermissions(): IUserPermission[] {
-    return this._userPermissions;
+  get permissions(): PermissionModel[] {
+    return this._permissions;
   }
 
-  set userPermissions(value: IUserPermission[]) {
-    this._userPermissions = value;
-  }
-
-  @IsOptional({
-    groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE, OPERATIONS.READ],
-  })
-  get userGroup(): IUserGroup[] {
-    return this._userGroup;
-  }
-
-  set userGroup(value: IUserGroup[]) {
-    this._userGroup = value;
+  set permissions(value: PermissionModel[]) {
+    this._permissions = value;
   }
 
   @IsOptional({
     groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE, OPERATIONS.READ],
   })
-  get adminLog(): IAdminLog[] {
-    return this._adminLog;
+  get groups(): GroupModel[] {
+    return this._groups;
   }
 
-  set adminLog(value: IAdminLog[]) {
-    this._adminLog = value;
+  set groups(value: GroupModel[]) {
+    this._groups = value;
+  }
+
+  @IsOptional({
+    groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE, OPERATIONS.READ],
+  })
+  get adminLogs(): AdminLogModel[] {
+    return this._adminLogs;
+  }
+
+  set adminLogs(value: AdminLogModel[]) {
+    this._adminLogs = value;
   }
 }
 

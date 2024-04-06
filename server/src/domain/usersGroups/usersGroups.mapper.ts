@@ -25,4 +25,14 @@ export class UserGroupMapper {
       groupId: entity.groupId,
     };
   }
+
+  static toObejct(entity: UserGroupModel): UserGroup {
+    return {
+      id: entity.id,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      userId: entity.userId,
+      groupId: entity.groupId,
+    };
+  }
 }
