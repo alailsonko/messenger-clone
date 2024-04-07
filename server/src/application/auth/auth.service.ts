@@ -1,25 +1,28 @@
 import { Injectable } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { IUser, UsersModel } from 'src/domain/users';
 import { jwtConstants } from './auth.constants';
 import { AuthenticatePayload } from './auth.types';
 import { UsersMapper } from 'src/domain/users/users.mapper';
+import { FindUniqueUserQuery } from '../users/queries/impl';
+import { QueryBus } from '@nestjs/cqrs';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private usersService: UsersService,
     private jwtService: JwtService,
+    private queryBus: QueryBus,
   ) {}
 
   async validateUser(email: string, pass: string): Promise<UsersModel | null> {
-    const user = await this.usersService.findUniqueUser(
-      { email },
-      {
-        groups: true,
-        permissions: true,
-      },
+    const user = await this.queryBus.execute<FindUniqueUserQuery, UsersModel>(
+      new FindUniqueUserQuery(
+        { email },
+        {
+          permissions: true,
+          groups: true,
+        },
+      ),
     );
 
     if (user && user.password === pass) {
@@ -32,12 +35,14 @@ export class AuthService {
   }
 
   async userWithGroupsAndPermissions(id: string): Promise<IUser> {
-    const user = await this.usersService.findUniqueUser(
-      { id },
-      {
-        permissions: true,
-        groups: true,
-      },
+    const user = await this.queryBus.execute<FindUniqueUserQuery, UsersModel>(
+      new FindUniqueUserQuery(
+        { id },
+        {
+          permissions: true,
+          groups: true,
+        },
+      ),
     );
 
     return UsersMapper.toObject(user);

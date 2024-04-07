@@ -1,4 +1,4 @@
-import { ContentTypes } from 'static/content-types.static';
+import { ContentTypes } from 'lib/content-types.static';
 
 export enum EGroups {
   ADMIN = 'ADMIN',

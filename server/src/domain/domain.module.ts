@@ -109,7 +109,7 @@ class Seeder {
       '..',
       '..',
       '..',
-      'static',
+      'lib',
       'content-types.static.ts',
     );
     const fileContent = `export const ContentTypes = ${JSON.stringify(contentTypes, null, 2)};`;

@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { UsersService } from 'src/application/users/users.service';
 import { CreateUserDto } from './dto/CreateUser.dto';
 import {
@@ -30,5 +30,16 @@ export class UsersController {
   @ApiBody({ type: CreateUserDto })
   createUser(@Body() body: CreateUserDto): Promise<CreateUserResponse> {
     return this.usersService.createUser(body);
+  }
+
+  @Get()
+  @ApiOperation({
+    summary: 'Get all users',
+  })
+  getUsers(@Query('skip') skip: number, @Query('take') take: number) {
+    return this.usersService.findAllUsers({
+      skip,
+      take,
+    });
   }
 }

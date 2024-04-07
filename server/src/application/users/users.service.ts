@@ -3,9 +3,10 @@ import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { CreateUserCommand } from './commands/impl';
 import { UsersEntity } from 'src/domain/users/users.entity';
 import { CreateUserRequest, CreateUserResponse } from './users.type';
-import { FindUniqueUserQuery } from './queries/impl';
-import { UsersModel } from 'src/domain/users';
+import { FindAllUsersQuery, FindUniqueUserQuery } from './queries/impl';
+import { IUser, UsersMapper, UsersModel } from 'src/domain/users';
 import { IUsersService } from './users.interface';
+import { PagedResult } from 'src/common/types/paged-result.type';
 
 @Injectable()
 export class UsersService implements IUsersService {
@@ -45,16 +46,33 @@ export class UsersService implements IUsersService {
     return response;
   }
 
-  findUniqueUser(
+  async findUniqueUser(
     data: { email?: string; username?: string; id?: string },
     include?: {
       permissions?: boolean;
       groups?: boolean;
       AdminLogs?: boolean;
     },
-  ) {
-    return this.queryBus.execute<FindUniqueUserQuery, UsersModel>(
+  ): Promise<IUser> {
+    const user = await this.queryBus.execute<FindUniqueUserQuery, UsersModel>(
       new FindUniqueUserQuery(data, include),
     );
+
+    return UsersMapper.toObject(user);
+  }
+
+  async findAllUsers(queryOptions: {
+    skip?: number;
+    take?: number;
+  }): Promise<PagedResult<IUser>> {
+    const response = await this.queryBus.execute<
+      FindAllUsersQuery,
+      PagedResult<UsersModel>
+    >(new FindAllUsersQuery(queryOptions));
+
+    return {
+      data: response.data.map(UsersMapper.toObject),
+      count: response.count,
+    };
   }
 }

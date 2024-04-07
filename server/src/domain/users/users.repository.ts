@@ -34,6 +34,12 @@ class UsersRepository {
     });
   }
 
+  async count(where: Prisma.UserWhereInput): Promise<number> {
+    return this.prisma.user.count({
+      where,
+    });
+  }
+
   async create(data: Prisma.UserCreateInput): Promise<User> {
     return this.prisma.user
       .create({
