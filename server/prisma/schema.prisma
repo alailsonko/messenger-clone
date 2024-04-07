@@ -24,16 +24,15 @@ model User {
   isActive        Boolean          @default(true)
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
-  userPermissions UserPermission[]
-  UserGroup       UserGroup[]
-  AdminLog        AdminLog[]
-  Message         Message[]
-  UserChatRoom    UserChatRoom[]
-  Reaction        Reaction[]
-  Post            Post[]
-  Comment         Comment[]
-  Like            Like[]
-  Share           Share[]
+  usersPermissions UserPermission[]
+  usersGroups       UserGroup[]
+  adminLogs        AdminLog[]
+  messages         Message[]
+  usersChatRooms    UserChatRoom[]
+  reactions        Reaction[]
+  posts            Post[]
+  comments         Comment[]
+  shares           Share[]
 }
 
 model UserPermission {
@@ -56,6 +55,17 @@ model UserGroup {
   groupId   String
 }
 
+
+model Group {
+  id              String            @id @default(dbgenerated("public.uuid_generate_v4()"))
+  name            String            @unique
+  permissions     Permission[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  groupsPermissions GroupPermission[]
+  usersGroups       UserGroup[]
+}
+
 model GroupPermission {
   id           String     @id @default(dbgenerated("public.uuid_generate_v4()"))
   group        Group      @relation(fields: [groupId], references: [id])
@@ -64,16 +74,6 @@ model GroupPermission {
   updatedAt    DateTime   @updatedAt
   groupId      String
   permissionId String
-}
-
-model Group {
-  id              String            @id @default(dbgenerated("public.uuid_generate_v4()"))
-  name            String            @unique
-  permissions     Permission[]
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  GroupPermission GroupPermission[]
-  UserGroup       UserGroup[]
 }
 
 model Permission {
@@ -85,8 +85,8 @@ model Permission {
   groups          Group[]
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
-  UserPermission  UserPermission[]
-  GroupPermission GroupPermission[]
+  usersPermissions  UserPermission[]
+  groupsPermissions GroupPermission[]
 }
 
 model ContentType {
@@ -96,8 +96,8 @@ model ContentType {
   name       String
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
-  Permission Permission[]
-  AdminLog   AdminLog[]
+  permissions Permission[]
+  adminLogs   AdminLog[]
 }
 
 model AdminLog {
@@ -142,7 +142,7 @@ model ChatRoom {
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
   messages  Message[]
-  users     UserChatRoom[]
+  usersChatRooms     UserChatRoom[]
 }
 
 model UserChatRoom {
@@ -171,9 +171,14 @@ model Reaction {
   id        String  @id @default(dbgenerated("public.uuid_generate_v4()"))
   type      String
   userId    String
-  messageId String
+  messageId String?
+  postId    String?
+  commentId String?
   user      User    @relation(fields: [userId], references: [id])
-  message   Message @relation(fields: [messageId], references: [id])
+  message   Message? @relation(fields: [messageId], references: [id])
+  post      Post?    @relation(fields: [postId], references: [id])
+  comment   Comment? @relation(fields: [commentId], references: [id])
+  createdAt DateTime @default(now())
 }
 
 model Post {
@@ -184,9 +189,9 @@ model Post {
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
   comments   Comment[]
-  likes      Like[]
+  reactions      Reaction[]
   shares     Share[]
-  Attachment Attachment[]
+  attachments Attachment[]
 }
 
 model Comment {
@@ -198,19 +203,8 @@ model Comment {
   post       Post         @relation(fields: [postId], references: [id])
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
-  likes      Like[]
-  Attachment Attachment[]
-}
-
-model Like {
-  id        String   @id @default(dbgenerated("public.uuid_generate_v4()"))
-  userId    String
-  postId    String?
-  commentId String?
-  user      User     @relation(fields: [userId], references: [id])
-  post      Post?    @relation(fields: [postId], references: [id])
-  comment   Comment? @relation(fields: [commentId], references: [id])
-  createdAt DateTime @default(now())
+  reactions      Reaction[]
+  attachments Attachment[]
 }
 
 model Share {

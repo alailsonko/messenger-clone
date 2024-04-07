@@ -12,8 +12,16 @@ import { PrismaClient } from '@prisma/client';
 import { InfraModule } from 'src/infra/infra.module';
 import * as fs from 'fs';
 import * as path from 'path';
-import { Groups, UserGroupDefaultPermissions } from './groups/groups.default';
+import { EGroups, userGroupDefaultPermissions } from './groups/groups.default';
 import { LoggerService } from 'src/infra/logger/logger.service';
+import { AttachmentsRepository } from './attachments/attachments.repository';
+import { ChatRoomsRepository } from './chatRooms/chat-rooms.repository';
+import { CommentsRepository } from './comments/comments.repository';
+import { MessagesRepository } from './messages/message.repository';
+import { PostsRepository } from './posts/posts.repository';
+import { ReactionsRepository } from './reactions/reactions.repository';
+import { SharesRepository } from './shares/shares.repository';
+import { UsersChatRoomsRepository } from './usersChatRooms/users-chat-rooms.repository';
 
 class Seeder {
   public readonly prisma: PrismaClient;
@@ -76,14 +84,14 @@ class Seeder {
   async getContentTypesAndPermissions() {
     const contentTypes = await this.prisma.contentType.findMany({
       include: {
-        Permission: true,
+        permissions: true,
       },
     });
 
     const formattedContentTypes = contentTypes.reduce((acc, contentType) => {
       acc[contentType.model] = {
         ...contentType,
-        Permission: contentType.Permission.reduce((acc, permission) => {
+        permissions: contentType.permissions.reduce((acc, permission) => {
           acc[permission.codename] = permission;
           return acc;
         }, {}),
@@ -180,8 +188,8 @@ class Seeder {
     await this.seedPermissions();
     await this.writeContentTypesToFile();
     await this.createGroupDefaultPermissions(
-      Groups.USER,
-      UserGroupDefaultPermissions,
+      EGroups.USER,
+      userGroupDefaultPermissions,
     );
   }
 }
@@ -199,6 +207,14 @@ class Seeder {
     UsersRepository,
     UsersGroupsRepository,
     UsersPermissionsRepository,
+    AttachmentsRepository,
+    ChatRoomsRepository,
+    CommentsRepository,
+    MessagesRepository,
+    PostsRepository,
+    ReactionsRepository,
+    SharesRepository,
+    UsersChatRoomsRepository,
   ],
   providers: [
     UsersRepository,
@@ -211,6 +227,14 @@ class Seeder {
     UsersRepository,
     UsersGroupsRepository,
     UsersPermissionsRepository,
+    AttachmentsRepository,
+    ChatRoomsRepository,
+    CommentsRepository,
+    MessagesRepository,
+    PostsRepository,
+    ReactionsRepository,
+    SharesRepository,
+    UsersChatRoomsRepository,
   ],
 })
 export class DomainModule extends Seeder implements OnModuleInit {

@@ -64,7 +64,7 @@ export class FindUniqueUserHandler {
     if (include.permissions) {
       const permissions = await this.permissionRepository.findAll({
         where: {
-          UserPermission: {
+          usersPermissions: {
             some: {
               userId: model.id,
             },
@@ -79,7 +79,7 @@ export class FindUniqueUserHandler {
     if (include.groups) {
       const groups = await this.groupRepository.findAll({
         where: {
-          UserGroup: {
+          usersGroups: {
             some: {
               userId: model.id,
             },

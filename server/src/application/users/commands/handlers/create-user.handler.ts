@@ -5,7 +5,7 @@ import { LoggerService } from 'src/infra/logger/logger.service';
 import { UsersRepository } from 'src/domain/users/users.repository';
 import { UsersGroupsRepository } from 'src/domain/usersGroups/usersGroups.repository';
 import { GroupsRepository } from 'src/domain/groups/groups.repository';
-import { Groups } from 'src/domain/groups/groups.default';
+import { EGroups } from 'src/domain/groups/groups.default';
 
 @CommandHandler(CreateUserCommand)
 export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
@@ -28,7 +28,7 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
     const response = await this.repository.create(user);
 
     const group = await this.groupsRepository.findUnique({
-      name: Groups.USER,
+      name: EGroups.USER,
     });
 
     if (!group) {

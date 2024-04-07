@@ -1,115 +1,108 @@
 import { ContentTypes } from 'static/content-types.static';
 
-export const Groups = {
-  ADMIN: 'ADMIN',
-  USER: 'USER',
-};
+export enum EGroups {
+  ADMIN = 'ADMIN',
+  USER = 'USER',
+}
 
-export const UserGroupDefaultPermissions: {
+export type GroupDefaultPermissionType = {
   contentTypeId: string;
   permissions: string[];
-}[] = [
+};
+
+export const userGroupDefaultPermissions: GroupDefaultPermissionType[] = [
   {
     contentTypeId: ContentTypes.Attachment.id,
     permissions: [
-      ContentTypes.Attachment.Permission.add_Attachment.id,
-      ContentTypes.Attachment.Permission.change_Attachment.id,
-      ContentTypes.Attachment.Permission.delete_Attachment.id,
-      ContentTypes.Attachment.Permission.read_Attachment.id,
+      ContentTypes.Attachment.permissions.add_Attachment.id,
+      ContentTypes.Attachment.permissions.change_Attachment.id,
+      ContentTypes.Attachment.permissions.delete_Attachment.id,
+      ContentTypes.Attachment.permissions.read_Attachment.id,
     ],
   },
   {
     contentTypeId: ContentTypes.User.id,
     permissions: [
-      ContentTypes.User.Permission.add_User.id,
-      ContentTypes.User.Permission.change_User.id,
-      ContentTypes.User.Permission.delete_User.id,
-      ContentTypes.User.Permission.read_User.id,
+      ContentTypes.User.permissions.add_User.id,
+      ContentTypes.User.permissions.change_User.id,
+      ContentTypes.User.permissions.delete_User.id,
+      ContentTypes.User.permissions.read_User.id,
     ],
   },
   {
     contentTypeId: ContentTypes.UserGroup.id,
-    permissions: [ContentTypes.UserGroup.Permission.read_UserGroup.id],
+    permissions: [ContentTypes.UserGroup.permissions.read_UserGroup.id],
   },
   {
     contentTypeId: ContentTypes.UserPermission.id,
     permissions: [
-      ContentTypes.UserPermission.Permission.read_UserPermission.id,
+      ContentTypes.UserPermission.permissions.read_UserPermission.id,
     ],
   },
   {
     contentTypeId: ContentTypes.Permission.id,
-    permissions: [ContentTypes.Permission.Permission.read_Permission.id],
+    permissions: [ContentTypes.Permission.permissions.read_Permission.id],
   },
   {
     contentTypeId: ContentTypes.ContentType.id,
-    permissions: [ContentTypes.ContentType.Permission.read_ContentType.id],
+    permissions: [ContentTypes.ContentType.permissions.read_ContentType.id],
   },
   {
     contentTypeId: ContentTypes.AdminLog.id,
-    permissions: [ContentTypes.AdminLog.Permission.read_AdminLog.id],
+    permissions: [ContentTypes.AdminLog.permissions.read_AdminLog.id],
   },
   {
     contentTypeId: ContentTypes.ChatRoom.id,
     permissions: [
-      ContentTypes.ChatRoom.Permission.add_ChatRoom.id,
-      ContentTypes.ChatRoom.Permission.change_ChatRoom.id,
-      ContentTypes.ChatRoom.Permission.delete_ChatRoom.id,
-      ContentTypes.ChatRoom.Permission.read_ChatRoom.id,
+      ContentTypes.ChatRoom.permissions.add_ChatRoom.id,
+      ContentTypes.ChatRoom.permissions.change_ChatRoom.id,
+      ContentTypes.ChatRoom.permissions.delete_ChatRoom.id,
+      ContentTypes.ChatRoom.permissions.read_ChatRoom.id,
     ],
   },
   {
     contentTypeId: ContentTypes.Message.id,
     permissions: [
-      ContentTypes.Message.Permission.add_Message.id,
-      ContentTypes.Message.Permission.change_Message.id,
-      ContentTypes.Message.Permission.delete_Message.id,
-      ContentTypes.Message.Permission.read_Message.id,
+      ContentTypes.Message.permissions.add_Message.id,
+      ContentTypes.Message.permissions.change_Message.id,
+      ContentTypes.Message.permissions.delete_Message.id,
+      ContentTypes.Message.permissions.read_Message.id,
     ],
   },
   {
     contentTypeId: ContentTypes.UserChatRoom.id,
     permissions: [
-      ContentTypes.UserChatRoom.Permission.add_UserChatRoom.id,
-      ContentTypes.UserChatRoom.Permission.change_UserChatRoom.id,
-      ContentTypes.UserChatRoom.Permission.delete_UserChatRoom.id,
-      ContentTypes.UserChatRoom.Permission.read_UserChatRoom.id,
-    ],
-  },
-  {
-    contentTypeId: ContentTypes.Like.id,
-    permissions: [
-      ContentTypes.Like.Permission.add_Like.id,
-      ContentTypes.Like.Permission.change_Like.id,
-      ContentTypes.Like.Permission.delete_Like.id,
-      ContentTypes.Like.Permission.read_Like.id,
+      ContentTypes.UserChatRoom.permissions.add_UserChatRoom.id,
+      ContentTypes.UserChatRoom.permissions.change_UserChatRoom.id,
+      ContentTypes.UserChatRoom.permissions.delete_UserChatRoom.id,
+      ContentTypes.UserChatRoom.permissions.read_UserChatRoom.id,
     ],
   },
   {
     contentTypeId: ContentTypes.Comment.id,
     permissions: [
-      ContentTypes.Comment.Permission.add_Comment.id,
-      ContentTypes.Comment.Permission.change_Comment.id,
-      ContentTypes.Comment.Permission.delete_Comment.id,
-      ContentTypes.Comment.Permission.read_Comment.id,
+      ContentTypes.Comment.permissions.add_Comment.id,
+      ContentTypes.Comment.permissions.change_Comment.id,
+      ContentTypes.Comment.permissions.delete_Comment.id,
+      ContentTypes.Comment.permissions.read_Comment.id,
     ],
   },
   {
     contentTypeId: ContentTypes.Post.id,
     permissions: [
-      ContentTypes.Post.Permission.add_Post.id,
-      ContentTypes.Post.Permission.change_Post.id,
-      ContentTypes.Post.Permission.delete_Post.id,
-      ContentTypes.Post.Permission.read_Post.id,
+      ContentTypes.Post.permissions.add_Post.id,
+      ContentTypes.Post.permissions.change_Post.id,
+      ContentTypes.Post.permissions.delete_Post.id,
+      ContentTypes.Post.permissions.read_Post.id,
     ],
   },
   {
     contentTypeId: ContentTypes.Reaction.id,
     permissions: [
-      ContentTypes.Reaction.Permission.add_Reaction.id,
-      ContentTypes.Reaction.Permission.change_Reaction.id,
-      ContentTypes.Reaction.Permission.delete_Reaction.id,
-      ContentTypes.Reaction.Permission.read_Reaction.id,
+      ContentTypes.Reaction.permissions.add_Reaction.id,
+      ContentTypes.Reaction.permissions.change_Reaction.id,
+      ContentTypes.Reaction.permissions.delete_Reaction.id,
+      ContentTypes.Reaction.permissions.read_Reaction.id,
     ],
   },
 ];

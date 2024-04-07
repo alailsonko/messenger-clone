@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Prisma, AdminLog } from '@prisma/client';
 import { PrismaService } from 'src/infra/db/prisma/prisma.service';
 
@@ -22,17 +22,13 @@ export class AdminLogsRepository {
     orderBy?: Prisma.AdminLogOrderByWithRelationInput;
   }): Promise<AdminLog[]> {
     const { skip, take, cursor, where, orderBy } = params;
-    return this.prisma.adminLog
-      .findMany({
-        skip,
-        take,
-        cursor,
-        where,
-        orderBy,
-      })
-      .catch((error) => {
-        throw new BadRequestException(error);
-      });
+    return this.prisma.adminLog.findMany({
+      skip,
+      take,
+      cursor,
+      where,
+      orderBy,
+    });
   }
 
   async create(data: Prisma.AdminLogCreateInput): Promise<AdminLog> {
