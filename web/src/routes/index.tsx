@@ -3,8 +3,11 @@ import { RouteObject, useRoutes } from 'react-router-dom';
 import { Landing } from '../pages/Landing';
 import { publicRoutes } from './public';
 import { protectedRoutes } from './protected';
+import { AuthContext } from '../contexts/auth-context';
 
 export const AppRoutes = () => {
+  const authContext = React.useContext(AuthContext);
+
   const commonRoutes: RouteObject[] = [
     {
       path: '/landing',
@@ -12,7 +15,7 @@ export const AppRoutes = () => {
     },
   ];
 
-  const routes = false ? protectedRoutes : publicRoutes;
+  const routes = authContext?.isAuthenticated ? protectedRoutes : publicRoutes;
 
   const element = useRoutes([...commonRoutes, ...routes]);
 

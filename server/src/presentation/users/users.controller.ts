@@ -1,6 +1,10 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { UsersService } from 'src/application/users/users.service';
-import { CreateUserDto } from './dto/CreateUser.dto';
+import {
+  CreateUserDto,
+  CreateUserRequest,
+  CreateUserResponse,
+} from './dto/CreateUser.dto';
 import {
   ApiBadRequestResponse,
   ApiBody,
@@ -9,7 +13,6 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { CreateUserResponse } from 'src/application/users/users.type';
 
 @ApiTags('users')
 @Controller('users')
@@ -27,7 +30,7 @@ export class UsersController {
     description: 'OK',
     type: CreateUserResponse,
   })
-  @ApiBody({ type: CreateUserDto })
+  @ApiBody({ type: CreateUserRequest })
   createUser(@Body() body: CreateUserDto): Promise<CreateUserResponse> {
     return this.usersService.createUser(body);
   }

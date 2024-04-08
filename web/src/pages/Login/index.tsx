@@ -12,6 +12,7 @@ import { useMutation } from '@tanstack/react-query';
 import React from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../contexts/auth-context';
 
 type LoginInputs = {
   email: string;
@@ -20,24 +21,11 @@ type LoginInputs = {
 
 export const Login = () => {
   const navigate = useNavigate();
+  const authContext = React.useContext(AuthContext);
 
   const { mutate, isSuccess } = useMutation({
     mutationFn: async (data: LoginInputs) => {
-      const response = await fetch(
-        `${process.env.REACT_APP_BACKEND_URL!}/auth/login`,
-        {
-          credentials: 'include',
-          method: 'POST',
-          body: JSON.stringify(data),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
+      return authContext?.login(data);
     },
   });
 

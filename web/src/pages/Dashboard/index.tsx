@@ -1,7 +1,7 @@
 import React from 'react';
 import { AuthContext } from '../../contexts/auth-context';
 
-export const Profile = () => {
+export const Dashboard = () => {
   const authContext = React.useContext(AuthContext);
 
   console.log('info', authContext?.user);
@@ -13,4 +13,4 @@ export const Profile = () => {
   );
 };
 
-export default Profile;
+export default Dashboard;

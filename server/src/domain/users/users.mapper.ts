@@ -62,7 +62,7 @@ class UsersMapper {
     return user;
   }
 
-  static toObject(user: UsersModel): IUser {
+  static toObject(user: UsersModel | UsersEntity): IUser {
     return {
       id: user.id,
       isSuperUser: user.isSuperUser,
@@ -76,13 +76,18 @@ class UsersMapper {
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
       lastLogin: user.lastLogin,
-      groups: user.groups.length ? user.groups.map(GroupMapper.toObject) : [],
-      adminLogs: user.adminLogs.length
-        ? user.adminLogs.map(AdminLogsMapper.toObject)
-        : [],
-      permissions: user.permissions.length
-        ? user.permissions.map(PermissionMapper.toObject)
-        : [],
+      groups:
+        user.groups && user.groups.length
+          ? user.groups.map(GroupMapper.toObject)
+          : [],
+      adminLogs:
+        user.adminLogs && user.adminLogs.length
+          ? user.adminLogs.map(AdminLogsMapper.toObject)
+          : [],
+      permissions:
+        user.permissions && user.permissions.length
+          ? user.permissions.map(PermissionMapper.toObject)
+          : [],
     };
   }
 }

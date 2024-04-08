@@ -2,20 +2,24 @@ import { Injectable } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { CreateUserCommand } from './commands/impl';
 import { UsersEntity } from 'src/domain/users/users.entity';
-import { CreateUserRequest, CreateUserResponse } from './users.type';
 import { FindAllUsersQuery, FindUniqueUserQuery } from './queries/impl';
 import { IUser, UsersMapper, UsersModel } from 'src/domain/users';
-import { IUsersService } from './users.interface';
 import { PagedResult } from 'src/common/types/paged-result.type';
 
 @Injectable()
-export class UsersService implements IUsersService {
+export class UsersService {
   constructor(
     private commandBus: CommandBus,
     private queryBus: QueryBus,
   ) {}
 
-  async createUser(data: CreateUserRequest): Promise<CreateUserResponse> {
+  async createUser(data: {
+    email: string;
+    password: string;
+    username: string;
+    firstName: string;
+    lastName: string;
+  }): Promise<IUser> {
     const userEntity = await this.commandBus.execute<
       CreateUserCommand,
       UsersEntity
@@ -29,21 +33,7 @@ export class UsersService implements IUsersService {
       }),
     );
 
-    const response: CreateUserResponse = {
-      id: userEntity.id,
-      email: userEntity.email,
-      username: userEntity.username,
-      firstName: userEntity.firstName,
-      lastName: userEntity.lastName,
-      createdAt: userEntity.createdAt,
-      isActive: userEntity.isActive,
-      isStaff: userEntity.isStaff,
-      isSuperUser: userEntity.isSuperUser,
-      lastLogin: userEntity.lastLogin,
-      updatedAt: userEntity.updatedAt,
-    };
-
-    return response;
+    return UsersMapper.toObject(userEntity);
   }
 
   async findUniqueUser(

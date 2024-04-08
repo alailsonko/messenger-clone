@@ -1,10 +1,15 @@
 import React from 'react';
 import { RouteObject } from 'react-router-dom';
-import { Login } from '../pages/Login';
+import Profile from '../pages/Profile';
+import Dashboard from '../pages/Dashboard';
 
 export const protectedRoutes: RouteObject[] = [
   {
     path: '/',
-    element: <Login />,
+    element: <Dashboard />,
+  },
+  {
+    path: '/profile',
+    element: <Profile />,
   },
 ];
