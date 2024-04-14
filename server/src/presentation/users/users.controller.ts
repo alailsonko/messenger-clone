@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   ParseIntPipe,
   Post,
   Query,
@@ -25,11 +26,18 @@ import {
 } from '@nestjs/swagger';
 import { UsersPagedResult } from './dto/GetUsers.dto';
 import { JwtAuthGuard } from 'src/application/auth/guards/jwt-auth.guard';
+import { ChatRoomsService } from 'src/application/chat-rooms/chat-rooms.service';
+import { ChatRoom, CreateUserChatRoomDto } from './dto/CreateUserChatRoom.dto';
+import { IChatRoom } from 'src/domain/chatRooms/chat-rooms.interface';
+import { PagedUserChatRooms } from './dto/GetUserChatRooms.dto';
 
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
-  constructor(private usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly chatRoomsService: ChatRoomsService,
+  ) {}
 
   @Post()
   @ApiOperation({
@@ -66,6 +74,52 @@ export class UsersController {
     @Query('take', new ParseIntPipe()) take: number,
   ): Promise<UsersPagedResult> {
     return this.usersService.findAllUsers({
+      skip,
+      take,
+    });
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':userId/chat-rooms')
+  @ApiOperation({
+    summary: 'Create a chat room',
+  })
+  @ApiForbiddenResponse({ status: 403, description: 'Forbidden.' })
+  @ApiBadRequestResponse({ status: 400, description: 'Bad Request.' })
+  @ApiCreatedResponse({
+    status: 201,
+    description: 'OK',
+    type: ChatRoom,
+  })
+  @ApiBody({ type: CreateUserChatRoomDto })
+  async createUserChatRoom(
+    @Param('userId') userId: string,
+    @Body()
+    body: CreateUserChatRoomDto,
+  ): Promise<IChatRoom> {
+    return this.chatRoomsService.createUserChatRoom(userId, body);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':userId/chat-rooms')
+  @ApiOperation({
+    summary: 'Get user chat rooms',
+  })
+  @ApiQuery({ name: 'skip', required: true })
+  @ApiQuery({ name: 'take', required: true })
+  @ApiResponse({
+    status: 200,
+    description: 'OK',
+    type: PagedUserChatRooms,
+  })
+  @ApiForbiddenResponse({ status: 403, description: 'Forbidden.' })
+  @ApiBadRequestResponse({ status: 400, description: 'Bad Request.' })
+  getUserChatRooms(
+    @Param('userId') userId: string,
+    @Query('skip', new ParseIntPipe()) skip: number,
+    @Query('take', new ParseIntPipe()) take: number,
+  ): Promise<PagedUserChatRooms> {
+    return this.chatRoomsService.getUserChatRooms(userId, {
       skip,
       take,
     });

@@ -67,6 +67,54 @@ export interface UsersPagedResult {
   data: Users[];
 }
 
+export interface CreateUserChatRoomDto {
+  /**
+   * Chat room name
+   * @example "Chat room 1"
+   */
+  name: string;
+  /**
+   * User IDs
+   * @example ["1","2"]
+   */
+  userIds: string[];
+}
+
+export interface ChatRoom {
+  /**
+   * Chat room ID
+   * @example "1"
+   */
+  id: string;
+  /**
+   * Chat room name
+   * @example "Chat room 1"
+   */
+  name: string;
+  /**
+   * Chat room creation date
+   * @format date-time
+   * @example "2021-07-01T00:00:00.000Z"
+   */
+  createdAt: string;
+  /**
+   * Chat room last update date
+   * @format date-time
+   * @example "2021-07-01T00:00:00.000Z"
+   */
+  updatedAt: string;
+}
+
+export interface PagedUserChatRooms {
+  /** Chat rooms */
+  data: ChatRoom[];
+  /**
+   * Chat rooms count
+   * @example 1
+   */
+  count: number;
+}
+
 export interface Login {
   email: string;
   password: string;
@@ -362,6 +410,52 @@ export class Api<
     ) =>
       this.request<UsersPagedResult, void>({
         path: `/users`,
+        method: 'GET',
+        query: query,
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags users
+     * @name UsersControllerCreateUserChatRoom
+     * @summary Create a chat room
+     * @request POST:/users/{userId}/chat-rooms
+     */
+    usersControllerCreateUserChatRoom: (
+      userId: string,
+      data: CreateUserChatRoomDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<ChatRoom, void>({
+        path: `/users/${userId}/chat-rooms`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags users
+     * @name UsersControllerGetUserChatRooms
+     * @summary Get user chat rooms
+     * @request GET:/users/{userId}/chat-rooms
+     */
+    usersControllerGetUserChatRooms: (
+      userId: string,
+      query: {
+        skip: number;
+        take: number;
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<PagedUserChatRooms, void>({
+        path: `/users/${userId}/chat-rooms`,
         method: 'GET',
         query: query,
         format: 'json',

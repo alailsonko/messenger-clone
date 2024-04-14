@@ -51,4 +51,10 @@ export class ChatRoomsRepository {
       where,
     });
   }
+
+  async count(where: Prisma.ChatRoomWhereInput) {
+    return this.prisma.chatRoom.count({
+      where,
+    });
+  }
 }

@@ -9,7 +9,7 @@ import { join } from 'path';
   imports: [
     PresentationModule,
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'static'),
+      rootPath: join(__dirname, '..', '..', 'public'),
     }),
   ],
   controllers: [AppController],

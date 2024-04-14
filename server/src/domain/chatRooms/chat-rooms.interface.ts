@@ -1,4 +1,4 @@
-export interface IMessage {
+export interface IChatRoom {
   id: string;
   name: string;
   createdAt: Date;

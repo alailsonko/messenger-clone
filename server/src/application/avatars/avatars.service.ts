@@ -29,6 +29,7 @@ export class AvatarsService {
       '..',
       '..',
       '..',
+      'public',
       'static',
       'avatar',
       data.avatar.filename + data.avatar.mimetype.replace('image/', '.'),
