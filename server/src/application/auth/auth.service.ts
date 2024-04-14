@@ -48,7 +48,7 @@ export class AuthService {
     return UsersMapper.toObject(user);
   }
 
-  async createAccessToken(user: UsersModel) {
+  async createAccessToken(user: IUser) {
     const payload: AuthenticatePayload = {
       email: user.email,
       id: user.id,
@@ -56,12 +56,12 @@ export class AuthService {
     };
 
     return this.jwtService.sign(payload, {
-      expiresIn: '15m',
+      expiresIn: '1d',
       secret: jwtConstants.secret,
     });
   }
 
-  async createRefreshToken(user: UsersModel) {
+  async createRefreshToken(user: IUser) {
     const payload: AuthenticatePayload = {
       email: user.email,
       id: user.id,
@@ -74,7 +74,7 @@ export class AuthService {
     });
   }
 
-  async login(user: UsersModel) {
+  async login(user: IUser) {
     return {
       accessToken: await this.createAccessToken(user),
       refreshToken: await this.createRefreshToken(user),

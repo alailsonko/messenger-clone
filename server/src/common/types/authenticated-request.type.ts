@@ -1,4 +1,4 @@
 import { Request as RequestType } from 'express';
-import { UsersModel } from 'src/domain/users';
+import { IUser } from 'src/domain/users';
 
-export type AuthenticatedRequest = RequestType & { user: UsersModel };
+export type AuthenticatedRequest = RequestType & { user: IUser };

@@ -4,6 +4,7 @@ import { Landing } from '../pages/Landing';
 import { publicRoutes } from './public';
 import { protectedRoutes } from './protected';
 import { AuthContext } from '../contexts/auth-context';
+import LinearIndeterminate from '../components/Loading/linear-indeterminate';
 
 export const AppRoutes = () => {
   const authContext = React.useContext(AuthContext);
@@ -17,7 +18,18 @@ export const AppRoutes = () => {
 
   const routes = authContext?.isAuthenticated ? protectedRoutes : publicRoutes;
 
-  const element = useRoutes([...commonRoutes, ...routes]);
+  const element = useRoutes([
+    ...commonRoutes,
+    ...routes,
+    {
+      path: '*',
+      element: <div>Not Found</div>,
+    },
+  ]);
+
+  if (authContext?.isLoading) {
+    return <LinearIndeterminate />;
+  }
 
   return <>{element}</>;
 };

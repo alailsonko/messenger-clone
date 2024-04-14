@@ -62,7 +62,7 @@ class UsersMapper {
     return user;
   }
 
-  static toObject(user: UsersModel | UsersEntity): IUser {
+  static toObject(user: UsersEntity): IUser {
     return {
       id: user.id,
       isSuperUser: user.isSuperUser,

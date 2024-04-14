@@ -33,6 +33,16 @@ model User {
   posts            Post[]
   comments         Comment[]
   shares           Share[]
+  avatar           Avatar?
+}
+
+model Avatar {
+  id        String   @id @default(dbgenerated("public.uuid_generate_v4()"))
+  url       String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String @unique
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model UserPermission {

@@ -11,6 +11,10 @@ import { JwtAuthGuard } from 'src/application/auth/guards/jwt-auth.guard';
 import { Response as ResponseType } from 'express';
 import { LocalAuthGuard } from 'src/application/auth/guards/local-auth.guard';
 import { AuthenticatedRequest } from 'src/common/types/authenticated-request.type';
+import { IUser } from 'src/domain/users';
+import { ApiBody, ApiResponse } from '@nestjs/swagger';
+import { Profile } from './dto/GetProfile.dto';
+import { Login } from './dto/Login.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -18,6 +22,11 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
+  @ApiBody({ type: Login, description: 'Login' })
+  @ApiResponse({
+    status: 200,
+    description: 'Login successful',
+  })
   async login(
     @Request() req: AuthenticatedRequest,
     @Response() res: ResponseType,
@@ -44,9 +53,21 @@ export class AuthController {
     res.send({ message: 'Login successful' });
   }
 
+  @Post('logout')
+  @ApiResponse({
+    status: 200,
+    type: 'object',
+  })
+  logout(@Response() res: ResponseType) {
+    res.clearCookie('refreshToken');
+    res.clearCookie('accessToken');
+    res.send({ message: 'Logout successful' });
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  getProfile(@Request() req: AuthenticatedRequest) {
+  @ApiResponse({ status: 200, type: Profile })
+  getProfile(@Request() req: AuthenticatedRequest): IUser {
     return req.user;
   }
 }

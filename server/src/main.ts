@@ -5,6 +5,7 @@ import { AllExceptionsFilter } from './common/errors/http-exception.filter';
 import { promises as fs } from 'fs';
 import { join } from 'path';
 import * as cookieParser from 'cookie-parser';
+import { LoggerService } from './infra/logger/logger.service';
 
 async function bootstrap() {
   const keyFile = await fs.readFile(join(__dirname, '..', '/../cert/key.pem'));
@@ -34,8 +35,17 @@ async function bootstrap() {
     .addTag('mc')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('api', app, document, {
+    jsonDocumentUrl: '/api-json',
+  });
   app.useGlobalFilters(new AllExceptionsFilter());
-  await app.listen(4000);
+  await app.listen(4000, () => {
+    const logger = app.get(LoggerService);
+
+    logger.setContext('Bootstrap');
+    logger.log('OPENAPI path on https://localhost:4000/api');
+    logger.log('OPENAPI json path on https://localhost:4000/api-json');
+    logger.log('Server is running on https://localhost:4000');
+  });
 }
 bootstrap();
