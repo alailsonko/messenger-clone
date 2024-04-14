@@ -1,4 +1,5 @@
 import { IAdminLog } from '../adminLogs/adminLogs.interface';
+import { IAvatar } from '../avatars/avatars.interface';
 import { IGroup } from '../groups';
 import { IPermission } from '../permissions';
 import { IUser } from './users.interface';
@@ -27,6 +28,9 @@ abstract class UserAbstract implements IUser {
 
   abstract get adminLogs(): IAdminLog[];
   abstract set adminLogs(value: IAdminLog[]);
+
+  abstract get avatar(): IAvatar;
+  abstract set avatar(value: IAvatar);
 
   abstract get id(): string;
   abstract set id(value: string);

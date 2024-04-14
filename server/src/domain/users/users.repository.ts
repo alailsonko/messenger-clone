@@ -31,6 +31,9 @@ class UsersRepository {
       cursor,
       where,
       orderBy,
+      include: {
+        avatar: true,
+      },
     });
   }
 

@@ -10,6 +10,8 @@ import { LoggerService } from 'src/infra/logger/logger.service';
 import { GroupsRepository } from 'src/domain/groups/groups.repository';
 import { PermissionsRepository } from 'src/domain/permissions/permissions.repository';
 import { UsersRepository } from 'src/domain/users/users.repository';
+import { AvatarsRepository } from 'src/domain/avatars/avatars.repository';
+import { AvatarsMapper } from 'src/domain/avatars/avatars.mapper';
 
 @QueryHandler(FindUniqueUserQuery)
 export class FindUniqueUserHandler {
@@ -18,6 +20,7 @@ export class FindUniqueUserHandler {
     private readonly adminLogRepository: AdminLogsRepository,
     private readonly permissionRepository: PermissionsRepository,
     private readonly groupRepository: GroupsRepository,
+    private readonly avatarRepository: AvatarsRepository,
     private readonly logger: LoggerService,
   ) {
     this.logger.setContext(FindUniqueUserHandler.name);
@@ -49,6 +52,12 @@ export class FindUniqueUserHandler {
     model.adminLogs = [];
     model.permissions = [];
     model.groups = [];
+
+    const avatar = await this.avatarRepository.findUnique({
+      userId: model.id,
+    });
+
+    model.avatar = AvatarsMapper.toDomain(avatar);
 
     if (include.AdminLogs) {
       const AdminLogs = await this.adminLogRepository.findAll({

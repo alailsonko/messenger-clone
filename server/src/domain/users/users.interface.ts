@@ -1,4 +1,5 @@
 import { IAdminLog } from '../adminLogs/adminLogs.interface';
+import { IAvatar } from '../avatars/avatars.interface';
 import { IGroup } from '../groups';
 import { IPermission } from '../permissions';
 
@@ -18,4 +19,5 @@ export interface IUser {
   permissions?: IPermission[];
   groups?: IGroup[];
   adminLogs?: IAdminLog[];
+  avatar?: IAvatar;
 }

@@ -34,6 +34,16 @@ export interface CreateUserResponse {
   lastLogin: string | null;
 }
 
+export interface Avatar {
+  /** @format date-time */
+  createdAt: string;
+  id: string;
+  /** @format date-time */
+  updatedAt: string;
+  url: string;
+  userId: string;
+}
+
 export interface Users {
   id: string;
   email: string;
@@ -47,6 +57,7 @@ export interface Users {
   password: string;
   updatedAt: string;
   username: string;
+  avatar: Avatar;
 }
 
 export interface UsersPagedResult {
@@ -113,6 +124,7 @@ export interface Profile {
   /** @format date-time */
   updatedAt: string;
   username: string;
+  avatar?: Avatar;
 }
 
 import type {
@@ -397,6 +409,27 @@ export class Api<
         path: `/auth/profile`,
         method: 'GET',
         format: 'json',
+        ...params,
+      }),
+  };
+  avatars = {
+    /**
+     * No description
+     *
+     * @tags avatars
+     * @name AvatarsControllerCreateAvatar
+     * @request POST:/avatars/{userId}
+     */
+    avatarsControllerCreateAvatar: (
+      userId: string,
+      data: any,
+      params: RequestParams = {}
+    ) =>
+      this.request<void, any>({
+        path: `/avatars/${userId}`,
+        method: 'POST',
+        body: data,
+        type: ContentType.FormData,
         ...params,
       }),
   };

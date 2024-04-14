@@ -13,6 +13,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { AdminLogModel } from '../adminLogs';
 import { GroupModel } from '../groups';
 import { PermissionModel } from '../permissions';
+import { AvatarModel } from '../avatars';
 
 class UsersEntity extends UserAbstract {
   private _isSuperUser: boolean;
@@ -23,6 +24,7 @@ class UsersEntity extends UserAbstract {
   private _permissions: PermissionModel[];
   private _groups: GroupModel[];
   private _adminLogs: AdminLogModel[];
+  private _avatar: AvatarModel;
   private _id: string;
   private _username: string;
   private _password: string;
@@ -246,6 +248,17 @@ class UsersEntity extends UserAbstract {
 
   set adminLogs(value: AdminLogModel[]) {
     this._adminLogs = value;
+  }
+
+  @IsOptional({
+    groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE, OPERATIONS.READ],
+  })
+  get avatar(): AvatarModel {
+    return this._avatar;
+  }
+
+  set avatar(value: AvatarModel) {
+    this._avatar = value;
   }
 }
 

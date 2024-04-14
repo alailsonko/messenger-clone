@@ -11,6 +11,9 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { teal } from '@mui/material/colors';
 import React from 'react';
 import { useMutation } from '@tanstack/react-query';
+import { RequestContext } from '../../contexts/request-context';
+import { CloudUpload } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 
 type RegisterInputs = {
   username: string;
@@ -19,25 +22,48 @@ type RegisterInputs = {
   email: string;
   password: string;
   confirmPassword: string;
+  avatar: File[];
 };
 
 export const Register = () => {
+  const navigate = useNavigate();
+  const requestContext = React.useContext(RequestContext);
+
   const mutation = useMutation({
     mutationFn: async (data: RegisterInputs) => {
-      const response = await fetch(
-        `${process.env.REACT_APP_BACKEND_URL!}/users`,
+      const response = await requestContext.users.usersControllerCreateUser({
+        email: data.email,
+        password: data.password,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        username: data.username,
+      });
+
+      await requestContext.auth.authControllerLogin({
+        email: data.email,
+        password: data.password,
+      });
+
+      const formData = new FormData();
+
+      formData.append('avatar', data.avatar[0]);
+
+      await requestContext.avatars.avatarsControllerCreateAvatar(
+        response.data.id,
+        { avatar: data.avatar[0] },
         {
-          method: 'POST',
-          body: JSON.stringify(data),
           headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'multipart/form-data',
           },
         }
       );
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
+
+      return response.data;
+    },
+    onSuccess(data, variables, context) {
+      navigate('/');
+
+      console.log('Success', data);
     },
   });
 
@@ -66,6 +92,30 @@ export const Register = () => {
             <h1>Register</h1>
             <form onSubmit={handleSubmit(onSubmit)}>
               <FormGroup>
+                <Button
+                  component="label"
+                  role={undefined}
+                  variant="contained"
+                  tabIndex={-1}
+                  startIcon={<CloudUpload />}
+                >
+                  Upload avatar
+                  <input
+                    style={{
+                      clip: 'rect(0 0 0 0)',
+                      clipPath: 'inset(50%)',
+                      height: 1,
+                      overflow: 'hidden',
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      whiteSpace: 'nowrap',
+                      width: 1,
+                    }}
+                    type="file"
+                    {...register('avatar')}
+                  />
+                </Button>
                 <TextField
                   required
                   id="username"

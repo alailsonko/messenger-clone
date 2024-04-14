@@ -1,10 +1,11 @@
-import { User } from '@prisma/client';
+import { Avatar, User } from '@prisma/client';
 import { UsersEntity } from './users.entity';
 import { UsersModel } from './users.model';
 import { AdminLogsMapper } from '../adminLogs';
 import { GroupMapper } from '../groups';
 import { PermissionMapper } from '../permissions';
 import { IUser } from './users.interface';
+import { AvatarsMapper } from '../avatars/avatars.mapper';
 
 class UsersMapper {
   static toDomain(raw: User): UsersEntity {
@@ -43,7 +44,7 @@ class UsersMapper {
     };
   }
 
-  static toModel(raw: User): UsersModel {
+  static toModel(raw: User & { avatar?: Avatar }): UsersModel {
     const user = new UsersModel();
 
     user.id = raw.id;
@@ -58,6 +59,7 @@ class UsersMapper {
     user.createdAt = raw.createdAt;
     user.updatedAt = raw.updatedAt;
     user.lastLogin = raw.lastLogin;
+    user.avatar = raw.avatar ? AvatarsMapper.toModel(raw.avatar) : null;
 
     return user;
   }
@@ -76,6 +78,7 @@ class UsersMapper {
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
       lastLogin: user.lastLogin,
+      avatar: user.avatar ? AvatarsMapper.toObject(user.avatar) : null,
       groups:
         user.groups && user.groups.length
           ? user.groups.map(GroupMapper.toObject)

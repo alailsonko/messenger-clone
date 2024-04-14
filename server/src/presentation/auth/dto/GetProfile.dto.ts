@@ -1,8 +1,26 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IAdminLog } from 'src/domain/adminLogs';
+import { IAvatar } from 'src/domain/avatars/avatars.interface';
 import { IGroup } from 'src/domain/groups';
 import { IPermission } from 'src/domain/permissions';
 import { IUser } from 'src/domain/users';
+
+export class Avatar implements IAvatar {
+  @ApiProperty({ type: Date, required: true })
+  createdAt: Date;
+
+  @ApiProperty({ type: String, required: true })
+  id: string;
+
+  @ApiProperty({ type: Date, required: true })
+  updatedAt: Date;
+
+  @ApiProperty({ type: String, required: true })
+  url: string;
+
+  @ApiProperty({ type: String, required: true })
+  userId: string;
+}
 
 export class AdminLog implements IAdminLog {
   @ApiProperty({ type: String, required: true })
@@ -109,4 +127,7 @@ export class Profile implements Omit<IUser, 'password'> {
 
   @ApiProperty({ type: String, required: true })
   username: string;
+
+  @ApiProperty({ type: Avatar, required: false })
+  avatar?: IAvatar;
 }

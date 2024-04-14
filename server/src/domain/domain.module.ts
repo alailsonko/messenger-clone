@@ -22,6 +22,7 @@ import { PostsRepository } from './posts/posts.repository';
 import { ReactionsRepository } from './reactions/reactions.repository';
 import { SharesRepository } from './shares/shares.repository';
 import { UsersChatRoomsRepository } from './usersChatRooms/users-chat-rooms.repository';
+import { AvatarsRepository } from './avatars/avatars.repository';
 
 class Seeder {
   public readonly prisma: PrismaClient;
@@ -215,6 +216,7 @@ class Seeder {
     ReactionsRepository,
     SharesRepository,
     UsersChatRoomsRepository,
+    AvatarsRepository,
   ],
   providers: [
     UsersRepository,
@@ -235,6 +237,7 @@ class Seeder {
     ReactionsRepository,
     SharesRepository,
     UsersChatRoomsRepository,
+    AvatarsRepository,
   ],
 })
 export class DomainModule extends Seeder implements OnModuleInit {
