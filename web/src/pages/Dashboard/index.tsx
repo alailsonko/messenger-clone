@@ -6,19 +6,43 @@ import { BottomNavigationComponent } from '../../components/BottomNavigation/bot
 import { ListItemComponent } from '../../components/List/list-item';
 import { SocketContext } from '../../contexts/socket-context';
 import { RequestContext } from '../../contexts/request-context';
+import { useQuery } from '@tanstack/react-query';
+import { Outlet, useNavigate } from 'react-router-dom';
 
-export const Dashboard = () => {
-  const [usersList, setUsersList] = React.useState<
+export const Dashboard: React.FC = () => {
+  const [searchUsersList, setSearchUsersList] = React.useState<
     {
       avatarSrc: string;
       primaryText: string;
       secondaryText: string;
       secondaryTypography: string;
+      id: string;
     }[]
   >([]);
+  const navigate = useNavigate();
   const authContext = React.useContext(AuthContext);
   const socketContext = React.useContext(SocketContext);
   const requestContext = React.useContext(RequestContext);
+
+  const {
+    data,
+    isLoading,
+    refetch: refetchUserChatRooms,
+  } = useQuery({
+    queryKey: ['/users/{userId}/chat-rooms'],
+    queryFn: async () => {
+      const { data } =
+        await requestContext.users.usersControllerGetUserChatRooms(
+          authContext.user?.id!,
+          {
+            skip: 0,
+            take: 10,
+          }
+        );
+
+      return data.data;
+    },
+  });
 
   const handleSearchUsers = async (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -31,12 +55,13 @@ export const Dashboard = () => {
         take: 10,
       });
 
-      setUsersList(
+      setSearchUsersList(
         data.data.map((user) => ({
-          avatarSrc: '/static/images/avatar/1.jpg',
+          avatarSrc: process.env.REACT_APP_BACKEND_URL + '/' + user.avatar.url,
           primaryText: user.email,
           secondaryText: user.username,
           secondaryTypography: user.id,
+          id: user.id,
         }))
       );
     } catch (error) {
@@ -44,8 +69,26 @@ export const Dashboard = () => {
     }
   };
 
-  const handleItemClick = () => {
-    console.log('item clicked');
+  const handleItemClick = async (
+    ev: React.MouseEvent<HTMLLIElement, MouseEvent>,
+    id: string
+  ) => {
+    navigate(`/${id}`);
+  };
+
+  const handleSearchItemClick = async (
+    ev: React.MouseEvent<HTMLLIElement, MouseEvent>,
+    id: string
+  ) => {
+    await requestContext.users.usersControllerCreateUserChatRoom(
+      authContext.user?.id!,
+      {
+        name: 'chat room',
+        userIds: [id],
+      }
+    );
+
+    refetchUserChatRooms();
   };
 
   return (
@@ -54,34 +97,22 @@ export const Dashboard = () => {
         <Paper>
           <Stack width={'100%'} height={'100%'}>
             <Search
-              onItemClick={handleItemClick}
+              onItemClick={handleSearchItemClick}
               onChange={debounce(handleSearchUsers, 1000)}
-              list={usersList}
+              list={searchUsersList}
             />
             <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
-              <ListItemComponent
-                onItemClick={handleItemClick}
-                avatarSrc="/static/images/avatar/1.jpg"
-                primaryText="Brunch this weekend?"
-                secondaryText="I'll be in your neighborhood doing errands this…"
-                secondaryTypography="Ali Connors"
-              />
-              <Divider variant="inset" component="li" />
-              <ListItemComponent
-                onItemClick={handleItemClick}
-                avatarSrc="/static/images/avatar/2.jpg"
-                primaryText="Summer BBQ"
-                secondaryText="Wish I could come, but I'm out of town this…"
-                secondaryTypography="to Scott, Alex, Jennifer"
-              />
-              <Divider variant="inset" component="li" />
-              <ListItemComponent
-                onItemClick={handleItemClick}
-                avatarSrc="/static/images/avatar/3.jpg"
-                primaryText="Oui Oui"
-                secondaryText="Do you have Paris recommendations? Have you ever…"
-                secondaryTypography="Sandra Adams"
-              />
+              {data?.map((chatRoom) => (
+                <ListItemComponent
+                  key={chatRoom.id}
+                  id={chatRoom.id}
+                  onItemClick={handleItemClick}
+                  avatarSrc="/static/images/avatar/1.jpg"
+                  primaryText={chatRoom.name}
+                  secondaryText="I'll be in your neighborhood doing errands this…"
+                  secondaryTypography="Ali Connors"
+                />
+              ))}
             </List>
           </Stack>
         </Paper>
@@ -92,53 +123,7 @@ export const Dashboard = () => {
             height: '100%',
           }}
         >
-          <Stack
-            width={'100%'}
-            height={'100%'}
-            justifyContent={'space-between'}
-          >
-            <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
-              <ListItemComponent
-                onItemClick={handleItemClick}
-                avatarSrc="/static/images/avatar/1.jpg"
-                primaryText="Brunch this weekend?"
-                secondaryText="I'll be in your neighborhood doing errands this…"
-                secondaryTypography="Ali Connors"
-              />
-              <Divider variant="middle" component="li" />
-              <ListItemComponent
-                onItemClick={handleItemClick}
-                avatarSrc="/static/images/avatar/2.jpg"
-                primaryText="Summer BBQ"
-                secondaryText="Wish I could come, but I'm out of town this…"
-                secondaryTypography="to Scott, Alex, Jennifer"
-              />
-              <Divider variant="inset" component="li" />
-              <ListItemComponent
-                onItemClick={handleItemClick}
-                avatarSrc="/static/images/avatar/3.jpg"
-                primaryText="Oui Oui"
-                secondaryText="Do you have Paris recommendations? Have you ever…"
-                secondaryTypography="Sandra Adams"
-              />
-            </List>
-            <BottomNavigationComponent
-              onChatMessage={async (message) => {
-                socketContext.socket.timeout(1000).emit(
-                  'message',
-                  {
-                    chatRoomId: '123',
-                    senderId: authContext.user?.id!,
-                    text: message,
-                    timestamp: new Date(),
-                  },
-                  (error, ack) => {
-                    console.log('response', ack);
-                  }
-                );
-              }}
-            />
-          </Stack>
+          <Outlet />
         </Paper>
       </Grid>
     </Grid>

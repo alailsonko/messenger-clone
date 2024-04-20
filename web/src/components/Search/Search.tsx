@@ -7,6 +7,7 @@ interface ListItemComponentProps {
   primaryText: string;
   secondaryText: string;
   secondaryTypography: string;
+  id: string;
 }
 
 export const Search: React.FC<{
@@ -14,7 +15,10 @@ export const Search: React.FC<{
   onChange: (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
-  onItemClick: () => void;
+  onItemClick: (
+    ev: React.MouseEvent<HTMLLIElement, MouseEvent>,
+    id: string
+  ) => void;
 }> = ({ list, onChange, onItemClick }) => {
   return (
     <Autocomplete
@@ -29,6 +33,7 @@ export const Search: React.FC<{
       getOptionLabel={(option) => option.primaryText}
       renderOption={(props, option) => (
         <ListItemComponent
+          id={option.id}
           onItemClick={onItemClick}
           key={crypto.randomUUID()}
           avatarSrc={option.avatarSrc}

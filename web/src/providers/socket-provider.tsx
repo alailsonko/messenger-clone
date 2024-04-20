@@ -14,7 +14,20 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     console.log('Received message', message);
   });
 
+  socket.socket.on('disconnect', () => {
+    console.log('Disconnected from socket');
+  });
+
+  socket.socket.on('connect_error', (error) => {
+    console.error('Connection error', error);
+  });
+
+  socket.socket.on('disconnected', (error) => {
+    console.error('Socket error', error);
+  });
+
   React.useEffect(() => {
+    socket.socket.connect();
     return () => {
       socket.socket.disconnect();
     };

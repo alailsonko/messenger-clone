@@ -21,20 +21,28 @@ export type Ack = {
   timestamp: Date;
 };
 
+export type Join = { chatRoomId: string; userId: string };
+
+export type Leave = { chatRoomId: string; userId: string };
+
 export type EventsMap = {
   message: (msg: Message) => void;
   typing: (typingEvent: TypingEvent) => void;
   stop_typing: (typingEvent: TypingEvent) => void;
   connected: (userId: string) => void;
   disconnected: (userId: string) => void;
+  join: (join: Join) => void;
+  leave: (leave: Leave) => void;
 };
 
 export type ListenEventsMap = {
   message: (msg: Message, callback: (ack: Ack) => void) => void;
   typing: (typingEvent: TypingEvent, callback: (ack: Ack) => void) => void;
   stop_typing: (typingEvent: TypingEvent, callback: (ack: Ack) => void) => void;
-  connected: (userId: Ack) => void;
-  disconnected: (userId: Ack) => void;
+  connected: (userId: string, callback: (ack: Ack) => void) => void;
+  disconnected: (userId: string, callback: (ack: Ack) => void) => void;
+  join: (join: Join, callback: (ack: Ack) => void) => void;
+  leave: (leave: Leave, callback: (ack: Ack) => void) => void;
 };
 
 export const socket: Socket<EventsMap, ListenEventsMap> = io(

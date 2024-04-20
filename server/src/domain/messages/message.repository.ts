@@ -51,4 +51,10 @@ export class MessagesRepository {
       where,
     });
   }
+
+  async count(where: Prisma.MessageWhereInput) {
+    return this.prisma.message.count({
+      where,
+    });
+  }
 }

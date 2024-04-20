@@ -12,7 +12,11 @@ interface ListItemComponentProps {
   primaryText: string;
   secondaryText: string;
   secondaryTypography: string;
-  onItemClick: () => void;
+  id: string;
+  onItemClick: (
+    ev: React.MouseEvent<HTMLLIElement, MouseEvent>,
+    id: string
+  ) => void;
 }
 
 export const ListItemComponent: React.FC<ListItemComponentProps> = ({
@@ -20,11 +24,12 @@ export const ListItemComponent: React.FC<ListItemComponentProps> = ({
   primaryText,
   secondaryText,
   secondaryTypography,
+  id,
   onItemClick,
 }) => {
   return (
     <ListItem
-      onClick={onItemClick}
+      onClick={(ev) => onItemClick(ev, id)}
       alignItems="flex-start"
       sx={{
         '&:hover': {
