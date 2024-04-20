@@ -4,6 +4,7 @@ import { LoggerService } from 'src/infra/logger/logger.service';
 import { ChatRoomsRepository } from 'src/domain/chatRooms/chat-rooms.repository';
 import { UsersChatRoomsRepository } from 'src/domain/usersChatRooms/users-chat-rooms.repository';
 import { IChatRoom } from 'src/domain/chatRooms/chat-rooms.interface';
+import { PrismaService } from 'src/infra/db/prisma/prisma.service';
 
 @CommandHandler(CreateUserChatRoomCommand)
 export class CreateUserChatRoomHandler
@@ -12,6 +13,7 @@ export class CreateUserChatRoomHandler
   constructor(
     private readonly repository: ChatRoomsRepository,
     private readonly usersChatRoomsRepository: UsersChatRoomsRepository,
+    private readonly prisma: PrismaService,
     private readonly logger: LoggerService,
   ) {
     this.logger.setContext(CreateUserChatRoomHandler.name);
@@ -26,35 +28,32 @@ export class CreateUserChatRoomHandler
 
     this.logger.log(`Chat room created with ID ${response.id}`);
 
-    await this.usersChatRoomsRepository.create({
-      user: {
-        connect: {
-          id: creatorUserId,
+    await this.usersChatRoomsRepository.createTrx([
+      {
+        user: {
+          connect: {
+            id: creatorUserId,
+          },
+        },
+        chatRoom: {
+          connect: {
+            id: response.id,
+          },
         },
       },
-      chatRoom: {
-        connect: {
-          id: response.id,
+      ...data.userIds.map((userId) => ({
+        user: {
+          connect: {
+            id: userId,
+          },
         },
-      },
-    });
-
-    await Promise.all(
-      data.userIds.map(async (userId) => {
-        await this.usersChatRoomsRepository.create({
-          user: {
-            connect: {
-              id: userId,
-            },
+        chatRoom: {
+          connect: {
+            id: response.id,
           },
-          chatRoom: {
-            connect: {
-              id: response.id,
-            },
-          },
-        });
-      }),
-    );
+        },
+      })),
+    ]);
 
     return response;
   }

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { DefaultArgs } from '@prisma/client/runtime/library';
 import { PrismaService } from 'src/infra/db/prisma/prisma.service';
 
 @Injectable()
@@ -18,14 +19,16 @@ export class ChatRoomsRepository {
     cursor?: Prisma.ChatRoomWhereUniqueInput;
     where?: Prisma.ChatRoomWhereInput;
     orderBy?: Prisma.ChatRoomOrderByWithRelationInput;
+    include?: Prisma.ChatRoomInclude<DefaultArgs>;
   }) {
-    const { skip, take, cursor, where, orderBy } = params;
+    const { skip, take, cursor, where, orderBy, include } = params;
     return this.prisma.chatRoom.findMany({
       skip,
       take,
       cursor,
       where,
       orderBy,
+      include,
     });
   }
 
