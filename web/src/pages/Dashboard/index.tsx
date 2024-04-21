@@ -92,7 +92,7 @@ export const Dashboard: React.FC = () => {
   };
 
   return (
-    <Grid container spacing={2} height={'100vh'}>
+    <Grid container spacing={2} height={'100vh'} maxHeight={'100vh'}>
       <Grid item xs={4}>
         <Paper>
           <Stack width={'100%'} height={'100%'}>

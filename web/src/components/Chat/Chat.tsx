@@ -107,12 +107,7 @@ export const Chat = () => {
   };
 
   return (
-    <Stack
-      key={params.chatRoomId}
-      width={'100%'}
-      height={'100%'}
-      display={'flex'}
-    >
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '98vh' }}>
       <Box sx={{ display: 'flex', top: 0 }}>
         <ListItemComponent
           avatarSrc={''}
@@ -128,9 +123,8 @@ export const Chat = () => {
           width: '100%',
           bgcolor: 'background.paper',
           display: 'grid',
-          marginTop: 'auto',
           overflow: 'auto',
-          maxHeight: '615px',
+          marginTop: 'auto',
         }}
         ref={messagesRef}
       >
@@ -165,6 +159,6 @@ export const Chat = () => {
         ))}
       </List>
       <BottomNavigationComponent onChatMessage={handleSendChatMessage} />
-    </Stack>
+    </Box>
   );
 };
