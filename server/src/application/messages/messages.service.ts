@@ -24,11 +24,12 @@ export class MessagesService {
     },
   ) {
     return this.commandBus.execute<CreateMessageCommand, void>(
-      new CreateMessageCommand(chatRoomId, senderId, data),
+      new CreateMessageCommand(senderId, chatRoomId, data),
     );
   }
 
   async getChatRoomMessages(
+    userId: string,
     chatRoomId: string,
     query: { take: number; skip: number },
   ) {

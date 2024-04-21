@@ -56,7 +56,7 @@ export class AuthService {
     };
 
     return this.jwtService.sign(payload, {
-      expiresIn: '1d',
+      expiresIn: '5h',
       secret: jwtConstants.secret,
     });
   }

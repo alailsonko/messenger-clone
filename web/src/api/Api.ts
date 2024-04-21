@@ -115,6 +115,51 @@ export interface PagedUserChatRooms {
   count: number;
 }
 
+export interface Message {
+  /**
+   * Message ID
+   * @example "1"
+   */
+  id: string;
+  /**
+   * Message content
+   * @example "Hello, world!"
+   */
+  content: string;
+  /**
+   * Message sender ID
+   * @example "1"
+   */
+  senderId: string;
+  /**
+   * Chat room ID
+   * @example "1"
+   */
+  chatRoomId: string;
+  /**
+   * Message creation date
+   * @format date-time
+   * @example "2021-07-01T00:00:00.000Z"
+   */
+  createdAt: string;
+  /**
+   * Message last update date
+   * @format date-time
+   * @example "2021-07-01T00:00:00.000Z"
+   */
+  updatedAt: string;
+}
+
+export interface PagedUserChatRoomMessages {
+  /** Messages */
+  data: Message[];
+  /**
+   * Messages count
+   * @example 1
+   */
+  count: number;
+}
+
 export interface Login {
   email: string;
   password: string;
@@ -456,6 +501,31 @@ export class Api<
     ) =>
       this.request<PagedUserChatRooms, void>({
         path: `/users/${userId}/chat-rooms`,
+        method: 'GET',
+        query: query,
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags users
+     * @name UsersControllerGetChatRoomMessages
+     * @summary Get chat room messages
+     * @request GET:/users/{userId}/chat-rooms/{chatRoomId}/messages
+     */
+    usersControllerGetChatRoomMessages: (
+      userId: string,
+      chatRoomId: string,
+      query: {
+        skip: number;
+        take: number;
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<PagedUserChatRoomMessages, void>({
+        path: `/users/${userId}/chat-rooms/${chatRoomId}/messages`,
         method: 'GET',
         query: query,
         format: 'json',

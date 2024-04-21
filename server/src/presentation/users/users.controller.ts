@@ -30,6 +30,8 @@ import { ChatRoomsService } from 'src/application/chat-rooms/chat-rooms.service'
 import { ChatRoom, CreateUserChatRoomDto } from './dto/CreateUserChatRoom.dto';
 import { IChatRoom } from 'src/domain/chatRooms/chat-rooms.interface';
 import { PagedUserChatRooms } from './dto/GetUserChatRooms.dto';
+import { MessagesService } from 'src/application/messages/messages.service';
+import { PagedUserChatRoomMessages } from './dto/GetUserChatRoomMessages.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -37,6 +39,7 @@ export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly chatRoomsService: ChatRoomsService,
+    private readonly messagesService: MessagesService,
   ) {}
 
   @Post()
@@ -120,6 +123,32 @@ export class UsersController {
     @Query('take', new ParseIntPipe()) take: number,
   ): Promise<PagedUserChatRooms> {
     return this.chatRoomsService.getUserChatRooms(userId, {
+      skip,
+      take,
+    });
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':userId/chat-rooms/:chatRoomId/messages')
+  @ApiOperation({
+    summary: 'Get chat room messages',
+  })
+  @ApiQuery({ name: 'skip', required: true })
+  @ApiQuery({ name: 'take', required: true })
+  @ApiResponse({
+    status: 200,
+    description: 'OK',
+    type: PagedUserChatRoomMessages,
+  })
+  @ApiForbiddenResponse({ status: 403, description: 'Forbidden.' })
+  @ApiBadRequestResponse({ status: 400, description: 'Bad Request.' })
+  getChatRoomMessages(
+    @Param('userId') userId: string,
+    @Param('chatRoomId') chatRoomId: string,
+    @Query('skip', new ParseIntPipe()) skip: number,
+    @Query('take', new ParseIntPipe()) take: number,
+  ): Promise<PagedUserChatRoomMessages> {
+    return this.messagesService.getChatRoomMessages(userId, chatRoomId, {
       skip,
       take,
     });

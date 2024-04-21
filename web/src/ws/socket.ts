@@ -3,7 +3,7 @@ import { Socket, io } from 'socket.io-client';
 export type Message = {
   senderId: string;
   chatRoomId: string;
-  text: string;
+  content: string;
   timestamp: Date;
 };
 

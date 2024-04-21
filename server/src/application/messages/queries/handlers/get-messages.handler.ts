@@ -19,6 +19,9 @@ export class GetMessagesHandler {
       where: {
         chatRoomId: chatId,
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
 
     const messagesCountPromise = this.repository.count({

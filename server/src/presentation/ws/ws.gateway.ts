@@ -7,6 +7,7 @@ import {
   WsResponse,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { MessagesService } from 'src/application/messages/messages.service';
 import { LoggerService } from 'src/infra/logger/logger.service';
 
 enum EventsMap {
@@ -22,7 +23,7 @@ enum EventsMap {
 export type Message = {
   senderId: string;
   chatRoomId: string;
-  text: string;
+  content: string;
   timestamp: Date;
 };
 
@@ -49,7 +50,10 @@ export class WSGateway {
   @WebSocketServer()
   server: Server;
 
-  constructor(private readonly logger: LoggerService) {
+  constructor(
+    private readonly logger: LoggerService,
+    private readonly messagesService: MessagesService,
+  ) {
     this.logger.setContext(WSGateway.name);
   }
 
@@ -92,14 +96,34 @@ export class WSGateway {
     @MessageBody() data: Message,
     @ConnectedSocket() socket: Socket,
   ): Promise<WsResponse<Ack>> {
-    socket.timeout(5000).to(data.chatRoomId).emit(EventsMap.message, data);
-    this.logger.log(`Message sent to room ${data.chatRoomId}`);
-    return {
-      event: 'events',
-      data: {
-        timestamp: new Date(),
-      },
-    };
+    try {
+      await this.messagesService.createChatRoomMessage(
+        data.chatRoomId,
+        data.senderId,
+        {
+          content: data.content,
+        },
+      );
+
+      socket.timeout(5000).to(data.chatRoomId).emit(EventsMap.message, data);
+      this.logger.log(`Message sent to room ${data.chatRoomId}`);
+      return {
+        event: 'events',
+        data: {
+          timestamp: new Date(),
+        },
+      };
+    } catch (error) {
+      this.logger.error(`Error sending message to room ${data.chatRoomId}`, {
+        error,
+      });
+      return {
+        event: 'events',
+        data: {
+          timestamp: new Date(),
+        },
+      };
+    }
   }
 
   @SubscribeMessage(EventsMap.typing)

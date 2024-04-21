@@ -13,6 +13,12 @@ export const BottomNavigationComponent: React.FC<{
         value={value}
         onChange={(e) => setValue(e.target.value)}
         fullWidth
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            onChatMessage(value);
+            setValue('');
+          }
+        }}
         InputProps={{
           rows: 1,
           multiline: true,
@@ -23,6 +29,7 @@ export const BottomNavigationComponent: React.FC<{
       <BottomNavigationAction
         onClick={() => {
           onChatMessage(value);
+          setValue('');
         }}
         label="Archive"
         icon={<SendIcon />}
