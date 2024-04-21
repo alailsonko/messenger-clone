@@ -15,7 +15,7 @@ import { CqrsModule } from '@nestjs/cqrs';
     PassportModule,
     JwtModule.register({
       secret: jwtConstants.secret,
-      verifyOptions: { ignoreExpiration: false },
+      signOptions: { expiresIn: '7d' },
     }),
   ],
   providers: [AuthService, LocalStrategy, JwtStrategy],

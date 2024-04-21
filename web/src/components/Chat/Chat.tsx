@@ -38,6 +38,10 @@ export const Chat = () => {
         }
       );
 
+    socketContext.socket.on('message', (message) => {
+      console.log('received message', message);
+    });
+
     return () => {
       socketContext.socket
         .timeout(5000)
@@ -48,6 +52,7 @@ export const Chat = () => {
             console.log('left room', data);
           }
         );
+      socketContext.socket.off('message');
     };
   }, [params.chatRoomId]);
 

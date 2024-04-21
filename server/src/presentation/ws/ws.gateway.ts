@@ -6,8 +6,6 @@ import {
   WebSocketServer,
   WsResponse,
 } from '@nestjs/websockets';
-import { from, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { Server, Socket } from 'socket.io';
 import { LoggerService } from 'src/infra/logger/logger.service';
 
@@ -20,6 +18,26 @@ enum EventsMap {
   join = 'join',
   leave = 'leave',
 }
+
+export type Message = {
+  senderId: string;
+  chatRoomId: string;
+  text: string;
+  timestamp: Date;
+};
+
+export type TypingEvent = {
+  senderId: string;
+  chatRoomId: string;
+};
+
+export type Ack = {
+  timestamp: Date;
+};
+
+export type Join = { chatRoomId: string; userId: string };
+
+export type Leave = { chatRoomId: string; userId: string };
 
 @WebSocketGateway({
   cors: {
@@ -37,66 +55,108 @@ export class WSGateway {
 
   @SubscribeMessage(EventsMap.join)
   async handleEvent(
-    @MessageBody() data: { chatRoomId: string; userId: string },
+    @MessageBody() data: Join,
     @ConnectedSocket() socket: Socket,
-  ): Promise<WsResponse<number>> {
-    console.log(socket.connected);
-
+  ): Promise<WsResponse<Ack>> {
     await socket.join(data.chatRoomId);
 
     this.logger.log(`User ${data.userId} joined room ${data.chatRoomId}`);
 
-    return { event: 'events', data: 0 };
+    return {
+      event: 'events',
+      data: {
+        timestamp: new Date(),
+      },
+    };
   }
 
   @SubscribeMessage(EventsMap.leave)
   async leave(
-    @MessageBody() data: { chatRoomId: string; userId: string },
+    @MessageBody() data: Leave,
     @ConnectedSocket() socket: Socket,
-  ): Promise<WsResponse<number>> {
+  ): Promise<WsResponse<Ack>> {
     await socket.leave(data.chatRoomId);
 
     this.logger.log(`User ${data.userId} left room ${data.chatRoomId}`);
 
-    return { event: 'events', data: 0 };
+    return {
+      event: 'events',
+      data: {
+        timestamp: new Date(),
+      },
+    };
   }
 
   @SubscribeMessage(EventsMap.message)
-  findAll(@MessageBody() data: any): string {
-    console.log(data);
-    return 'Hello';
+  async findAll(
+    @MessageBody() data: Message,
+    @ConnectedSocket() socket: Socket,
+  ): Promise<WsResponse<Ack>> {
+    socket.timeout(5000).to(data.chatRoomId).emit(EventsMap.message, data);
+    this.logger.log(`Message sent to room ${data.chatRoomId}`);
+    return {
+      event: 'events',
+      data: {
+        timestamp: new Date(),
+      },
+    };
   }
 
   @SubscribeMessage(EventsMap.typing)
-  typing(@MessageBody() data: any): Observable<WsResponse<number>> {
-    console.log(data);
-
-    return from([1, 2, 3]).pipe(
-      map((item) => ({ event: 'events', data: item })),
+  async typing(
+    @MessageBody() data: TypingEvent,
+    @ConnectedSocket() socket: Socket,
+  ): Promise<WsResponse<Ack>> {
+    socket.timeout(5000).to(data.chatRoomId).emit(EventsMap.typing, data);
+    this.logger.log(
+      `User ${data.senderId} is typing in room ${data.chatRoomId}`,
     );
+
+    return {
+      event: 'events',
+      data: {
+        timestamp: new Date(),
+      },
+    };
   }
 
   @SubscribeMessage(EventsMap.stop_typing)
-  stopTyping(@MessageBody() data: any): Observable<WsResponse<number>> {
-    console.log(data);
-    return from([1, 2, 3]).pipe(
-      map((item) => ({ event: 'events', data: item })),
+  async stopTyping(
+    @MessageBody() data: TypingEvent,
+    @ConnectedSocket() socket: Socket,
+  ): Promise<WsResponse<Ack>> {
+    socket.timeout(5000).to(data.chatRoomId).emit(EventsMap.stop_typing, data);
+    this.logger.log(
+      `User ${data.senderId} stopped typing in room ${data.chatRoomId}`,
     );
+
+    return {
+      event: 'events',
+      data: {
+        timestamp: new Date(),
+      },
+    };
   }
 
   @SubscribeMessage(EventsMap.connected)
-  connected(@MessageBody() data: any): Observable<WsResponse<number>> {
-    console.log(data);
-    return from([1, 2, 3]).pipe(
-      map((item) => ({ event: 'events', data: item })),
-    );
+  async connected(@MessageBody() data: any): Promise<WsResponse<Ack>> {
+    console.log('connected', data);
+    return {
+      event: 'events',
+      data: {
+        timestamp: new Date(),
+      },
+    };
   }
 
   @SubscribeMessage(EventsMap.disconnected)
-  disconnected(@MessageBody() data: any): Observable<WsResponse<number>> {
-    console.log(data);
-    return from([1, 2, 3]).pipe(
-      map((item) => ({ event: 'events', data: item })),
-    );
+  async disconnected(@MessageBody() data: any): Promise<WsResponse<Ack>> {
+    console.log('disconnected', data);
+    return {
+      event: 'events',
+      data: {
+        timestamp: new Date(),
+      },
+    };
   }
 }

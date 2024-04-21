@@ -12,11 +12,6 @@ export type TypingEvent = {
   chatRoomId: string;
 };
 
-export type ChatRoom = {
-  name: string;
-  userIds: string[];
-};
-
 export type Ack = {
   timestamp: Date;
 };

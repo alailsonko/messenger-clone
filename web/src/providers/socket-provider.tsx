@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { SocketContext } from '../contexts/socket-context';
 
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -8,10 +8,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
   socket.socket.on('connect', () => {
     console.log('Connected to socket');
-  });
-
-  socket.socket.on('message', (message) => {
-    console.log('Received message', message);
   });
 
   socket.socket.on('disconnect', () => {
@@ -29,6 +25,10 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   React.useEffect(() => {
     socket.socket.connect();
     return () => {
+      socket.socket.off('connect');
+      socket.socket.off('disconnect');
+      socket.socket.off('connect_error');
+      socket.socket.off('disconnected');
       socket.socket.disconnect();
     };
   }, []);
