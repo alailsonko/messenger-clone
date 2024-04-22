@@ -7,9 +7,14 @@ import { PrismaService } from 'src/infra/db/prisma/prisma.service';
 export class ChatRoomsRepository {
   constructor(private prisma: PrismaService) {}
 
-  async findUnique(chatRoomWhereUniqueInput: Prisma.ChatRoomWhereUniqueInput) {
+  async findUnique(params: {
+    where: Prisma.ChatRoomWhereUniqueInput;
+    include?: Prisma.ChatRoomInclude<DefaultArgs>;
+  }) {
+    const { where, include } = params;
     return this.prisma.chatRoom.findUnique({
-      where: chatRoomWhereUniqueInput,
+      where,
+      include,
     });
   }
 

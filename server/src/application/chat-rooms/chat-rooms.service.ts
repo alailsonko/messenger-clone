@@ -5,6 +5,7 @@ import { LoggerService } from 'src/infra/logger/logger.service';
 import { IChatRoom } from 'src/domain/chatRooms/chat-rooms.interface';
 import {
   CheckUserChatRoomExistsQuery,
+  GetUserChatRoomQuery,
   GetUserChatRoomsQuery,
 } from './queries/impl';
 import { PagedResult } from 'src/common/types/paged-result.type';
@@ -61,6 +62,15 @@ export class ChatRoomsService {
   ): Promise<PagedResult<IChatRoom>> {
     return this.queryBus.execute<GetUserChatRoomsQuery, PagedResult<IChatRoom>>(
       new GetUserChatRoomsQuery(userId, query),
+    );
+  }
+
+  async getUserChatRoom(
+    userId: string,
+    chatRoomId: string,
+  ): Promise<IChatRoom> {
+    return this.queryBus.execute<GetUserChatRoomQuery, IChatRoom>(
+      new GetUserChatRoomQuery(userId, chatRoomId),
     );
   }
 }

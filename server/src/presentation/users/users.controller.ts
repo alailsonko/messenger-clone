@@ -153,4 +153,23 @@ export class UsersController {
       take,
     });
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':userId/chat-rooms/:chatRoomId')
+  @ApiOperation({
+    summary: 'Get chat room',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'OK',
+    type: ChatRoom,
+  })
+  @ApiForbiddenResponse({ status: 403, description: 'Forbidden.' })
+  @ApiBadRequestResponse({ status: 400, description: 'Bad Request.' })
+  getChatRoom(
+    @Param('userId') userId: string,
+    @Param('chatRoomId') chatRoomId: string,
+  ): Promise<IChatRoom> {
+    return this.chatRoomsService.getUserChatRoom(userId, chatRoomId);
+  }
 }
