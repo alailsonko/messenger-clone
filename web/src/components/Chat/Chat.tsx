@@ -1,18 +1,4 @@
-import {
-  Stack,
-  List,
-  Divider,
-  ListItem,
-  Card,
-  Avatar,
-  ListItemAvatar,
-  ListItemText,
-  Typography,
-  BottomNavigationAction,
-  Box,
-  TextField,
-  Grid,
-} from '@mui/material';
+import { Stack, List, ListItem, Card, ListItemText, Box } from '@mui/material';
 import { BottomNavigationComponent } from '../BottomNavigation/bottom-navigation';
 import { ListItemComponent } from '../List/list-item';
 import React, { Fragment, useEffect } from 'react';
@@ -20,7 +6,8 @@ import { AuthContext } from '../../contexts/auth-context';
 import { RequestContext } from '../../contexts/request-context';
 import { SocketContext } from '../../contexts/socket-context';
 import { useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Events } from '../../ws/socket';
 
 export const Chat = () => {
   const authContext = React.useContext(AuthContext);
@@ -29,8 +16,11 @@ export const Chat = () => {
   const messagesRef = React.useRef<HTMLUListElement>(null);
   const params = useParams<{ chatRoomId: string }>();
 
-  const { data, refetch: refetchMessages } = useQuery({
-    queryKey: ['chatRoomMessages', params.chatRoomId],
+  const { data: chatRoomMessages } = useQuery({
+    queryKey: [
+      '/users/{userId}/chat-rooms/{chatRoomId}/messages',
+      params.chatRoomId,
+    ],
     queryFn: async () => {
       const { data } =
         await requestContext.users.usersControllerGetChatRoomMessages(
@@ -48,32 +38,84 @@ export const Chat = () => {
     },
   });
 
+  const queryClient = useQueryClient();
+
+  const sendMessageMutation = useMutation({
+    onSuccess(data, variables, context) {
+      queryClient.setQueryData(
+        ['/users/{userId}/chat-rooms/{chatRoomId}/messages', params.chatRoomId],
+        (oldData: any) => ({
+          ...oldData,
+          data: [
+            ...oldData.data,
+            {
+              id: 'new',
+              chatRoomId: params.chatRoomId!,
+              senderId: authContext.user?.id!,
+              content: variables,
+              timestamp: new Date(),
+            },
+          ],
+        })
+      );
+    },
+    mutationFn: async (message: string) => {
+      socketContext.socket.timeout(1000).emit(
+        Events.message,
+        {
+          chatRoomId: params.chatRoomId!,
+          senderId: authContext.user?.id!,
+          content: message,
+          timestamp: new Date(),
+        },
+        (error, ack) => {
+          console.log('response', ack);
+        }
+      );
+    },
+  });
+
   useEffect(() => {
     socketContext.socket
       .timeout(5000)
       .emit(
-        'join',
+        Events.join,
         { chatRoomId: params.chatRoomId!, userId: authContext.user?.id! },
         (data) => {
           console.log('joined room', data);
         }
       );
 
-    socketContext.socket.on('message', (message) => {
-      refetchMessages();
+    socketContext.socket.on(Events.message, (message) => {
+      queryClient.setQueryData(
+        ['/users/{userId}/chat-rooms/{chatRoomId}/messages', params.chatRoomId],
+        (oldData: any) => ({
+          ...oldData,
+          data: [
+            ...oldData.data,
+            {
+              id: 'new',
+              chatRoomId: params.chatRoomId!,
+              senderId: message.senderId,
+              content: message.content,
+              timestamp: message.timestamp,
+            },
+          ],
+        })
+      );
     });
 
     return () => {
       socketContext.socket
         .timeout(5000)
         .emit(
-          'leave',
+          Events.leave,
           { chatRoomId: params.chatRoomId!, userId: authContext.user?.id! },
           (data) => {
             console.log('left room', data);
           }
         );
-      socketContext.socket.off('message');
+      socketContext.socket.off(Events.message);
     };
   }, [params.chatRoomId]);
 
@@ -91,19 +133,7 @@ export const Chat = () => {
   };
 
   const handleSendChatMessage = async (message: string) => {
-    socketContext.socket.timeout(1000).emit(
-      'message',
-      {
-        chatRoomId: params.chatRoomId!,
-        senderId: authContext.user?.id!,
-        content: message,
-        timestamp: new Date(),
-      },
-      (error, ack) => {
-        refetchMessages();
-        console.log('response', ack);
-      }
-    );
+    await sendMessageMutation.mutateAsync(message);
   };
 
   return (
@@ -128,7 +158,7 @@ export const Chat = () => {
         }}
         ref={messagesRef}
       >
-        {data?.data.map((message) => (
+        {chatRoomMessages?.data.map((message) => (
           <ListItem
             key={message.id}
             sx={{

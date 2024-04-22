@@ -21,7 +21,6 @@ export const Dashboard: React.FC = () => {
   >([]);
   const navigate = useNavigate();
   const authContext = React.useContext(AuthContext);
-  const socketContext = React.useContext(SocketContext);
   const requestContext = React.useContext(RequestContext);
 
   const {

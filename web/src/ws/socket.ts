@@ -1,5 +1,15 @@
 import { Socket, io } from 'socket.io-client';
 
+export enum Events {
+  message = 'message',
+  typing = 'typing',
+  stop_typing = 'stop_typing',
+  connected = 'connected',
+  disconnected = 'disconnected',
+  join = 'join',
+  leave = 'leave',
+}
+
 export type Message = {
   senderId: string;
   chatRoomId: string;
