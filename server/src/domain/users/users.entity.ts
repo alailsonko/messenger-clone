@@ -168,9 +168,16 @@ class UsersEntity extends UserAbstract {
     entity.createdAt = createdAt;
     entity.updatedAt = updatedAt;
     entity.lastLogin = lastLogin;
-    entity.permissions = permissions.map(PermissionEntity.create);
-    entity.groups = groups.map(GroupEntity.create);
-    entity.adminLogs = adminLogs.map(AdminLogsEntity.create);
+    entity.permissions =
+      permissions && permissions.length
+        ? permissions.map(PermissionEntity.create)
+        : [];
+    entity.groups =
+      groups && groups.length ? groups.map(GroupEntity.create) : [];
+    entity.adminLogs =
+      adminLogs && adminLogs.length
+        ? adminLogs.map(AdminLogsEntity.create)
+        : [];
     entity.avatar = AvatarEntity.create(avatar);
 
     return entity;

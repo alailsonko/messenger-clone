@@ -104,6 +104,8 @@ export const Dashboard: React.FC = () => {
                   id={chatRoom.id}
                   onItemClick={handleItemClick}
                   avatarSrc={
+                    process.env.REACT_APP_BACKEND_URL +
+                    '/' +
                     chatRoom.usersChatRooms.find(
                       (u) => u.user.id !== appContext.user?.id
                     )?.user.avatar.url!
