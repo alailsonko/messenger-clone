@@ -1,6 +1,6 @@
 import { Autocomplete, TextField } from '@mui/material';
 import React from 'react';
-import { ListItemComponent } from '../List/list-item';
+import { ListItem } from '../List/ListItem';
 
 interface ListItemComponentProps {
   avatarSrc: string;
@@ -32,7 +32,7 @@ export const Search: React.FC<{
       )}
       getOptionLabel={(option) => option.primaryText}
       renderOption={(props, option) => (
-        <ListItemComponent
+        <ListItem
           id={option.id}
           onItemClick={onItemClick}
           key={crypto.randomUUID()}

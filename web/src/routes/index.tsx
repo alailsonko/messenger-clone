@@ -3,11 +3,11 @@ import { RouteObject, useRoutes } from 'react-router-dom';
 import { Landing } from '../pages/Landing';
 import { publicRoutes } from './public';
 import { protectedRoutes } from './protected';
-import { AuthContext } from '../contexts/auth-context';
-import LinearIndeterminate from '../components/Loading/linear-indeterminate';
+import { AppContext } from '../contexts/app-context';
+import LinearIndeterminate from '../components/Loading/LinearIndeterminate';
 
 export const AppRoutes = () => {
-  const authContext = React.useContext(AuthContext);
+  const appContext = React.useContext(AppContext);
 
   const commonRoutes: RouteObject[] = [
     {
@@ -16,7 +16,7 @@ export const AppRoutes = () => {
     },
   ];
 
-  const routes = authContext?.isAuthenticated ? protectedRoutes : publicRoutes;
+  const routes = appContext?.isAuthenticated ? protectedRoutes : publicRoutes;
 
   const element = useRoutes([
     ...commonRoutes,
@@ -27,7 +27,7 @@ export const AppRoutes = () => {
     },
   ]);
 
-  if (authContext?.isLoading) {
+  if (appContext?.isLoading) {
     return <LinearIndeterminate />;
   }
 

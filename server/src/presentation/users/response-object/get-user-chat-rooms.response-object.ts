@@ -1,8 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { PagedResult } from 'src/common/types/paged-result.type';
 import { IChatRoom } from 'src/domain/chatRooms/chat-rooms.interface';
+import { AvatarResponseObject } from 'src/presentation/auth/response-object/get-profile.response-object';
 
 export class UserResponseObject {
+  @ApiProperty({
+    type: AvatarResponseObject,
+    required: true,
+  })
+  avatar?: AvatarResponseObject;
+
   @ApiProperty()
   id: string;
 
@@ -47,7 +54,7 @@ export class UserChatRoomResponseObject {
   @ApiProperty()
   userId: string;
 
-  @ApiProperty({ type: () => UserResponseObject })
+  @ApiProperty({ type: UserResponseObject })
   user: UserResponseObject;
 }
 

@@ -11,7 +11,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { teal } from '@mui/material/colors';
 import React from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { RequestContext } from '../../contexts/request-context';
+import { AppContext } from '../../contexts/app-context';
 import { CloudUpload } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
@@ -27,11 +27,11 @@ type RegisterInputs = {
 
 export const Register = () => {
   const navigate = useNavigate();
-  const requestContext = React.useContext(RequestContext);
+  const appContext = React.useContext(AppContext);
 
   const mutation = useMutation({
     mutationFn: async (data: RegisterInputs) => {
-      const response = await requestContext.users.usersControllerCreateUser({
+      const response = await appContext.api.users.usersControllerCreateUser({
         email: data.email,
         password: data.password,
         firstName: data.firstName,
@@ -39,7 +39,7 @@ export const Register = () => {
         username: data.username,
       });
 
-      await requestContext.auth.authControllerLogin({
+      await appContext.api.auth.authControllerLogin({
         email: data.email,
         password: data.password,
       });
@@ -48,7 +48,7 @@ export const Register = () => {
 
       formData.append('avatar', data.avatar[0]);
 
-      await requestContext.avatars.avatarsControllerCreateAvatar(
+      await appContext.api.avatars.avatarsControllerCreateAvatar(
         response.data.id,
         { avatar: data.avatar[0] },
         {

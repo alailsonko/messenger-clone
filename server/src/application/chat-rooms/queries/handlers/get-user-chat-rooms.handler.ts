@@ -44,7 +44,11 @@ export class GetUserChatRoomsHandler {
       include: {
         usersChatRooms: {
           include: {
-            user: true,
+            user: {
+              include: {
+                avatar: true,
+              },
+            },
           },
         },
       },

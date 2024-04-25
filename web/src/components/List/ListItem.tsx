@@ -1,13 +1,13 @@
 import {
   Avatar,
-  ListItem,
+  ListItem as ListItemMUI,
   ListItemAvatar,
   ListItemText,
   Typography,
 } from '@mui/material';
 import React from 'react';
 
-interface ListItemComponentProps {
+interface ListItemProps {
   avatarSrc: string;
   primaryText: string;
   secondaryText: string;
@@ -19,7 +19,7 @@ interface ListItemComponentProps {
   ) => void;
 }
 
-export const ListItemComponent: React.FC<ListItemComponentProps> = ({
+export const ListItem: React.FC<ListItemProps> = ({
   avatarSrc,
   primaryText,
   secondaryText,
@@ -28,7 +28,7 @@ export const ListItemComponent: React.FC<ListItemComponentProps> = ({
   onItemClick,
 }) => {
   return (
-    <ListItem
+    <ListItemMUI
       onClick={(ev) => onItemClick(ev, id)}
       alignItems="flex-start"
       sx={{
@@ -57,6 +57,6 @@ export const ListItemComponent: React.FC<ListItemComponentProps> = ({
           </React.Fragment>
         }
       />
-    </ListItem>
+    </ListItemMUI>
   );
 };

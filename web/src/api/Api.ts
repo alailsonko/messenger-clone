@@ -72,7 +72,18 @@ export interface CreateUserChatRoomResponseObject {
   id: string;
 }
 
+export interface AvatarResponseObject {
+  /** @format date-time */
+  createdAt: string;
+  id: string;
+  /** @format date-time */
+  updatedAt: string;
+  url: string;
+  userId: string;
+}
+
 export interface UserResponseObject {
+  avatar: AvatarResponseObject;
   id: string;
   /** @format date-time */
   createdAt: string;
@@ -198,16 +209,6 @@ export interface PermissionResponseObject {
   name: string;
   /** @format date-time */
   updatedAt: string;
-}
-
-export interface AvatarResponseObject {
-  /** @format date-time */
-  createdAt: string;
-  id: string;
-  /** @format date-time */
-  updatedAt: string;
-  url: string;
-  userId: string;
 }
 
 export interface ProfileResponseObject {

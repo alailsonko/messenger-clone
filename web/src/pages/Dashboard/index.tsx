@@ -1,13 +1,11 @@
 import React from 'react';
-import { AuthContext } from '../../contexts/auth-context';
-import { Grid, Paper, Stack, Divider, List, debounce } from '@mui/material';
+import { AppContext } from '../../contexts/app-context';
+import { Grid, Paper, Stack, List, debounce } from '@mui/material';
 import { Search } from '../../components/Search/Search';
-import { BottomNavigationComponent } from '../../components/BottomNavigation/bottom-navigation';
-import { ListItemComponent } from '../../components/List/list-item';
-import { SocketContext } from '../../contexts/socket-context';
-import { RequestContext } from '../../contexts/request-context';
+import { ListItem } from '../../components/List/ListItem';
 import { useQuery } from '@tanstack/react-query';
 import { Outlet, useNavigate } from 'react-router-dom';
+import { ChatRoomResponseObject } from '../../api/Api';
 
 export const Dashboard: React.FC = () => {
   const [searchUsersList, setSearchUsersList] = React.useState<
@@ -20,8 +18,7 @@ export const Dashboard: React.FC = () => {
     }[]
   >([]);
   const navigate = useNavigate();
-  const authContext = React.useContext(AuthContext);
-  const requestContext = React.useContext(RequestContext);
+  const appContext = React.useContext(AppContext);
 
   const {
     data,
@@ -31,15 +28,15 @@ export const Dashboard: React.FC = () => {
     queryKey: ['/users/{userId}/chat-rooms'],
     queryFn: async () => {
       const { data } =
-        await requestContext.users.usersControllerGetUserChatRooms(
-          authContext.user?.id!,
+        await appContext.api.users.usersControllerGetUserChatRooms(
+          appContext.user?.id!,
           {
             skip: 0,
             take: 10,
           }
         );
 
-      return data.data;
+      return data.data as ChatRoomResponseObject[];
     },
   });
 
@@ -49,7 +46,7 @@ export const Dashboard: React.FC = () => {
     try {
       const query = event.target.value;
       console.log(query);
-      const { data } = await requestContext.users.usersControllerGetUsers({
+      const { data } = await appContext.api.users.usersControllerGetUsers({
         skip: 0,
         take: 10,
       });
@@ -79,8 +76,8 @@ export const Dashboard: React.FC = () => {
     ev: React.MouseEvent<HTMLLIElement, MouseEvent>,
     id: string
   ) => {
-    await requestContext.users.usersControllerCreateUserChatRoom(
-      authContext.user?.id!,
+    await appContext.api.users.usersControllerCreateUserChatRoom(
+      appContext.user?.id!,
       {
         name: 'chat room',
         userIds: [id],
@@ -102,11 +99,15 @@ export const Dashboard: React.FC = () => {
             />
             <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
               {data?.map((chatRoom) => (
-                <ListItemComponent
+                <ListItem
                   key={chatRoom.id}
                   id={chatRoom.id}
                   onItemClick={handleItemClick}
-                  avatarSrc="/static/images/avatar/1.jpg"
+                  avatarSrc={
+                    chatRoom.usersChatRooms.find(
+                      (u) => u.user.id !== appContext.user?.id
+                    )?.user.avatar.url!
+                  }
                   primaryText={chatRoom.name}
                   secondaryText="I'll be in your neighborhood doing errands this…"
                   secondaryTypography="Ali Connors"

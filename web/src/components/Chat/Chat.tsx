@@ -1,18 +1,21 @@
-import { Stack, List, ListItem, Card, ListItemText, Box } from '@mui/material';
-import { BottomNavigationComponent } from '../BottomNavigation/bottom-navigation';
-import { ListItemComponent } from '../List/list-item';
-import React, { Fragment, useEffect } from 'react';
-import { AuthContext } from '../../contexts/auth-context';
-import { RequestContext } from '../../contexts/request-context';
-import { SocketContext } from '../../contexts/socket-context';
+import {
+  Stack,
+  List,
+  ListItem as ListItemMUI,
+  Card,
+  ListItemText,
+  Box,
+} from '@mui/material';
+import { BottomNavigation } from '../BottomNavigation/BottomNavigation';
+import { ListItem } from '../List/ListItem';
+import React, { useEffect } from 'react';
+import { AppContext } from '../../contexts/app-context';
 import { useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Events } from '../../ws/socket';
 
 export const Chat = () => {
-  const authContext = React.useContext(AuthContext);
-  const socketContext = React.useContext(SocketContext);
-  const requestContext = React.useContext(RequestContext);
+  const appContext = React.useContext(AppContext);
   const messagesRef = React.useRef<HTMLUListElement>(null);
   const params = useParams<{ chatRoomId: string }>();
 
@@ -23,8 +26,8 @@ export const Chat = () => {
     ],
     queryFn: async () => {
       const { data } =
-        await requestContext.users.usersControllerGetChatRoomMessages(
-          authContext.user?.id!,
+        await appContext.api.users.usersControllerGetChatRoomMessages(
+          appContext.user?.id!,
           params.chatRoomId!,
           {
             take: 10,
@@ -51,7 +54,7 @@ export const Chat = () => {
             {
               id: 'new',
               chatRoomId: params.chatRoomId!,
-              senderId: authContext.user?.id!,
+              senderId: appContext.user?.id!,
               content: variables,
               timestamp: new Date(),
             },
@@ -60,11 +63,11 @@ export const Chat = () => {
       );
     },
     mutationFn: async (message: string) => {
-      socketContext.socket.timeout(1000).emit(
+      appContext.socket.timeout(1000).emit(
         Events.message,
         {
           chatRoomId: params.chatRoomId!,
-          senderId: authContext.user?.id!,
+          senderId: appContext.user?.id!,
           content: message,
           timestamp: new Date(),
         },
@@ -76,17 +79,17 @@ export const Chat = () => {
   });
 
   useEffect(() => {
-    socketContext.socket
+    appContext.socket
       .timeout(5000)
       .emit(
         Events.join,
-        { chatRoomId: params.chatRoomId!, userId: authContext.user?.id! },
+        { chatRoomId: params.chatRoomId!, userId: appContext.user?.id! },
         (data) => {
           console.log('joined room', data);
         }
       );
 
-    socketContext.socket.on(Events.message, (message) => {
+    appContext.socket.on(Events.message, (message) => {
       queryClient.setQueryData(
         ['/users/{userId}/chat-rooms/{chatRoomId}/messages', params.chatRoomId],
         (oldData: any) => ({
@@ -106,16 +109,16 @@ export const Chat = () => {
     });
 
     return () => {
-      socketContext.socket
+      appContext.socket
         .timeout(5000)
         .emit(
           Events.leave,
-          { chatRoomId: params.chatRoomId!, userId: authContext.user?.id! },
+          { chatRoomId: params.chatRoomId!, userId: appContext.user?.id! },
           (data) => {
             console.log('left room', data);
           }
         );
-      socketContext.socket.off(Events.message);
+      appContext.socket.off(Events.message);
     };
   }, [params.chatRoomId]);
 
@@ -139,7 +142,7 @@ export const Chat = () => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '98vh' }}>
       <Box sx={{ display: 'flex', top: 0 }}>
-        <ListItemComponent
+        <ListItem
           avatarSrc={''}
           primaryText={'some name'}
           secondaryText={''}
@@ -159,11 +162,11 @@ export const Chat = () => {
         ref={messagesRef}
       >
         {chatRoomMessages?.data.map((message) => (
-          <ListItem
+          <ListItemMUI
             key={message.id}
             sx={{
               justifyContent:
-                message.senderId === authContext.user?.id
+                message.senderId === appContext.user?.id
                   ? 'flex-end'
                   : 'flex-start',
             }}
@@ -172,7 +175,7 @@ export const Chat = () => {
               <Stack
                 direction="row"
                 justifyContent={
-                  message.senderId === authContext.user?.id
+                  message.senderId === appContext.user?.id
                     ? 'flex-end'
                     : 'flex-start'
                 }
@@ -185,10 +188,10 @@ export const Chat = () => {
                 />
               </Stack>
             </Card>
-          </ListItem>
+          </ListItemMUI>
         ))}
       </List>
-      <BottomNavigationComponent onChatMessage={handleSendChatMessage} />
+      <BottomNavigation onChatMessage={handleSendChatMessage} />
     </Box>
   );
 };

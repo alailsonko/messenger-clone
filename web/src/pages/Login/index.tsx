@@ -12,7 +12,7 @@ import { useMutation } from '@tanstack/react-query';
 import React from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../../contexts/auth-context';
+import { AppContext } from '../../contexts/app-context';
 
 type LoginInputs = {
   email: string;
@@ -21,11 +21,11 @@ type LoginInputs = {
 
 export const Login = () => {
   const navigate = useNavigate();
-  const authContext = React.useContext(AuthContext);
+  const appContext = React.useContext(AppContext);
 
   const { mutate, isSuccess } = useMutation({
     mutationFn: async (data: LoginInputs) => {
-      return authContext?.login(data);
+      return appContext?.login(data);
     },
   });
 

@@ -1,10 +1,10 @@
 import React from 'react';
-import { AuthContext } from '../../contexts/auth-context';
+import { AppContext } from '../../contexts/app-context';
 
 export const Profile = () => {
-  const authContext = React.useContext(AuthContext);
+  const appContext = React.useContext(AppContext);
 
-  console.log('info', authContext?.user);
+  console.log('info', appContext?.user);
 
   return (
     <div>
