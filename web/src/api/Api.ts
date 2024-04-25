@@ -166,7 +166,7 @@ export interface LoginDto {
   password: string;
 }
 
-export interface AdminLog {
+export interface AdminLogResponseObject {
   action: string;
   /** @format date-time */
   createdAt: string;
@@ -180,7 +180,7 @@ export interface AdminLog {
   userId: string;
 }
 
-export interface Group {
+export interface GroupResponseObject {
   id: string;
   name: string;
   /** @format date-time */
@@ -189,7 +189,7 @@ export interface Group {
   updatedAt: string;
 }
 
-export interface Permission {
+export interface PermissionResponseObject {
   codename: string;
   contentTypeId: string;
   /** @format date-time */
@@ -200,13 +200,23 @@ export interface Permission {
   updatedAt: string;
 }
 
-export interface Profile {
-  adminLogs?: AdminLog[];
+export interface AvatarResponseObject {
+  /** @format date-time */
+  createdAt: string;
+  id: string;
+  /** @format date-time */
+  updatedAt: string;
+  url: string;
+  userId: string;
+}
+
+export interface ProfileResponseObject {
+  adminLogs?: AdminLogResponseObject[];
   /** @format date-time */
   createdAt: string;
   email: string;
   firstName: string;
-  groups?: Group[];
+  groups?: GroupResponseObject[];
   id: string;
   isActive: boolean;
   isStaff: boolean;
@@ -214,11 +224,11 @@ export interface Profile {
   /** @format date-time */
   lastLogin?: string;
   lastName: string;
-  permissions?: Permission[];
+  permissions?: PermissionResponseObject[];
   /** @format date-time */
   updatedAt: string;
   username: string;
-  avatar?: Avatar;
+  avatar?: AvatarResponseObject;
 }
 
 import type {
@@ -590,7 +600,7 @@ export class Api<
      * @request GET:/auth/profile
      */
     authControllerGetProfile: (params: RequestParams = {}) =>
-      this.request<Profile, any>({
+      this.request<ProfileResponseObject, any>({
         path: `/auth/profile`,
         method: 'GET',
         format: 'json',

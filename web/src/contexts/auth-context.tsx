@@ -1,5 +1,5 @@
 import React from 'react';
-import { Profile } from '../api/Api';
+import { ProfileResponseObject } from '../api/Api';
 
 export type LoginInputs = {
   email: string;
@@ -7,8 +7,10 @@ export type LoginInputs = {
 };
 
 export const AuthContext = React.createContext<{
-  user: Profile | null;
-  login: (data: LoginInputs) => Promise<Profile | null | undefined>;
+  user: ProfileResponseObject | null;
+  login: (
+    data: LoginInputs
+  ) => Promise<ProfileResponseObject | null | undefined>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
   isLoading: boolean;

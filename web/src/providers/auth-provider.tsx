@@ -3,12 +3,12 @@ import { AuthContext, LoginInputs } from '../contexts/auth-context';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { RequestContext } from '../contexts/request-context';
-import { Profile } from '../api/Api';
+import { ProfileResponseObject } from '../api/Api';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [user, setUser] = React.useState<Profile | null>(null);
+  const [user, setUser] = React.useState<ProfileResponseObject | null>(null);
   const requestContext = React.useContext(RequestContext);
   const navigate = useNavigate();
   const isAuthenticated = !!user;
@@ -33,7 +33,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const login = async (
     data: LoginInputs
-  ): Promise<Profile | null | undefined> => {
+  ): Promise<ProfileResponseObject | null | undefined> => {
     await requestContext.auth.authControllerLogin(data);
     const response = await refetch();
 
