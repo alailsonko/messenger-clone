@@ -1,6 +1,6 @@
 import { QueryHandler } from '@nestjs/cqrs';
 import { FindAllUsersQuery } from '../impl';
-import { UsersMapper, UsersModel } from 'src/domain/users';
+import { UsersEntity } from 'src/domain/users';
 import { BadRequestException } from '@nestjs/common';
 import { LoggerService } from 'src/infra/logger/logger.service';
 import { UsersRepository } from 'src/domain/users/users.repository';
@@ -15,7 +15,7 @@ export class FindAllUsersHandler {
     this.logger.setContext(FindAllUsersHandler.name);
   }
 
-  async execute(query: FindAllUsersQuery): Promise<PagedResult<UsersModel>> {
+  async execute(query: FindAllUsersQuery): Promise<PagedResult<UsersEntity>> {
     const { queryOptions } = query;
 
     this.logger.log(`Finding all users`, {
@@ -33,7 +33,7 @@ export class FindAllUsersHandler {
       throw new BadRequestException('User not found');
     }
 
-    const models = entities.map((user) => UsersMapper.toModel(user));
+    const models = entities.map(UsersEntity.create);
 
     return {
       data: models,

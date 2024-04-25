@@ -1,5 +1,5 @@
-import { CommentAbstract } from './comments.abstract';
-import { CommentEntity } from './comments.entity';
-import { CommentModel } from './comments.model';
-
-export { CommentAbstract, CommentEntity, CommentModel };
+export * from './comments.abstract';
+export * from './comments.entity';
+export * from './comments.model';
+export * from './comments.interface';
+export * from './comments.repository';

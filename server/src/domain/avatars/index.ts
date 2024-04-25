@@ -1,3 +1,5 @@
-export { AvatarAbstract } from './avatars.abstract';
-export { AvatarEntity } from './avatars.entity';
-export { AvatarModel } from './avatars.model';
+export * from './avatars.abstract';
+export * from './avatars.entity';
+export * from './avatars.model';
+export * from './avatars.interface';
+export * from './avatars.repository';

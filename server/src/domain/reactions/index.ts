@@ -1,5 +1,5 @@
-import { ReactionAbstract } from './reactions.abstract';
-import { ReactionEntity } from './reactions.entity';
-import { ReactionModel } from './reactions.model';
-
-export { ReactionAbstract, ReactionEntity, ReactionModel };
+export * from './reactions.abstract';
+export * from './reactions.entity';
+export * from './reactions.model';
+export * from './reactions.interface';
+export * from './reactions.repository';

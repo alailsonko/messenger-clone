@@ -1,5 +1,5 @@
-import { AttachmentAbstract } from './attachments.abstract';
-import { AttachmentEntity } from './attachments.entity';
-import { AttachmentModel } from './attachments.model';
-
-export { AttachmentAbstract, AttachmentEntity, AttachmentModel };
+export * from './attachments.abstract';
+export * from './attachments.entity';
+export * from './attachments.model';
+export * from './attachments.interface';
+export * from './attachments.repository';

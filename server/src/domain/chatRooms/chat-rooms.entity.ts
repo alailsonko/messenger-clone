@@ -33,4 +33,22 @@ export class ChatRoomEntity implements ChatRoomAbstract {
   set updatedAt(value: Date) {
     this._updatedAt = value;
   }
+
+  public static create(data: ChatRoomAbstract): ChatRoomEntity {
+    const entity = new ChatRoomEntity();
+    entity.id = data.id;
+    entity.name = data.name;
+    entity.createdAt = data.createdAt;
+    entity.updatedAt = data.updatedAt;
+    return entity;
+  }
+
+  public toObject(): ChatRoomAbstract {
+    return {
+      id: this.id,
+      name: this.name,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+    };
+  }
 }

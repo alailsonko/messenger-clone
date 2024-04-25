@@ -1,10 +1,6 @@
-import { IsUUID, IsString, IsDate, IsOptional, IsArray } from 'class-validator';
-import { Type } from 'class-transformer';
 import { ContentTypeAbstract } from './contentTypes.abstract';
 import { IAdminLog } from '../adminLogs/adminLogs.interface';
 import { IPermission } from '../permissions/permissions.interface';
-import { OPERATIONS } from 'src/common/enums/operations.enum';
-import { AdminLogsEntity } from '../adminLogs/adminLogs.entity';
 
 export class ContentTypeEntity extends ContentTypeAbstract {
   protected _id: string;
@@ -17,7 +13,6 @@ export class ContentTypeEntity extends ContentTypeAbstract {
   protected _permissionId: string | null;
   protected _adminLog: IAdminLog[];
 
-  @IsUUID('4', { groups: [OPERATIONS.READ] })
   get id(): string {
     return this._id;
   }
@@ -25,7 +20,6 @@ export class ContentTypeEntity extends ContentTypeAbstract {
     this._id = value;
   }
 
-  @IsString({ groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE] })
   get appLabel(): string {
     return this._appLabel;
   }
@@ -33,7 +27,6 @@ export class ContentTypeEntity extends ContentTypeAbstract {
     this._appLabel = value;
   }
 
-  @IsString({ groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE] })
   get model(): string {
     return this._model;
   }
@@ -41,7 +34,6 @@ export class ContentTypeEntity extends ContentTypeAbstract {
     this._model = value;
   }
 
-  @IsString({ groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE] })
   get name(): string {
     return this._name;
   }
@@ -49,8 +41,6 @@ export class ContentTypeEntity extends ContentTypeAbstract {
     this._name = value;
   }
 
-  @IsDate({ groups: [OPERATIONS.READ] })
-  @Type(() => Date)
   get createdAt(): Date {
     return this._createdAt;
   }
@@ -58,8 +48,6 @@ export class ContentTypeEntity extends ContentTypeAbstract {
     this._createdAt = value;
   }
 
-  @IsDate({ groups: [OPERATIONS.READ] })
-  @Type(() => Date)
   get updatedAt(): Date {
     return this._updatedAt;
   }
@@ -67,7 +55,6 @@ export class ContentTypeEntity extends ContentTypeAbstract {
     this._updatedAt = value;
   }
 
-  @IsOptional({ groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE] })
   get permission(): IPermission | null {
     return this._permission;
   }
@@ -75,8 +62,6 @@ export class ContentTypeEntity extends ContentTypeAbstract {
     this._permission = value;
   }
 
-  @IsUUID('4', { groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE] })
-  @IsOptional({ groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE] })
   get permissionId(): string | null {
     return this._permissionId;
   }
@@ -84,12 +69,39 @@ export class ContentTypeEntity extends ContentTypeAbstract {
     this._permissionId = value;
   }
 
-  @IsArray({ groups: [OPERATIONS.READ] })
-  @Type(() => AdminLogsEntity)
   get adminLog(): IAdminLog[] {
     return this._adminLog;
   }
   set adminLog(value: IAdminLog[]) {
     this._adminLog = value;
+  }
+
+  public static create(data: ContentTypeAbstract): ContentTypeEntity {
+    const entity = new ContentTypeEntity();
+    entity.id = data.id;
+    entity.appLabel = data.appLabel;
+    entity.model = data.model;
+    entity.name = data.name;
+    entity.createdAt = data.createdAt;
+    entity.updatedAt = data.updatedAt;
+    entity.permission = data.permission;
+    entity.permissionId = data.permissionId;
+    entity.adminLog = data.adminLog;
+
+    return entity;
+  }
+
+  public toObject(): ContentTypeAbstract {
+    return {
+      id: this.id,
+      appLabel: this.appLabel,
+      model: this.model,
+      name: this.name,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+      permission: this.permission,
+      permissionId: this.permissionId,
+      adminLog: this.adminLog,
+    };
   }
 }

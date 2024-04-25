@@ -531,6 +531,26 @@ export class Api<
         format: 'json',
         ...params,
       }),
+
+    /**
+     * No description
+     *
+     * @tags users
+     * @name UsersControllerGetChatRoom
+     * @summary Get chat room
+     * @request GET:/users/{userId}/chat-rooms/{chatRoomId}
+     */
+    usersControllerGetChatRoom: (
+      userId: string,
+      chatRoomId: string,
+      params: RequestParams = {}
+    ) =>
+      this.request<ChatRoom, void>({
+        path: `/users/${userId}/chat-rooms/${chatRoomId}`,
+        method: 'GET',
+        format: 'json',
+        ...params,
+      }),
   };
   auth = {
     /**

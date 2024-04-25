@@ -1,5 +1,5 @@
-import { ChatRoomAbstract } from './chat-rooms.abstract';
-import { ChatRoomEntity } from './chat-rooms.entity';
-import { ChatRoomModel } from './chat-rooms.model';
-
-export { ChatRoomAbstract, ChatRoomEntity, ChatRoomModel };
+export * from './chat-rooms.abstract';
+export * from './chat-rooms.entity';
+export * from './chat-rooms.model';
+export * from './chat-rooms.interface';
+export * from './chat-rooms.repository';

@@ -67,4 +67,30 @@ export class PermissionEntity extends PermissionAbstract {
   set users(value: IUser[]) {
     this._users = value;
   }
+
+  public static create(data: PermissionAbstract): PermissionEntity {
+    const permission = new PermissionEntity();
+    permission.id = data.id;
+    permission.name = data.name;
+    permission.codename = data.codename;
+    permission.contentTypeId = data.contentTypeId;
+    permission.groups = data.groups;
+    permission.createdAt = data.createdAt;
+    permission.updatedAt = data.updatedAt;
+    permission.users = data.users;
+    return permission;
+  }
+
+  public toObject(): PermissionAbstract {
+    return {
+      id: this.id,
+      name: this.name,
+      codename: this.codename,
+      contentTypeId: this.contentTypeId,
+      groups: this.groups,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+      users: this.users,
+    };
+  }
 }

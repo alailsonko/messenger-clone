@@ -2,6 +2,7 @@
 import { IPermission } from '../permissions/permissions.interface';
 import { IUser } from '../users/users.interface';
 import { UserPermissionAbstract } from './usersPermissions.abstract';
+import { IUserPermission } from './usersPermissions.interface';
 
 export class UserPermissionEntity extends UserPermissionAbstract {
   protected _id: string;
@@ -59,5 +60,32 @@ export class UserPermissionEntity extends UserPermissionAbstract {
   }
   set permissionId(value: string) {
     this._permissionId = value;
+  }
+
+  public static create(data: UserPermissionAbstract): UserPermissionEntity {
+    const entity = new UserPermissionEntity();
+    const { id, user, permission, createdAt, updatedAt, userId, permissionId } =
+      data;
+    entity.id = id;
+    entity.user = user;
+    entity.permission = permission;
+    entity.createdAt = createdAt;
+    entity.updatedAt = updatedAt;
+    entity.userId = userId;
+    entity.permissionId = permissionId;
+
+    return entity;
+  }
+
+  public toObject(): IUserPermission {
+    return {
+      id: this._id,
+      user: this._user,
+      permission: this._permission,
+      createdAt: this._createdAt,
+      updatedAt: this._updatedAt,
+      userId: this._userId,
+      permissionId: this._permissionId,
+    };
   }
 }

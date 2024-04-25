@@ -41,4 +41,24 @@ export class PostEntity implements PostAbstract {
   set updatedAt(value: Date) {
     this._updatedAt = value;
   }
+
+  public static create(data: PostAbstract): PostEntity {
+    const entity = new PostEntity();
+    entity.id = data.id;
+    entity.content = data.content;
+    entity.userId = data.userId;
+    entity.createdAt = data.createdAt;
+    entity.updatedAt = data.updatedAt;
+    return entity;
+  }
+
+  public toObject(): PostAbstract {
+    return {
+      id: this.id,
+      content: this.content,
+      userId: this.userId,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+    };
+  }
 }

@@ -33,4 +33,22 @@ export class ReactionEntity implements ReactionAbstract {
   set messageId(value: string) {
     this._messageId = value;
   }
+
+  public static create(data: ReactionAbstract): ReactionEntity {
+    const entity = new ReactionEntity();
+    entity.id = data.id;
+    entity.type = data.type;
+    entity.userId = data.userId;
+    entity.messageId = data.messageId;
+    return entity;
+  }
+
+  public toObject(): ReactionAbstract {
+    return {
+      id: this.id,
+      type: this.type,
+      userId: this.userId,
+      messageId: this.messageId,
+    };
+  }
 }

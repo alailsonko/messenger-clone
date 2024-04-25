@@ -48,4 +48,26 @@ export class MessageEntity implements MessageAbstract {
   set updatedAt(value: Date) {
     this._updatedAt = value;
   }
+
+  public static create(data: MessageAbstract): MessageEntity {
+    const entity = new MessageEntity();
+    entity.id = data.id;
+    entity.content = data.content;
+    entity.senderId = data.senderId;
+    entity.chatRoomId = data.chatRoomId;
+    entity.createdAt = data.createdAt;
+    entity.updatedAt = data.updatedAt;
+    return entity;
+  }
+
+  public toObject(): MessageAbstract {
+    return {
+      id: this.id,
+      content: this.content,
+      senderId: this.senderId,
+      chatRoomId: this.chatRoomId,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+    };
+  }
 }

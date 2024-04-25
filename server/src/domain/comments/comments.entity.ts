@@ -49,4 +49,26 @@ export class CommentEntity implements CommentAbstract {
   set updatedAt(value: Date) {
     this._updatedAt = value;
   }
+
+  public static create(data: CommentAbstract): CommentEntity {
+    const entity = new CommentEntity();
+    entity.id = data.id;
+    entity.content = data.content;
+    entity.userId = data.userId;
+    entity.postId = data.postId;
+    entity.createdAt = data.createdAt;
+    entity.updatedAt = data.updatedAt;
+    return entity;
+  }
+
+  public toObject(): CommentAbstract {
+    return {
+      id: this.id,
+      content: this.content,
+      userId: this.userId,
+      postId: this.postId,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+    };
+  }
 }

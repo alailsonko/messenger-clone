@@ -38,8 +38,27 @@ export class AvatarEntity implements AvatarAbstract {
   get updatedAt(): Date {
     return this._updatedAt;
   }
-
   set updatedAt(value: Date) {
     this._updatedAt = value;
+  }
+
+  public static create(data: AvatarAbstract): AvatarEntity {
+    const entity = new AvatarEntity();
+    entity.id = data.id;
+    entity.userId = data.userId;
+    entity.url = data.url;
+    entity.createdAt = data.createdAt;
+    entity.updatedAt = data.updatedAt;
+    return entity;
+  }
+
+  public toObject(): AvatarAbstract {
+    return {
+      id: this.id,
+      userId: this.userId,
+      url: this.url,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+    };
   }
 }

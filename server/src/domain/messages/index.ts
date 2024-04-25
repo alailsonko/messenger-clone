@@ -1,5 +1,5 @@
-import { MessageAbstract } from './message.abstract';
-import { MessageEntity } from './message.entity';
-import { MessageModel } from './message.model';
-
-export { MessageAbstract, MessageEntity, MessageModel };
+export * from './message.abstract';
+export * from './message.entity';
+export * from './message.model';
+export * from './message.interface';
+export * from './message.repository';

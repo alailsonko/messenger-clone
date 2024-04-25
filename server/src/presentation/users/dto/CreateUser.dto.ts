@@ -49,16 +49,6 @@ export interface ICreateUserRequest {
 
 export interface ICreateUserResponse {
   id: string;
-  isSuperUser: boolean;
-  firstName: string;
-  lastName: string;
-  isStaff: boolean;
-  isActive: boolean;
-  username: string;
-  email: string;
-  createdAt: Date;
-  updatedAt: Date;
-  lastLogin: Date | null;
 }
 
 export class CreateUserRequest implements ICreateUserRequest {
@@ -81,34 +71,4 @@ export class CreateUserRequest implements ICreateUserRequest {
 export class CreateUserResponse implements ICreateUserResponse {
   @ApiProperty()
   id: string;
-
-  @ApiProperty()
-  isSuperUser: boolean;
-
-  @ApiProperty()
-  firstName: string;
-
-  @ApiProperty()
-  lastName: string;
-
-  @ApiProperty()
-  isStaff: boolean;
-
-  @ApiProperty()
-  isActive: boolean;
-
-  @ApiProperty()
-  username: string;
-
-  @ApiProperty()
-  email: string;
-
-  @ApiProperty()
-  createdAt: Date;
-
-  @ApiProperty()
-  updatedAt: Date;
-
-  @ApiProperty({ type: 'string', format: 'date-time', nullable: true })
-  lastLogin: Date | null;
 }

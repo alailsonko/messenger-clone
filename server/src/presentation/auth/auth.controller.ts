@@ -13,8 +13,8 @@ import { LocalAuthGuard } from 'src/application/auth/guards/local-auth.guard';
 import { AuthenticatedRequest } from 'src/common/types/authenticated-request.type';
 import { IUser } from 'src/domain/users';
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
-import { Profile } from './dto/GetProfile.dto';
-import { Login } from './dto/Login.dto';
+import { Profile } from './dto/get-profile.dto';
+import { LoginDto } from './dto/login.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -22,7 +22,7 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  @ApiBody({ type: Login, description: 'Login' })
+  @ApiBody({ type: LoginDto, description: 'Login' })
   @ApiResponse({
     status: 200,
     description: 'Login successful',

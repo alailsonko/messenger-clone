@@ -50,4 +50,26 @@ export class SessionEntity extends SessionAbstract {
   set updatedAt(value: Date) {
     this._updatedAt = value;
   }
+
+  public static create(data: SessionAbstract): SessionEntity {
+    const entity = new SessionEntity();
+    entity.id = data.id;
+    entity.sessionKey = data.sessionKey;
+    entity.sessionData = data.sessionData;
+    entity.expireDate = data.expireDate;
+    entity.createdAt = data.createdAt;
+    entity.updatedAt = data.updatedAt;
+    return entity;
+  }
+
+  public toObject(): SessionAbstract {
+    return {
+      id: this.id,
+      sessionKey: this.sessionKey,
+      sessionData: this.sessionData,
+      expireDate: this.expireDate,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+    };
+  }
 }

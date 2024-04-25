@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { IUser, UsersModel } from 'src/domain/users';
+import { IUser, UsersEntity, UsersModel } from 'src/domain/users';
 import { jwtConstants } from './auth.constants';
 import { AuthenticatePayload } from './auth.types';
-import { UsersMapper } from 'src/domain/users/users.mapper';
 import { FindUniqueUserQuery } from '../users/queries/impl';
 import { QueryBus } from '@nestjs/cqrs';
 
@@ -45,7 +44,7 @@ export class AuthService {
       ),
     );
 
-    return UsersMapper.toObject(user);
+    return UsersEntity.create(user).toObject();
   }
 
   async createAccessToken(user: IUser) {

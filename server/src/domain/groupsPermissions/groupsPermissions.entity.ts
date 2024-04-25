@@ -60,4 +60,28 @@ export class GroupPermissionEntity extends GroupPermissionAbstract {
   set permissionId(value: string) {
     this._permissionId = value;
   }
+
+  public static create(data: GroupPermissionAbstract): GroupPermissionEntity {
+    const entity = new GroupPermissionEntity();
+    entity.id = data.id;
+    entity.group = data.group;
+    entity.permission = data.permission;
+    entity.createdAt = data.createdAt;
+    entity.updatedAt = data.updatedAt;
+    entity.groupId = data.groupId;
+    entity.permissionId = data.permissionId;
+    return entity;
+  }
+
+  public toObject(): GroupPermissionAbstract {
+    return {
+      id: this.id,
+      group: this.group,
+      permission: this.permission,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+      groupId: this.groupId,
+      permissionId: this.permissionId,
+    };
+  }
 }

@@ -1,9 +1,6 @@
-import { IsUUID, IsString, IsDate } from 'class-validator';
-import { Type } from 'class-transformer';
 import { AdminLogsAbstract } from './adminLogs.abstract';
 import { IContentType } from '../contentTypes/contentTypes.interface';
 import { IUser } from '../users/users.interface';
-import { OPERATIONS } from 'src/common/enums/operations.enum';
 
 export class AdminLogsEntity extends AdminLogsAbstract {
   protected _id: string;
@@ -18,7 +15,6 @@ export class AdminLogsEntity extends AdminLogsAbstract {
   protected _contentType: IContentType;
   protected _contentTypeId: string;
 
-  @IsUUID('4', { groups: [OPERATIONS.READ] })
   get id(): string {
     return this._id;
   }
@@ -26,7 +22,6 @@ export class AdminLogsEntity extends AdminLogsAbstract {
     this._id = value;
   }
 
-  @IsString({ groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE] })
   get action(): string {
     return this._action;
   }
@@ -34,7 +29,6 @@ export class AdminLogsEntity extends AdminLogsAbstract {
     this._action = value;
   }
 
-  @IsString({ groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE] })
   get objectId(): string {
     return this._objectId;
   }
@@ -42,7 +36,6 @@ export class AdminLogsEntity extends AdminLogsAbstract {
     this._objectId = value;
   }
 
-  @IsString({ groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE] })
   get objectRepr(): string {
     return this._objectRepr;
   }
@@ -50,7 +43,6 @@ export class AdminLogsEntity extends AdminLogsAbstract {
     this._objectRepr = value;
   }
 
-  @IsString({ groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE] })
   get changeMessage(): string {
     return this._changeMessage;
   }
@@ -58,8 +50,6 @@ export class AdminLogsEntity extends AdminLogsAbstract {
     this._changeMessage = value;
   }
 
-  @IsDate({ groups: [OPERATIONS.READ] })
-  @Type(() => Date)
   get createdAt(): Date {
     return this._createdAt;
   }
@@ -67,8 +57,6 @@ export class AdminLogsEntity extends AdminLogsAbstract {
     this._createdAt = value;
   }
 
-  @IsDate({ groups: [OPERATIONS.READ] })
-  @Type(() => Date)
   get updatedAt(): Date {
     return this._updatedAt;
   }
@@ -83,7 +71,6 @@ export class AdminLogsEntity extends AdminLogsAbstract {
     this._user = value;
   }
 
-  @IsUUID('4', { groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE] })
   get userId(): string {
     return this._userId;
   }
@@ -98,11 +85,57 @@ export class AdminLogsEntity extends AdminLogsAbstract {
     this._contentType = value;
   }
 
-  @IsUUID('4', { groups: [OPERATIONS.CREATE, OPERATIONS.UPDATE] })
   get contentTypeId(): string {
     return this._contentTypeId;
   }
   set contentTypeId(value: string) {
     this._contentTypeId = value;
+  }
+
+  public static create(data: AdminLogsAbstract): AdminLogsEntity {
+    const entity = new AdminLogsEntity();
+    const {
+      id,
+      action,
+      objectId,
+      objectRepr,
+      changeMessage,
+      createdAt,
+      updatedAt,
+      user,
+      userId,
+      contentType,
+      contentTypeId,
+    } = data;
+
+    entity.id = id;
+    entity.action = action;
+    entity.objectId = objectId;
+    entity.objectRepr = objectRepr;
+    entity.changeMessage = changeMessage;
+    entity.createdAt = createdAt;
+    entity.updatedAt = updatedAt;
+    entity.user = user;
+    entity.userId = userId;
+    entity.contentType = contentType;
+    entity.contentTypeId = contentTypeId;
+
+    return entity;
+  }
+
+  public toObject(): AdminLogsAbstract {
+    return {
+      id: this.id,
+      action: this.action,
+      objectId: this.objectId,
+      objectRepr: this.objectRepr,
+      changeMessage: this.changeMessage,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+      userId: this.userId,
+      contentTypeId: this.contentTypeId,
+      contentType: this.contentType,
+      user: this.user,
+    };
   }
 }

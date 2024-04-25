@@ -1,6 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CreateUserCommand } from '../impl';
-import { UsersMapper, UsersEntity } from 'src/domain/users';
 import { LoggerService } from 'src/infra/logger/logger.service';
 import { UsersRepository } from 'src/domain/users/users.repository';
 import { UsersGroupsRepository } from 'src/domain/usersGroups/usersGroups.repository';
@@ -18,7 +17,7 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
     this.logger.setContext(CreateUserHandler.name);
   }
 
-  async execute(command: CreateUserCommand): Promise<UsersEntity> {
+  async execute(command: CreateUserCommand): Promise<{ id: string }> {
     const { user } = command;
 
     this.logger.log(`Creating user: ${user.username}`, {
@@ -48,6 +47,6 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
       },
     });
 
-    return UsersMapper.toDomain(response);
+    return { id: response.id };
   }
 }

@@ -1,5 +1,5 @@
-import { PostAbstract } from './posts.abstract';
-import { PostEntity } from './posts.entity';
-import { PostModel } from './posts.model';
-
-export { PostAbstract, PostEntity, PostModel };
+export * from './posts.abstract';
+export * from './posts.entity';
+export * from './posts.model';
+export * from './posts.interface';
+export * from './posts.repository';

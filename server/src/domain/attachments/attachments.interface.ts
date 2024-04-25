@@ -1,8 +1,9 @@
-export interface IMessage {
+export interface IAttachment {
   id: string;
-  content: string;
-  senderId: string;
-  chatRoomId: string;
+  file: string;
+  messageId: string;
+  postId: string;
+  commentId: string;
   createdAt: Date;
   updatedAt: Date;
 }

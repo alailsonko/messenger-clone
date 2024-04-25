@@ -2,6 +2,7 @@
 import { IGroup } from '../groups/groups.interface';
 import { IUser } from '../users/users.interface';
 import { UserGroupAbstract } from './usersGroups.abstract';
+import { IUserGroup } from './usersGroups.interface';
 
 export class UserGroupEntity extends UserGroupAbstract {
   protected _id: string;
@@ -59,5 +60,32 @@ export class UserGroupEntity extends UserGroupAbstract {
   }
   set groupId(value: string) {
     this._groupId = value;
+  }
+
+  public static create(data: UserGroupAbstract): UserGroupEntity {
+    const entity = new UserGroupEntity();
+    const { id, user, group, createdAt, updatedAt, userId, groupId } = data;
+
+    entity.id = id;
+    entity.user = user;
+    entity.group = group;
+    entity.createdAt = createdAt;
+    entity.updatedAt = updatedAt;
+    entity.userId = userId;
+    entity.groupId = groupId;
+
+    return entity;
+  }
+
+  public toObject(): IUserGroup {
+    return {
+      id: this.id,
+      user: this.user,
+      group: this.group,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+      userId: this.userId,
+      groupId: this.groupId,
+    };
   }
 }

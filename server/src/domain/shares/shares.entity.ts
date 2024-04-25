@@ -33,4 +33,22 @@ export class ShareEntity implements ShareAbstract {
   set createdAt(value: Date) {
     this._createdAt = value;
   }
+
+  public static create(data: ShareAbstract): ShareEntity {
+    const entity = new ShareEntity();
+    entity.id = data.id;
+    entity.userId = data.userId;
+    entity.postId = data.postId;
+    entity.createdAt = data.createdAt;
+    return entity;
+  }
+
+  public toObject(): ShareAbstract {
+    return {
+      id: this.id,
+      userId: this.userId,
+      postId: this.postId,
+      createdAt: this.createdAt,
+    };
+  }
 }

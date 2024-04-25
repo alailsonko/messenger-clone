@@ -17,4 +17,13 @@ export class UserChatRoomEntity implements UserChatRoomAbstract {
   set chatRoomId(value: string) {
     this._chatRoomId = value;
   }
+
+  public static create(data: UserChatRoomAbstract): UserChatRoomEntity {
+    const entity = new UserChatRoomEntity();
+
+    entity.userId = data.userId;
+    entity.chatRoomId = data.chatRoomId;
+
+    return entity;
+  }
 }

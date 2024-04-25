@@ -1,4 +1,5 @@
 import { AttachmentAbstract } from './attachments.abstract';
+import { IAttachment } from './attachments.interface';
 
 export class AttachmentEntity implements AttachmentAbstract {
   private _id: string;
@@ -59,5 +60,31 @@ export class AttachmentEntity implements AttachmentAbstract {
   }
   set updatedAt(value: Date) {
     this._updatedAt = value;
+  }
+
+  public static create(data: IAttachment): AttachmentEntity {
+    const attachment = new AttachmentEntity();
+
+    attachment.id = data.id;
+    attachment.file = data.file;
+    attachment.messageId = data.messageId;
+    attachment.postId = data.postId;
+    attachment.commentId = data.commentId;
+    attachment.createdAt = data.createdAt;
+    attachment.updatedAt = data.updatedAt;
+
+    return attachment;
+  }
+
+  public toObject(): AttachmentAbstract {
+    return {
+      id: this.id,
+      file: this.file,
+      messageId: this.messageId,
+      postId: this.postId,
+      commentId: this.commentId,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+    };
   }
 }
