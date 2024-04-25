@@ -3,7 +3,6 @@ import { CreateUserChatRoomCommand } from '../impl';
 import { LoggerService } from 'src/infra/logger/logger.service';
 import { ChatRoomsRepository } from 'src/domain/chatRooms/chat-rooms.repository';
 import { UsersChatRoomsRepository } from 'src/domain/usersChatRooms/users-chat-rooms.repository';
-import { IChatRoom } from 'src/domain/chatRooms/chat-rooms.interface';
 import { PrismaService } from 'src/infra/db/prisma/prisma.service';
 
 @CommandHandler(CreateUserChatRoomCommand)
@@ -19,7 +18,7 @@ export class CreateUserChatRoomHandler
     this.logger.setContext(CreateUserChatRoomHandler.name);
   }
 
-  async execute(command: CreateUserChatRoomCommand): Promise<IChatRoom> {
+  async execute(command: CreateUserChatRoomCommand): Promise<{ id: string }> {
     const { data, userId: creatorUserId } = command;
 
     const response = await this.repository.create({
@@ -55,6 +54,8 @@ export class CreateUserChatRoomHandler
       })),
     ]);
 
-    return response;
+    return {
+      id: response.id,
+    };
   }
 }

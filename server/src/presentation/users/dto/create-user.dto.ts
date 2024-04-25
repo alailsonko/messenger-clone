@@ -38,37 +38,3 @@ export class CreateUserDto {
   @IsString()
   lastName: string;
 }
-
-export interface ICreateUserRequest {
-  email: string;
-  username: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-}
-
-export interface ICreateUserResponse {
-  id: string;
-}
-
-export class CreateUserRequest implements ICreateUserRequest {
-  @ApiProperty()
-  email: string;
-
-  @ApiProperty()
-  username: string;
-
-  @ApiProperty()
-  password: string;
-
-  @ApiProperty()
-  firstName: string;
-
-  @ApiProperty()
-  lastName: string;
-}
-
-export class CreateUserResponse implements ICreateUserResponse {
-  @ApiProperty()
-  id: string;
-}

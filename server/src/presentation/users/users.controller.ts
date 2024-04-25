@@ -9,11 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from 'src/application/users/users.service';
-import {
-  CreateUserDto,
-  CreateUserRequest,
-  CreateUserResponse,
-} from './dto/CreateUser.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 import {
   ApiBadRequestResponse,
   ApiBody,
@@ -27,11 +23,15 @@ import {
 import { UsersPagedResult } from './dto/GetUsers.dto';
 import { JwtAuthGuard } from 'src/application/auth/guards/jwt-auth.guard';
 import { ChatRoomsService } from 'src/application/chat-rooms/chat-rooms.service';
-import { ChatRoom, CreateUserChatRoomDto } from './dto/CreateUserChatRoom.dto';
-import { IChatRoom } from 'src/domain/chatRooms/chat-rooms.interface';
-import { PagedUserChatRooms } from './dto/GetUserChatRooms.dto';
+import { CreateUserChatRoomDto } from './dto/create-user-chat-room.dto';
+import {
+  ChatRoomResponseObject,
+  GetUserChatRoomsResponseObject,
+} from './response-object/get-user-chat-rooms.response-object';
 import { MessagesService } from 'src/application/messages/messages.service';
 import { PagedUserChatRoomMessages } from './dto/GetUserChatRoomMessages.dto';
+import { CreateUserResponseObject } from './response-object/create-user.response-object';
+import { CreateUserChatRoomResponseObject } from './response-object/create-user-chat-room.response-object';
 
 @ApiTags('users')
 @Controller('users')
@@ -51,10 +51,10 @@ export class UsersController {
   @ApiCreatedResponse({
     status: 201,
     description: 'OK',
-    type: CreateUserResponse,
+    type: CreateUserResponseObject,
   })
-  @ApiBody({ type: CreateUserRequest })
-  createUser(@Body() body: CreateUserDto): Promise<CreateUserResponse> {
+  @ApiBody({ type: CreateUserDto })
+  createUser(@Body() body: CreateUserDto): Promise<CreateUserResponseObject> {
     return this.usersService.createUser(body);
   }
 
@@ -92,14 +92,14 @@ export class UsersController {
   @ApiCreatedResponse({
     status: 201,
     description: 'OK',
-    type: ChatRoom,
+    type: CreateUserChatRoomResponseObject,
   })
   @ApiBody({ type: CreateUserChatRoomDto })
   async createUserChatRoom(
     @Param('userId') userId: string,
     @Body()
     body: CreateUserChatRoomDto,
-  ): Promise<IChatRoom> {
+  ): Promise<CreateUserChatRoomResponseObject> {
     return this.chatRoomsService.createUserChatRoom(userId, body);
   }
 
@@ -113,7 +113,7 @@ export class UsersController {
   @ApiResponse({
     status: 200,
     description: 'OK',
-    type: PagedUserChatRooms,
+    type: GetUserChatRoomsResponseObject,
   })
   @ApiForbiddenResponse({ status: 403, description: 'Forbidden.' })
   @ApiBadRequestResponse({ status: 400, description: 'Bad Request.' })
@@ -121,7 +121,7 @@ export class UsersController {
     @Param('userId') userId: string,
     @Query('skip', new ParseIntPipe()) skip: number,
     @Query('take', new ParseIntPipe()) take: number,
-  ): Promise<PagedUserChatRooms> {
+  ): Promise<GetUserChatRoomsResponseObject> {
     return this.chatRoomsService.getUserChatRooms(userId, {
       skip,
       take,
@@ -162,14 +162,14 @@ export class UsersController {
   @ApiResponse({
     status: 200,
     description: 'OK',
-    type: ChatRoom,
+    type: ChatRoomResponseObject,
   })
   @ApiForbiddenResponse({ status: 403, description: 'Forbidden.' })
   @ApiBadRequestResponse({ status: 400, description: 'Bad Request.' })
   getChatRoom(
     @Param('userId') userId: string,
     @Param('chatRoomId') chatRoomId: string,
-  ): Promise<IChatRoom> {
+  ): Promise<ChatRoomResponseObject> {
     return this.chatRoomsService.getUserChatRoom(userId, chatRoomId);
   }
 }

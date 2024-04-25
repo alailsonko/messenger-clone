@@ -9,7 +9,8 @@
  * ---------------------------------------------------------------
  */
 
-export interface CreateUserRequest {
+export interface CreateUserDto {
+  /** @format email */
   email: string;
   username: string;
   password: string;
@@ -17,21 +18,8 @@ export interface CreateUserRequest {
   lastName: string;
 }
 
-export interface CreateUserResponse {
+export interface CreateUserResponseObject {
   id: string;
-  isSuperUser: boolean;
-  firstName: string;
-  lastName: string;
-  isStaff: boolean;
-  isActive: boolean;
-  username: string;
-  email: string;
-  /** @format date-time */
-  createdAt: string;
-  /** @format date-time */
-  updatedAt: string;
-  /** @format date-time */
-  lastLogin: string | null;
 }
 
 export interface Avatar {
@@ -80,34 +68,47 @@ export interface CreateUserChatRoomDto {
   userIds: string[];
 }
 
-export interface ChatRoom {
-  /**
-   * Chat room ID
-   * @example "1"
-   */
+export interface CreateUserChatRoomResponseObject {
   id: string;
-  /**
-   * Chat room name
-   * @example "Chat room 1"
-   */
-  name: string;
-  /**
-   * Chat room creation date
-   * @format date-time
-   * @example "2021-07-01T00:00:00.000Z"
-   */
-  createdAt: string;
-  /**
-   * Chat room last update date
-   * @format date-time
-   * @example "2021-07-01T00:00:00.000Z"
-   */
-  updatedAt: string;
 }
 
-export interface PagedUserChatRooms {
+export interface UserResponseObject {
+  id: string;
+  /** @format date-time */
+  createdAt: string;
+  /** @format date-time */
+  updatedAt: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  username: string;
+  password: string;
+  isActive: boolean;
+  isStaff: boolean;
+  isSuperUser: boolean;
+  /** @format date-time */
+  lastLogin: string;
+}
+
+export interface UserChatRoomResponseObject {
+  chatRoomId: string;
+  userId: string;
+  user: UserResponseObject;
+}
+
+export interface ChatRoomResponseObject {
+  id: string;
+  name: string;
+  /** @format date-time */
+  createdAt: string;
+  /** @format date-time */
+  updatedAt: string;
+  usersChatRooms: UserChatRoomResponseObject[];
+}
+
+export interface GetUserChatRoomsResponseObject {
   /** Chat rooms */
-  data: ChatRoom[];
+  data: ChatRoomResponseObject[];
   /**
    * Chat rooms count
    * @example 1
@@ -160,7 +161,7 @@ export interface PagedUserChatRoomMessages {
   count: number;
 }
 
-export interface Login {
+export interface LoginDto {
   email: string;
   password: string;
 }
@@ -426,10 +427,10 @@ export class Api<
      * @request POST:/users
      */
     usersControllerCreateUser: (
-      data: CreateUserRequest,
+      data: CreateUserDto,
       params: RequestParams = {}
     ) =>
-      this.request<CreateUserResponse, void>({
+      this.request<CreateUserResponseObject, void>({
         path: `/users`,
         method: 'POST',
         body: data,
@@ -474,7 +475,7 @@ export class Api<
       data: CreateUserChatRoomDto,
       params: RequestParams = {}
     ) =>
-      this.request<ChatRoom, void>({
+      this.request<CreateUserChatRoomResponseObject, void>({
         path: `/users/${userId}/chat-rooms`,
         method: 'POST',
         body: data,
@@ -499,7 +500,7 @@ export class Api<
       },
       params: RequestParams = {}
     ) =>
-      this.request<PagedUserChatRooms, void>({
+      this.request<GetUserChatRoomsResponseObject, void>({
         path: `/users/${userId}/chat-rooms`,
         method: 'GET',
         query: query,
@@ -545,7 +546,7 @@ export class Api<
       chatRoomId: string,
       params: RequestParams = {}
     ) =>
-      this.request<ChatRoom, void>({
+      this.request<ChatRoomResponseObject, void>({
         path: `/users/${userId}/chat-rooms/${chatRoomId}`,
         method: 'GET',
         format: 'json',
@@ -559,7 +560,7 @@ export class Api<
      * @name AuthControllerLogin
      * @request POST:/auth/login
      */
-    authControllerLogin: (data: Login, params: RequestParams = {}) =>
+    authControllerLogin: (data: LoginDto, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/auth/login`,
         method: 'POST',
