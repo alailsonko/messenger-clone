@@ -11,9 +11,8 @@ import { JwtAuthGuard } from 'src/application/auth/guards/jwt-auth.guard';
 import { Response as ResponseType } from 'express';
 import { LocalAuthGuard } from 'src/application/auth/guards/local-auth.guard';
 import { AuthenticatedRequest } from 'src/common/types/authenticated-request.type';
-import { IUser } from 'src/domain/users';
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
-import { Profile } from './dto/get-profile.dto';
+import { ProfileResponseObject } from './response-object/get-profile.response-object';
 import { LoginDto } from './dto/login.dto';
 
 @Controller('auth')
@@ -39,7 +38,7 @@ export class AuthController {
       sameSite: 'strict',
       path: '/',
       expires: new Date(Date.now() + 900000),
-      maxAge: 900000,
+      maxAge: Date.now() + 900000,
     });
     res.cookie('accessToken', response.accessToken, {
       httpOnly: true,
@@ -47,7 +46,7 @@ export class AuthController {
       sameSite: 'strict',
       path: '/',
       expires: new Date(Date.now() + 900000),
-      maxAge: 900000,
+      maxAge: Date.now() + 900000,
     });
 
     res.send({ message: 'Login successful' });
@@ -66,8 +65,8 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  @ApiResponse({ status: 200, type: Profile })
-  getProfile(@Request() req: AuthenticatedRequest): IUser {
+  @ApiResponse({ status: 200, type: ProfileResponseObject })
+  getProfile(@Request() req: AuthenticatedRequest): ProfileResponseObject {
     return req.user;
   }
 }

@@ -5,7 +5,7 @@ import { IGroup } from 'src/domain/groups';
 import { IPermission } from 'src/domain/permissions';
 import { IUser } from 'src/domain/users';
 
-export class Avatar implements IAvatar {
+export class AvatarResponseObject implements IAvatar {
   @ApiProperty({ type: Date, required: true })
   createdAt: Date;
 
@@ -22,7 +22,7 @@ export class Avatar implements IAvatar {
   userId: string;
 }
 
-export class AdminLog implements IAdminLog {
+export class AdminLogResponseObject implements IAdminLog {
   @ApiProperty({ type: String, required: true })
   action: string;
 
@@ -51,7 +51,7 @@ export class AdminLog implements IAdminLog {
   userId: string;
 }
 
-export class Group implements IGroup {
+export class GroupResponseObject implements IGroup {
   @ApiProperty({ type: String, required: true })
   id: string;
 
@@ -65,7 +65,7 @@ export class Group implements IGroup {
   updatedAt: Date;
 }
 
-export class Permission implements IPermission {
+export class PermissionResponseObject implements IPermission {
   @ApiProperty({ type: String, required: true })
   codename: string;
 
@@ -85,8 +85,8 @@ export class Permission implements IPermission {
   updatedAt: Date;
 }
 
-export class Profile implements Omit<IUser, 'password'> {
-  @ApiProperty({ type: AdminLog, isArray: true, required: false })
+export class ProfileResponseObject implements Omit<IUser, 'password'> {
+  @ApiProperty({ type: AdminLogResponseObject, isArray: true, required: false })
   adminLogs?: IAdminLog[];
 
   @ApiProperty({ type: Date, required: true })
@@ -98,7 +98,7 @@ export class Profile implements Omit<IUser, 'password'> {
   @ApiProperty({ type: String, required: true })
   firstName: string;
 
-  @ApiProperty({ type: Group, isArray: true, required: false })
+  @ApiProperty({ type: GroupResponseObject, isArray: true, required: false })
   groups?: IGroup[];
 
   @ApiProperty({ type: String, required: true })
@@ -119,7 +119,11 @@ export class Profile implements Omit<IUser, 'password'> {
   @ApiProperty({ type: String, required: true })
   lastName: string;
 
-  @ApiProperty({ type: Permission, isArray: true, required: false })
+  @ApiProperty({
+    type: PermissionResponseObject,
+    isArray: true,
+    required: false,
+  })
   permissions?: IPermission[];
 
   @ApiProperty({ type: Date, required: true })
@@ -128,6 +132,6 @@ export class Profile implements Omit<IUser, 'password'> {
   @ApiProperty({ type: String, required: true })
   username: string;
 
-  @ApiProperty({ type: Avatar, required: false })
+  @ApiProperty({ type: AvatarResponseObject, required: false })
   avatar?: IAvatar;
 }
