@@ -54,5 +54,7 @@ export const socket: Socket<EventsMap, ListenEventsMap> = io(
   process.env.REACT_APP_BACKEND_URL!,
   {
     ackTimeout: 5000,
+    secure: true,
+    withCredentials: true,
   }
 );

@@ -42,7 +42,7 @@ export type Leave = { chatRoomId: string; userId: string };
 
 @WebSocketGateway({
   cors: {
-    origin: '*',
+    origin: 'https://localhost:3000',
     credentials: true,
   },
 })

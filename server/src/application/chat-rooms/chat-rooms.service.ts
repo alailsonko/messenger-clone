@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { CreateUserChatRoomCommand } from './commands/impl';
 import { LoggerService } from 'src/infra/logger/logger.service';
@@ -26,14 +26,15 @@ export class ChatRoomsService {
       name: string;
       userIds: string[];
     },
-  ): Promise<IChatRoom> {
+  ): Promise<{ id: string }> {
     this.logger.log('Creating chat room...');
 
     const exists = await Promise.all(
       data.userIds.map((recipientId) =>
-        this.queryBus.execute<CheckUserChatRoomExistsQuery, boolean>(
-          new CheckUserChatRoomExistsQuery(userId, recipientId),
-        ),
+        this.queryBus.execute<
+          CheckUserChatRoomExistsQuery,
+          { id: string } | null
+        >(new CheckUserChatRoomExistsQuery(userId, recipientId)),
       ),
     );
 
@@ -41,11 +42,11 @@ export class ChatRoomsService {
       exists,
     });
 
-    if (exists.some((exist) => exist)) {
-      throw new BadRequestException('Chat room already exists');
+    if (exists) {
+      return exists[0];
     }
 
-    return this.commandBus.execute<CreateUserChatRoomCommand, IChatRoom>(
+    return this.commandBus.execute<CreateUserChatRoomCommand, { id: string }>(
       new CreateUserChatRoomCommand(userId, {
         name: data.name,
         userIds: data.userIds,

@@ -107,6 +107,18 @@ export interface UserChatRoomResponseObject {
   user: UserResponseObject;
 }
 
+export interface MessageResponseObject {
+  chatRoomId: string;
+  content: string;
+  /** @format date-time */
+  createdAt: string;
+  id: string;
+  senderId: string;
+  /** @format date-time */
+  updatedAt: string;
+  sender: UserResponseObject;
+}
+
 export interface ChatRoomResponseObject {
   id: string;
   name: string;
@@ -115,6 +127,7 @@ export interface ChatRoomResponseObject {
   /** @format date-time */
   updatedAt: string;
   usersChatRooms: UserChatRoomResponseObject[];
+  messages: MessageResponseObject[];
 }
 
 export interface GetUserChatRoomsResponseObject {

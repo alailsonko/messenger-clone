@@ -41,6 +41,18 @@ export const Chat = () => {
     },
   });
 
+  const { data: chatRoom } = useQuery({
+    queryKey: ['/users/{userId}/chat-rooms/{chatRoomId}', params.chatRoomId],
+    queryFn: async () => {
+      const { data } = await appContext.api.users.usersControllerGetChatRoom(
+        appContext.user?.id!,
+        params.chatRoomId!
+      );
+
+      return data;
+    },
+  });
+
   const queryClient = useQueryClient();
 
   const sendMessageMutation = useMutation({
@@ -143,8 +155,22 @@ export const Chat = () => {
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '98vh' }}>
       <Box sx={{ display: 'flex', top: 0 }}>
         <ListItem
-          avatarSrc={''}
-          primaryText={'some name'}
+          avatarSrc={
+            process.env.REACT_APP_BACKEND_URL +
+            '/' +
+            chatRoom?.usersChatRooms.find(
+              (u) => u.userId !== appContext.user?.id
+            )?.user.avatar.url!
+          }
+          primaryText={
+            chatRoom?.usersChatRooms.find(
+              (u) => u.userId !== appContext.user?.id
+            )?.user.firstName +
+            ' ' +
+            chatRoom?.usersChatRooms.find(
+              (u) => u.userId !== appContext.user?.id
+            )?.user.lastName
+          }
           secondaryText={''}
           secondaryTypography={'online'}
           id={''}

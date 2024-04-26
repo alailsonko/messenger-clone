@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { PagedResult } from 'src/common/types/paged-result.type';
 import { IChatRoom } from 'src/domain/chatRooms/chat-rooms.interface';
+import { IMessage } from 'src/domain/messages';
 import { AvatarResponseObject } from 'src/presentation/auth/response-object/get-profile.response-object';
 
 export class UserResponseObject {
@@ -58,6 +59,29 @@ export class UserChatRoomResponseObject {
   user: UserResponseObject;
 }
 
+export class MessageResponseObject implements IMessage {
+  @ApiProperty()
+  chatRoomId: string;
+
+  @ApiProperty()
+  content: string;
+
+  @ApiProperty()
+  createdAt: Date;
+
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  senderId: string;
+
+  @ApiProperty()
+  updatedAt: Date;
+
+  @ApiProperty({ type: UserResponseObject })
+  sender?: UserResponseObject;
+}
+
 export class ChatRoomResponseObject {
   @ApiProperty()
   id: string;
@@ -73,6 +97,9 @@ export class ChatRoomResponseObject {
 
   @ApiProperty({ type: () => [UserChatRoomResponseObject] })
   usersChatRooms: UserChatRoomResponseObject[];
+
+  @ApiProperty({ type: () => [MessageResponseObject] })
+  messages: MessageResponseObject[];
 }
 
 export class GetUserChatRoomsResponseObject implements PagedResult<IChatRoom> {

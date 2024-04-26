@@ -12,7 +12,7 @@ export class CheckUserChatRoomExistsHandler {
     this.logger.setContext(CheckUserChatRoomExistsHandler.name);
   }
 
-  async execute(query: CheckUserChatRoomExistsQuery): Promise<boolean> {
+  async execute(query: CheckUserChatRoomExistsQuery): Promise<{ id: string }> {
     const { userId, recipientId } = query;
 
     const chatRooms = await this.repository.findAll({
@@ -32,12 +32,10 @@ export class CheckUserChatRoomExistsHandler {
       },
     });
 
-    console.log(chatRooms);
-
     this.logger.log('Checking if chat room exists...', {
       chatRooms,
     });
 
-    return chatRooms.length > 0;
+    return chatRooms.length > 0 ? { id: chatRooms[0].id } : null;
   }
 }

@@ -1,3 +1,5 @@
+import { IUser } from '../users';
+
 export interface IMessage {
   id: string;
   content: string;
@@ -5,4 +7,5 @@ export interface IMessage {
   chatRoomId: string;
   createdAt: Date;
   updatedAt: Date;
+  sender?: IUser;
 }

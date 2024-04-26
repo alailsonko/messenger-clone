@@ -4,7 +4,7 @@ import { Grid, Paper, Stack, List, debounce } from '@mui/material';
 import { Search } from '../../components/Search/Search';
 import { ListItem } from '../../components/List/ListItem';
 import { useQuery } from '@tanstack/react-query';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate, useParams } from 'react-router-dom';
 import { ChatRoomResponseObject } from '../../api/Api';
 
 export const Dashboard: React.FC = () => {
@@ -19,6 +19,7 @@ export const Dashboard: React.FC = () => {
   >([]);
   const navigate = useNavigate();
   const appContext = React.useContext(AppContext);
+  const { chatRoomId } = useParams<{ chatRoomId: string }>();
 
   const {
     data,
@@ -76,15 +77,17 @@ export const Dashboard: React.FC = () => {
     ev: React.MouseEvent<HTMLLIElement, MouseEvent>,
     id: string
   ) => {
-    await appContext.api.users.usersControllerCreateUserChatRoom(
-      appContext.user?.id!,
-      {
-        name: 'chat room',
-        userIds: [id],
-      }
-    );
+    const createdChatRoom =
+      await appContext.api.users.usersControllerCreateUserChatRoom(
+        appContext.user?.id!,
+        {
+          name: 'chat room',
+          userIds: [id],
+        }
+      );
+    await refetchUserChatRooms();
 
-    refetchUserChatRooms();
+    navigate(`/${createdChatRoom.data.id}`);
   };
 
   return (
@@ -110,9 +113,26 @@ export const Dashboard: React.FC = () => {
                       (u) => u.user.id !== appContext.user?.id
                     )?.user.avatar.url!
                   }
-                  primaryText={chatRoom.name}
-                  secondaryText="I'll be in your neighborhood doing errands this…"
-                  secondaryTypography="Ali Connors"
+                  primaryText={
+                    chatRoom.usersChatRooms.find(
+                      (u) => u.user.id !== appContext.user?.id
+                    )?.user.firstName! +
+                    ' ' +
+                    chatRoom.usersChatRooms.find(
+                      (u) => u.user.id !== appContext.user?.id
+                    )?.user.lastName!
+                  }
+                  secondaryText={
+                    chatRoom.id !== chatRoomId
+                      ? chatRoom.messages[0].content
+                      : ''
+                  }
+                  secondaryTypography={
+                    chatRoom.id !== chatRoomId &&
+                    chatRoom.messages[0].sender?.id! === appContext.user?.id
+                      ? 'You: '
+                      : ''
+                  }
                 />
               ))}
             </List>

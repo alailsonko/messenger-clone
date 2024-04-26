@@ -1,3 +1,4 @@
+import { IMessage } from '../messages';
 import { IUserChatRoom } from '../usersChatRooms';
 
 export interface IChatRoom {
@@ -5,5 +6,6 @@ export interface IChatRoom {
   name: string;
   createdAt: Date;
   updatedAt: Date;
+  messages: IMessage[];
   usersChatRooms: IUserChatRoom[];
 }

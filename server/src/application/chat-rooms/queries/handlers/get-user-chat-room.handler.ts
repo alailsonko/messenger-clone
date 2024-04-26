@@ -26,23 +26,24 @@ export class GetUserChatRoomHandler {
         where: {
           id: chatRoomId,
         },
-        include: {
-          usersChatRooms: {
-            include: {
-              user: true,
-            },
-          },
-        },
       }),
       this.usersChatRoomsRepository.findAll({
         where: {
           chatRoomId: chatRoomId,
         },
         include: {
-          user: true,
+          user: {
+            include: {
+              avatar: true,
+            },
+          },
         },
       }),
     ]);
+
+    if (!chatRoom) {
+      return null;
+    }
 
     return {
       id: chatRoom.id,
@@ -50,6 +51,7 @@ export class GetUserChatRoomHandler {
       createdAt: chatRoom.createdAt,
       updatedAt: chatRoom.updatedAt,
       usersChatRooms: userChatRooms,
+      messages: [],
     };
   }
 }

@@ -53,7 +53,7 @@ export const ListItem: React.FC<ListItemProps> = ({
             >
               {secondaryTypography}
             </Typography>
-            {` — ${secondaryText}`}
+            {secondaryText && ` — ${secondaryText}`}
           </React.Fragment>
         }
       />

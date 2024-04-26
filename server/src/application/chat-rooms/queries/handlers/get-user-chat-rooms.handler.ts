@@ -42,6 +42,19 @@ export class GetUserChatRoomsHandler {
         },
       },
       include: {
+        messages: {
+          orderBy: {
+            createdAt: 'desc',
+          },
+          take: 1,
+          include: {
+            sender: {
+              include: {
+                avatar: true,
+              },
+            },
+          },
+        },
         usersChatRooms: {
           include: {
             user: {
