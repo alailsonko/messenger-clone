@@ -1,6 +1,8 @@
-export interface IReaction {
+export interface IComment {
   id: string;
-  type: string;
+  content: string;
   userId: string;
-  messageId: string;
+  postId: string;
+  createdAt: Date;
+  updatedAt: Date;
 }

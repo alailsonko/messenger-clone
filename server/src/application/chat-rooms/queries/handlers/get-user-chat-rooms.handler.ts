@@ -3,7 +3,7 @@ import { GetUserChatRoomsQuery } from '../impl';
 import { ChatRoomsRepository } from 'src/domain/chatRooms/chat-rooms.repository';
 import { PagedResult } from 'src/common/types/paged-result.type';
 import { LoggerService } from 'src/infra/logger/logger.service';
-import { IChatRoom } from 'src/domain/chatRooms';
+import { ChatRoomEntity } from 'src/domain/chatRooms';
 
 @QueryHandler(GetUserChatRoomsQuery)
 export class GetUserChatRoomsHandler {
@@ -12,7 +12,9 @@ export class GetUserChatRoomsHandler {
     private readonly logger: LoggerService,
   ) {}
 
-  async execute(query: GetUserChatRoomsQuery): Promise<PagedResult<IChatRoom>> {
+  async execute(
+    query: GetUserChatRoomsQuery,
+  ): Promise<PagedResult<ChatRoomEntity>> {
     const { userId, query: chatRoomsQuery } = query;
 
     const { take, skip } = chatRoomsQuery;
@@ -65,7 +67,7 @@ export class GetUserChatRoomsHandler {
           },
         },
       },
-    }) as unknown as Promise<IChatRoom[]>;
+    });
 
     const chatRoomsCountPromise = this.repository.count({
       usersChatRooms: {

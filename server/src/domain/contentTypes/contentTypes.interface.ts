@@ -8,7 +8,7 @@ export interface IContentType {
   name: string;
   createdAt: Date;
   updatedAt: Date;
-  permission: IPermission | null;
-  permissionId: string | null;
-  adminLog: IAdminLog[];
+  permission?: IPermission | null;
+  permissionId?: string | null;
+  adminLog?: IAdminLog[];
 }

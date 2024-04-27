@@ -72,6 +72,10 @@ export interface CreateUserChatRoomResponseObject {
   id: string;
 }
 
+export interface CheckUserChatRoomExistsResponseObject {
+  id: string;
+}
+
 export interface AvatarResponseObject {
   /** @format date-time */
   createdAt: string;
@@ -527,6 +531,29 @@ export class Api<
       this.request<GetUserChatRoomsResponseObject, void>({
         path: `/users/${userId}/chat-rooms`,
         method: 'GET',
+        query: query,
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags users
+     * @name UsersControllerCheckUserChatRoomExists
+     * @summary Check chat room exists
+     * @request POST:/users/{userId}/recipients
+     */
+    usersControllerCheckUserChatRoomExists: (
+      userId: string,
+      query: {
+        recipientIds: string[];
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<CheckUserChatRoomExistsResponseObject, void>({
+        path: `/users/${userId}/recipients`,
+        method: 'POST',
         query: query,
         format: 'json',
         ...params,

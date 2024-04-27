@@ -77,6 +77,19 @@ export const Dashboard: React.FC = () => {
     ev: React.MouseEvent<HTMLLIElement, MouseEvent>,
     id: string
   ) => {
+    const checkChatRoomExists =
+      await appContext.api.users.usersControllerCheckUserChatRoomExists(
+        appContext.user?.id!,
+        {
+          recipientIds: [id],
+        }
+      );
+
+    if (checkChatRoomExists.data) {
+      navigate(`/${checkChatRoomExists.data.id}`);
+      return;
+    }
+
     const createdChatRoom =
       await appContext.api.users.usersControllerCreateUserChatRoom(
         appContext.user?.id!,
@@ -85,6 +98,7 @@ export const Dashboard: React.FC = () => {
           userIds: [id],
         }
       );
+
     await refetchUserChatRooms();
 
     navigate(`/${createdChatRoom.data.id}`);

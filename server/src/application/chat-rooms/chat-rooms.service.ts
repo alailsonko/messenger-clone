@@ -9,6 +9,7 @@ import {
   GetUserChatRoomsQuery,
 } from './queries/impl';
 import { PagedResult } from 'src/common/types/paged-result.type';
+import { ChatRoomEntity } from 'src/domain/chatRooms';
 
 @Injectable()
 export class ChatRoomsService {
@@ -20,6 +21,28 @@ export class ChatRoomsService {
     this.logger.setContext(ChatRoomsService.name);
   }
 
+  async checkUserChatRoomExists(
+    userId: string,
+    recipientIds: string[],
+  ): Promise<Pick<IChatRoom, 'id'> | null> {
+    this.logger.log('Checking if chat room already exists...');
+
+    const exists = await Promise.all(
+      recipientIds.map((recipientId) =>
+        this.queryBus.execute<
+          CheckUserChatRoomExistsQuery,
+          Pick<IChatRoom, 'id'> | null
+        >(new CheckUserChatRoomExistsQuery(userId, recipientId)),
+      ),
+    );
+
+    this.logger.log('Result of chat room check', {
+      exists,
+    });
+
+    return exists[0] || null;
+  }
+
   async createUserChatRoom(
     userId: string,
     data: {
@@ -28,23 +51,6 @@ export class ChatRoomsService {
     },
   ): Promise<{ id: string }> {
     this.logger.log('Creating chat room...');
-
-    const exists = await Promise.all(
-      data.userIds.map((recipientId) =>
-        this.queryBus.execute<
-          CheckUserChatRoomExistsQuery,
-          { id: string } | null
-        >(new CheckUserChatRoomExistsQuery(userId, recipientId)),
-      ),
-    );
-
-    this.logger.log('Checking if chat room already exists...', {
-      exists,
-    });
-
-    if (exists) {
-      return exists[0];
-    }
 
     return this.commandBus.execute<CreateUserChatRoomCommand, { id: string }>(
       new CreateUserChatRoomCommand(userId, {
@@ -61,9 +67,15 @@ export class ChatRoomsService {
       skip: number;
     },
   ): Promise<PagedResult<IChatRoom>> {
-    return this.queryBus.execute<GetUserChatRoomsQuery, PagedResult<IChatRoom>>(
-      new GetUserChatRoomsQuery(userId, query),
-    );
+    const response = await this.queryBus.execute<
+      GetUserChatRoomsQuery,
+      PagedResult<ChatRoomEntity>
+    >(new GetUserChatRoomsQuery(userId, query));
+
+    return {
+      data: response.data.map((chatRoom) => chatRoom.toObject()),
+      count: response.count,
+    };
   }
 
   async getUserChatRoom(

@@ -32,6 +32,7 @@ import { MessagesService } from 'src/application/messages/messages.service';
 import { PagedUserChatRoomMessages } from './dto/GetUserChatRoomMessages.dto';
 import { CreateUserResponseObject } from './response-object/create-user.response-object';
 import { CreateUserChatRoomResponseObject } from './response-object/create-user-chat-room.response-object';
+import { CheckUserChatRoomExistsResponseObject } from './response-object/check-user-chat-room-exists.response-object';
 
 @ApiTags('users')
 @Controller('users')
@@ -101,6 +102,25 @@ export class UsersController {
     body: CreateUserChatRoomDto,
   ): Promise<CreateUserChatRoomResponseObject> {
     return this.chatRoomsService.createUserChatRoom(userId, body);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':userId/recipients')
+  @ApiOperation({
+    summary: 'Check chat room exists',
+  })
+  @ApiForbiddenResponse({ status: 403, description: 'Forbidden.' })
+  @ApiBadRequestResponse({ status: 400, description: 'Bad Request.' })
+  @ApiCreatedResponse({
+    status: 200,
+    description: 'OK',
+    type: CheckUserChatRoomExistsResponseObject,
+  })
+  async checkUserChatRoomExists(
+    @Param('userId') userId: string,
+    @Query('recipientIds') recipientIds: string[],
+  ): Promise<CheckUserChatRoomExistsResponseObject> {
+    return this.chatRoomsService.checkUserChatRoomExists(userId, recipientIds);
   }
 
   @UseGuards(JwtAuthGuard)

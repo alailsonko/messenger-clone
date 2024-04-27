@@ -9,8 +9,8 @@ export interface IAdminLog {
   changeMessage: string;
   createdAt: Date;
   updatedAt: Date;
-  user?: IUser;
+  user?: IUser | null;
   userId: string;
-  contentType?: IContentType;
+  contentType?: IContentType | null;
   contentTypeId: string;
 }
