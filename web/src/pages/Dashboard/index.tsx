@@ -55,9 +55,9 @@ export const Dashboard: React.FC = () => {
       setSearchUsersList(
         data.data.map((user) => ({
           avatarSrc: process.env.REACT_APP_BACKEND_URL + '/' + user.avatar.url,
-          primaryText: user.email,
-          secondaryText: user.username,
-          secondaryTypography: user.id,
+          primaryText: user.firstName + ' ' + user.lastName,
+          secondaryText: user.email,
+          secondaryTypography: '',
           id: user.id,
         }))
       );
