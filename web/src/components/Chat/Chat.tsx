@@ -6,7 +6,7 @@ import {
   ListItemText,
   Box,
 } from '@mui/material';
-import { BottomNavigation } from '../BottomNavigation/BottomNavigation';
+import { SendMessage } from '../SendMessage/SendMessage';
 import { ListItem } from '../List/ListItem';
 import React, { useEffect } from 'react';
 import { AppContext } from '../../contexts/app-context';
@@ -217,7 +217,7 @@ export const Chat = () => {
           </ListItemMUI>
         ))}
       </List>
-      <BottomNavigation onChatMessage={handleSendChatMessage} />
+      <SendMessage onChatMessage={handleSendChatMessage} />
     </Box>
   );
 };

@@ -2,7 +2,7 @@ import { BottomNavigationAction, Box, TextField } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import React from 'react';
 
-export const BottomNavigation: React.FC<{
+export const SendMessage: React.FC<{
   onChatMessage: (message: string) => void;
 }> = ({ onChatMessage }) => {
   const [value, setValue] = React.useState('');
