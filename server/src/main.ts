@@ -4,8 +4,9 @@ import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/errors/http-exception.filter';
 import { promises as fs } from 'fs';
 import { join } from 'path';
-import * as cookieParser from 'cookie-parser';
+import cookieParser from 'cookie-parser';
 import { LoggerService } from './infra/logger/logger.service';
+import { AppClusterService } from './app_cluster.service';
 
 async function bootstrap() {
   const keyFile = await fs.readFile(join(__dirname, '..', '/../cert/key.pem'));
@@ -48,4 +49,5 @@ async function bootstrap() {
     logger.log('Server is running on https://localhost:4000');
   });
 }
-bootstrap();
+// bootstrap();
+AppClusterService.clusterize(bootstrap);
