@@ -121,11 +121,15 @@ export const Dashboard: React.FC = () => {
                   id={chatRoom.id}
                   onItemClick={handleItemClick}
                   avatarSrc={
-                    process.env.REACT_APP_BACKEND_URL +
-                    '/' +
                     chatRoom.usersChatRooms.find(
                       (u) => u.user.id !== appContext.user?.id
-                    )?.user.avatar.url!
+                    )?.user.avatar
+                      ? process.env.REACT_APP_BACKEND_URL +
+                        '/' +
+                        chatRoom.usersChatRooms.find(
+                          (u) => u.user.id !== appContext.user?.id
+                        )?.user.avatar.url!
+                      : ''
                   }
                   primaryText={
                     chatRoom.usersChatRooms.find(
@@ -137,11 +141,12 @@ export const Dashboard: React.FC = () => {
                     )?.user.lastName!
                   }
                   secondaryText={
-                    chatRoom.id !== chatRoomId
+                    chatRoom.id !== chatRoomId && chatRoom.messages.length
                       ? chatRoom.messages[0].content
                       : ''
                   }
                   secondaryTypography={
+                    chatRoom.messages.length &&
                     chatRoom.id !== chatRoomId &&
                     chatRoom.messages[0].sender?.id! === appContext.user?.id
                       ? 'You: '

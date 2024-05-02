@@ -1,0 +1,14 @@
+{
+  "module": "commonjs",
+  "devDependencies": {
+    "@faker-js/faker": "^8.4.1",
+    "@types/node": "^20.12.7",
+    "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "axios": "^1.6.8"
+  },
+  "scripts": {
+    "start": "concurrently \"node dist/create-new-user.js\" \"node dist/create-new-user.js\" \"node dist/create-new-user.js\" \"node dist/create-new-user.js\" \"node dist/create-new-user.js\" \"node dist/create-new-user.js\""
+  }
+}

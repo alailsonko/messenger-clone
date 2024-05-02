@@ -178,7 +178,7 @@ class UsersEntity extends UserAbstract {
       adminLogs && adminLogs.length
         ? adminLogs.map(AdminLogsEntity.create)
         : [];
-    entity.avatar = AvatarEntity.create(avatar);
+    entity.avatar = avatar ? AvatarEntity.create(avatar) : null;
 
     return entity;
   }
@@ -200,7 +200,7 @@ class UsersEntity extends UserAbstract {
       permissions: this.permissions.map((permission) => permission.toObject()),
       groups: this.groups.map((group) => group.toObject()),
       adminLogs: this.adminLogs.map((adminLog) => adminLog.toObject()),
-      avatar: this.avatar.toObject(),
+      avatar: this.avatar ? this.avatar.toObject() : null,
     };
   }
 }

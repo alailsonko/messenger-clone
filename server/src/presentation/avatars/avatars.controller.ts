@@ -1,11 +1,11 @@
 import {
   Controller,
   Post,
-  UseGuards,
   Request,
   UseInterceptors,
   UploadedFile,
   Param,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -23,13 +23,13 @@ import { AuthenticatedRequest } from 'src/common/types/authenticated-request.typ
 export class AvatarsController {
   constructor(private readonly avatarsService: AvatarsService) {}
 
+  @UseGuards(JwtAuthGuard)
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: 'The avatar and user data',
     type: 'multipart/form-data',
   })
   @Post(':userId')
-  @UseGuards(JwtAuthGuard)
   @ApiCreatedResponse({
     description: 'Avatar created successfully',
   })
