@@ -19,20 +19,13 @@ const createUser = async () => {
       lastName: faker.name.lastName(),
     };
 
-    const response = await axios.post('https://localhost:4000/users', user, {
+    await axios.post('https://localhost:4000/users', user, {
       httpsAgent: new https.Agent({
         rejectUnauthorized: false,
       }),
     });
 
-    await axios.post('https://localhost:4000/avatars/' + response.data.id, { avatar: fs.createReadStream(path.join(__dirname, '..', 'default.jpg')) }, {
-      httpsAgent: new https.Agent({
-        rejectUnauthorized: false,
-      }),
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      },
-    });
+
   } catch (error: any) {
     if (axios.isAxiosError(error)) {
       const axiosError = error as AxiosError;
@@ -53,7 +46,7 @@ if (cluster.isPrimary) {
   (async function createUsersIndefinitely() {
     while (true) {
       const promises = [];
-      for (let i = 0; i < 5000; i++) {
+      for (let i = 0; i < 250; i++) {
         promises.push(createUser());
       }
       await Promise.all(promises);

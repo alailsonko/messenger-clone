@@ -31,6 +31,7 @@ services:
 
   database-mc:
     container_name: database-mc
+    hostname: database-mc
     image: postgres:latest
     ports:
       - "5432:5432"
@@ -38,8 +39,42 @@ services:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST_AUTH_METHOD: trust
+      command: |
+        postgres 
+        -c wal_level=replica 
+        -c hot_standby=on 
+        -c max_wal_senders=10 
+        -c max_replication_slots=10 
+        -c hot_standby_feedback=on
     volumes:
       - pg_data:/var/lib/postgresql/data
+      - ./database/00_init.sql:/docker-entrypoint-initdb.d/00_init.sql
+      - ./database/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf
+
+  database-replica-mc:
+    container_name: database-replica-mc
+    hostname: database-replica-mc
+    image: postgres:latest
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: replicator
+      POSTGRES_PASSWORD: replicator_password
+    command: |
+        bash -c "
+        until rm -rf /var/lib/postgresql/data/* && pg_basebackup -U replicator --pgdata=/var/lib/postgresql/data -R --slot=replication_slot --host=database-mc --port=5432
+        do
+        echo 'Waiting for primary to connect...'
+        sleep 1s
+        done
+        echo 'Backup done, starting replica...'
+        chown -R postgres:postgres /var/lib/postgresql/data
+        chmod 0700 /var/lib/postgresql/data
+        gosu postgres postgres
+        "
+    depends_on:
+      - database-mc
 
 volumes:
   pg_data:

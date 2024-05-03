@@ -4,6 +4,7 @@ import { CreateUserCommand } from './commands/impl';
 import { FindAllUsersQuery, FindUniqueUserQuery } from './queries/impl';
 import { IUser, UsersEntity } from 'src/domain/users';
 import { PagedResult } from 'src/common/types/paged-result.type';
+import { CreateAvatarCommand } from '../avatars/commands/impl';
 
 @Injectable()
 export class UsersService {
@@ -19,7 +20,10 @@ export class UsersService {
     firstName: string;
     lastName: string;
   }): Promise<{ id: string }> {
-    return this.commandBus.execute<CreateUserCommand, { id: string }>(
+    const createdUser = await this.commandBus.execute<
+      CreateUserCommand,
+      { id: string }
+    >(
       new CreateUserCommand({
         email: data.email,
         password: data.password,
@@ -28,6 +32,15 @@ export class UsersService {
         lastName: data.lastName,
       }),
     );
+
+    await this.commandBus.execute<CreateAvatarCommand, void>(
+      new CreateAvatarCommand({
+        userId: createdUser.id,
+        url: 'static/avatar/default.jpg',
+      }),
+    );
+
+    return createdUser;
   }
 
   async findUniqueUser(
