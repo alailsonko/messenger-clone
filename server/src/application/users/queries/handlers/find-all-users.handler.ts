@@ -5,6 +5,7 @@ import { BadRequestException } from '@nestjs/common';
 import { LoggerService } from 'src/infra/logger/logger.service';
 import { UsersRepository } from 'src/domain/users/users.repository';
 import { PagedResult } from 'src/common/types/paged-result.type';
+import { Prisma } from '@prisma/client';
 
 @QueryHandler(FindAllUsersQuery)
 export class FindAllUsersHandler {
@@ -22,9 +23,25 @@ export class FindAllUsersHandler {
       queryOptions,
     });
 
+    const { email, firstName, lastName, username } = queryOptions.where;
+
+    let where: Prisma.UserWhereInput | undefined = undefined;
+
+    if (email || firstName || lastName || username) {
+      where = {
+        OR: [
+          { email: email ? { contains: email } : undefined },
+          { firstName: firstName ? { contains: firstName } : undefined },
+          { lastName: lastName ? { contains: lastName } : undefined },
+          { username: username ? { contains: username } : undefined },
+        ],
+      };
+    }
+
     const entities = await this.repository.findAll({
       skip: queryOptions.skip,
       take: queryOptions.take,
+      where,
     });
 
     const count = await this.repository.count({});

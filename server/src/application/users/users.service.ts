@@ -61,6 +61,12 @@ export class UsersService {
   async findAllUsers(queryOptions: {
     skip?: number;
     take?: number;
+    where?: {
+      email?: string;
+      username?: string;
+      firstName?: string;
+      lastName?: string;
+    };
   }): Promise<PagedResult<IUser>> {
     const response = await this.queryBus.execute<
       FindAllUsersQuery,

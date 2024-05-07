@@ -1,11 +1,11 @@
 import {
   Controller,
-  Post,
   Request,
   UseInterceptors,
   UploadedFile,
   Param,
   UseGuards,
+  Put,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -29,17 +29,17 @@ export class AvatarsController {
     description: 'The avatar and user data',
     type: 'multipart/form-data',
   })
-  @Post(':userId')
+  @Put(':userId')
   @ApiCreatedResponse({
-    description: 'Avatar created successfully',
+    description: 'Avatar updated successfully',
   })
   @UseInterceptors(FileInterceptor('avatar'))
-  async createAvatar(
+  async updateAvatar(
     @UploadedFile() avatar: Express.Multer.File,
     @Request() req: AuthenticatedRequest,
     @Param('userId') userId: string,
   ) {
-    await this.avatarsService.createAvatar({ avatar, userId });
-    return { message: 'Avatar created successfully' };
+    await this.avatarsService.updateAvatar({ avatar, userId });
+    return { message: 'Avatar updated successfully' };
   }
 }

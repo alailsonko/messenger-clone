@@ -7,7 +7,7 @@ services:
     image: messenger-clone/backend
     depends_on:
       - database-mc
-    command: ["yarn", "start:prod"]
+    command: ["yarn", "start:dev"]
     volumes:
       - ./server:/app
     env_file:

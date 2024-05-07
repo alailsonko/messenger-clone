@@ -66,6 +66,10 @@ export class UsersController {
   })
   @ApiQuery({ name: 'skip', required: true })
   @ApiQuery({ name: 'take', required: true })
+  @ApiQuery({ name: 'username', required: false })
+  @ApiQuery({ name: 'email', required: false })
+  @ApiQuery({ name: 'firstName', required: false })
+  @ApiQuery({ name: 'lastName', required: false })
   @ApiResponse({
     status: 200,
     description: 'OK',
@@ -76,10 +80,31 @@ export class UsersController {
   getUsers(
     @Query('skip', new ParseIntPipe()) skip: number,
     @Query('take', new ParseIntPipe()) take: number,
+    @Query('username') username?: string,
+    @Query('email') email?: string,
+    @Query('firstName') firstName?: string,
+    @Query('lastName') lastName?: string,
   ): Promise<UsersPagedResult> {
+    let where:
+      | {
+          username?: string;
+          email?: string;
+          firstName?: string;
+          lastName?: string;
+        }
+      | undefined = undefined;
+    if (username || email || firstName || lastName) {
+      where = {
+        username,
+        email,
+        firstName,
+        lastName,
+      };
+    }
     return this.usersService.findAllUsers({
       skip,
       take,
+      where,
     });
   }
 

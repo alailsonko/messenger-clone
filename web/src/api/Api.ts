@@ -479,6 +479,10 @@ export class Api<
       query: {
         skip: number;
         take: number;
+        username?: string;
+        email?: string;
+        firstName?: string;
+        lastName?: string;
       },
       params: RequestParams = {}
     ) =>
@@ -653,17 +657,17 @@ export class Api<
      * No description
      *
      * @tags avatars
-     * @name AvatarsControllerCreateAvatar
-     * @request POST:/avatars/{userId}
+     * @name AvatarsControllerUpdateAvatar
+     * @request PUT:/avatars/{userId}
      */
-    avatarsControllerCreateAvatar: (
+    avatarsControllerUpdateAvatar: (
       userId: string,
       data: any,
       params: RequestParams = {}
     ) =>
       this.request<void, any>({
         path: `/avatars/${userId}`,
-        method: 'POST',
+        method: 'PUT',
         body: data,
         type: ContentType.FormData,
         ...params,

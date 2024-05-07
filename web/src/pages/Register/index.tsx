@@ -39,24 +39,10 @@ export const Register = () => {
         username: data.username,
       });
 
-      await appContext.api.auth.authControllerLogin({
+      await appContext.login({
         email: data.email,
         password: data.password,
       });
-
-      const formData = new FormData();
-
-      formData.append('avatar', data.avatar[0]);
-
-      await appContext.api.avatars.avatarsControllerCreateAvatar(
-        response.data.id,
-        { avatar: data.avatar[0] },
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
 
       return response.data;
     },
@@ -92,30 +78,6 @@ export const Register = () => {
             <h1>Register</h1>
             <form onSubmit={handleSubmit(onSubmit)}>
               <FormGroup>
-                <Button
-                  component="label"
-                  role={undefined}
-                  variant="contained"
-                  tabIndex={-1}
-                  startIcon={<CloudUpload />}
-                >
-                  Upload avatar
-                  <input
-                    style={{
-                      clip: 'rect(0 0 0 0)',
-                      clipPath: 'inset(50%)',
-                      height: 1,
-                      overflow: 'hidden',
-                      position: 'absolute',
-                      bottom: 0,
-                      left: 0,
-                      whiteSpace: 'nowrap',
-                      width: 1,
-                    }}
-                    type="file"
-                    {...register('avatar')}
-                  />
-                </Button>
                 <TextField
                   required
                   id="username"
