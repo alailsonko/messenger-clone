@@ -1,7 +1,5 @@
 import axios, { AxiosError } from 'axios';
 import { faker } from '@faker-js/faker';
-import cluster from 'cluster';
-import os from 'os';
 import https from 'https';
 import fs from 'fs';
 import path from 'path';
@@ -15,8 +13,8 @@ const createUser = async () => {
       email: uuid + faker.internet.email(),
       username: faker.internet.userName() + uuid,
       password: faker.internet.password(),
-      firstName: faker.name.firstName(),
-      lastName: faker.name.lastName(),
+      firstName: faker.person.firstName(),
+      lastName: faker.person.lastName(),
     };
 
     await axios.post('https://localhost:4000/users', user, {
@@ -37,19 +35,14 @@ const createUser = async () => {
   }
 };
 
-if (cluster.isPrimary) {
-  const numCPUs = os.cpus().length;
-  for (let i = 0; i < numCPUs; i++) {
-    cluster.fork();
-  }
-} else {
+
   (async function createUsersIndefinitely() {
     while (true) {
-      const promises = [];
-      for (let i = 0; i < 250; i++) {
-        promises.push(createUser());
-      }
-      await Promise.all(promises);
+      const object = Array.from({ length: 275 }, () => createUser());
+      const startTime = Date.now(); // Start time
+      await Promise.all(object);
+      const endTime = Date.now(); // End time
+      const timeDiff = (endTime - startTime) / 275; // Time difference in seconds
+      console.log(`Sent ${275} requests in ${timeDiff} seconds. Requests per second: ${275 / timeDiff}`);
     }
   })();
-}

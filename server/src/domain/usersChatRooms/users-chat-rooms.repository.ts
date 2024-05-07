@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { DefaultArgs } from '@prisma/client/runtime/library';
-import { PrismaService } from 'src/infra/db/prisma/prisma.service';
+import { prisma } from 'src/infra/db/prisma/prisma.service';
 
 @Injectable()
 export class UsersChatRoomsRepository {
-  constructor(private prisma: PrismaService) {}
+  private readonly prisma = prisma;
+  constructor() {}
 
   async findUnique(
     usersChatRoomWhereUniqueInput: Prisma.UserChatRoomWhereUniqueInput,

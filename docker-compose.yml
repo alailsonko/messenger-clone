@@ -2,19 +2,29 @@ version: '3'
 
 services:
   backend:
-    container_name: backend
     build:
       context: ./server
     image: messenger-clone/backend
-    ports:
-      - "4000:4000"
     depends_on:
       - database-mc
-    command: ["yarn", "start:dev"]
+    command: ["yarn", "start:prod"]
     volumes:
       - ./server:/app
     env_file:
       - ./server/.env.docker
+    deploy:
+      mode: replicated
+      replicas: 2
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "4000:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/certs:/etc/nginx/certs
+    depends_on:
+      - backend
 
   frontend:
     container_name: frontend
@@ -50,7 +60,6 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
       - ./database/00_init.sql:/docker-entrypoint-initdb.d/00_init.sql
-      - ./database/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf
 
   database-replica-mc:
     container_name: database-replica-mc
@@ -59,11 +68,11 @@ services:
     ports:
       - "5433:5432"
     environment:
-      POSTGRES_USER: replicator
-      POSTGRES_PASSWORD: replicator_password
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     command: |
         bash -c "
-        until rm -rf /var/lib/postgresql/data/* && pg_basebackup -U replicator --pgdata=/var/lib/postgresql/data -R --slot=replication_slot --host=database-mc --port=5432
+        until rm -rf /var/lib/postgresql/data/* && pg_basebackup -U postgres --pgdata=/var/lib/postgresql/data -R --slot=replication_slot --host=database-mc --port=5432
         do
         echo 'Waiting for primary to connect...'
         sleep 1s

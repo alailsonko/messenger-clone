@@ -26,6 +26,9 @@ export const Search: React.FC<{
       disablePortal
       id="search"
       options={list}
+      filterOptions={(options, state) => {
+        return options;
+      }}
       sx={{ width: '100%' }}
       renderInput={(params) => (
         <TextField onChange={onChange} {...params} label="Search Users" />
@@ -35,7 +38,7 @@ export const Search: React.FC<{
         <ListItem
           id={option.id}
           onItemClick={onItemClick}
-          key={crypto.randomUUID()}
+          key={option.id}
           avatarSrc={option.avatarSrc}
           primaryText={option.primaryText}
           secondaryText={option.secondaryText}

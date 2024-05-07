@@ -56,5 +56,6 @@ export const socket: Socket<EventsMap, ListenEventsMap> = io(
     ackTimeout: 5000,
     secure: true,
     withCredentials: true,
+    transports: ['websocket'],
   }
 );

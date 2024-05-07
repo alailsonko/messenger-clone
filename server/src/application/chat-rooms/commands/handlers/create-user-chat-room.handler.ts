@@ -3,7 +3,6 @@ import { CreateUserChatRoomCommand } from '../impl';
 import { LoggerService } from 'src/infra/logger/logger.service';
 import { ChatRoomsRepository } from 'src/domain/chatRooms/chat-rooms.repository';
 import { UsersChatRoomsRepository } from 'src/domain/usersChatRooms/users-chat-rooms.repository';
-import { PrismaService } from 'src/infra/db/prisma/prisma.service';
 
 @CommandHandler(CreateUserChatRoomCommand)
 export class CreateUserChatRoomHandler
@@ -12,7 +11,6 @@ export class CreateUserChatRoomHandler
   constructor(
     private readonly repository: ChatRoomsRepository,
     private readonly usersChatRoomsRepository: UsersChatRoomsRepository,
-    private readonly prisma: PrismaService,
     private readonly logger: LoggerService,
   ) {
     this.logger.setContext(CreateUserChatRoomHandler.name);

@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { PrismaService } from 'src/infra/db/prisma/prisma.service';
+import { prisma } from 'src/infra/db/prisma/prisma.service';
 import { AdminLogsEntity } from './adminLogs.entity';
 import { DefaultArgs } from '@prisma/client/runtime/library';
 import { IAdminLog } from './adminLogs.interface';
 
 @Injectable()
 export class AdminLogsRepository {
-  constructor(private prisma: PrismaService) {}
+  private readonly prisma = prisma;
+  constructor() {}
 
   async findUnique(params: {
     where: Prisma.AdminLogWhereUniqueInput;

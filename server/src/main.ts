@@ -2,25 +2,27 @@ import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/errors/http-exception.filter';
-import { promises as fs } from 'fs';
-import { join } from 'path';
+// import { promises as fs } from 'fs';
+// import { join } from 'path';
 import cookieParser from 'cookie-parser';
 import { LoggerService } from './infra/logger/logger.service';
 import { AppClusterService } from './app_cluster.service';
 
 async function bootstrap() {
-  const keyFile = await fs.readFile(join(__dirname, '..', '/../cert/key.pem'));
-  const certFile = await fs.readFile(
-    join(__dirname, '..', '/../cert/cert.pem'),
-  );
+  // const keyFile = await fs.readFile(join(__dirname, '..', '/../cert/key.pem'));
+  // const certFile = await fs.readFile(
+  //   join(__dirname, '..', '/../cert/cert.pem'),
+  // );
 
-  const app = await NestFactory.create(AppModule, {
-    httpsOptions: {
-      key: keyFile,
-      cert: certFile,
-      passphrase: '1234',
-    },
-  });
+  // const app = await NestFactory.create(AppModule, {
+  //   httpsOptions: {
+  //     key: keyFile,
+  //     cert: certFile,
+  //     passphrase: '1234',
+  //   },
+  // });
+
+  const app = await NestFactory.create(AppModule);
 
   app.use(cookieParser());
 

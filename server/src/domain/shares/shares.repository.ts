@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { PrismaService } from 'src/infra/db/prisma/prisma.service';
+import { prisma } from 'src/infra/db/prisma/prisma.service';
 
 @Injectable()
 export class SharesRepository {
-  constructor(private prisma: PrismaService) {}
-
+  private readonly prisma = prisma;
+  constructor() {}
   async findUnique(shareWhereUniqueInput: Prisma.ShareWhereUniqueInput) {
     return this.prisma.share.findUnique({
       where: shareWhereUniqueInput,

@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { PrismaService } from 'src/infra/db/prisma/prisma.service';
+import { prisma } from 'src/infra/db/prisma/prisma.service';
 import { AttachmentEntity } from './attachments.entity';
 import { IAttachment } from './attachments.interface';
 
 @Injectable()
 export class AttachmentsRepository {
-  constructor(private prisma: PrismaService) {}
+  private readonly prisma = prisma;
+  constructor() {}
 
   async findUnique(
     attachmentWhereUniqueInput: Prisma.AttachmentWhereUniqueInput,

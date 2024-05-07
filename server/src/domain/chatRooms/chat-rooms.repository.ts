@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, User, UserChatRoom } from '@prisma/client';
 import { DefaultArgs } from '@prisma/client/runtime/library';
-import { PrismaService } from 'src/infra/db/prisma/prisma.service';
+import { prisma } from 'src/infra/db/prisma/prisma.service';
 import { ChatRoomEntity } from './chat-rooms.entity';
 import { IChatRoom } from './chat-rooms.interface';
 
 @Injectable()
 export class ChatRoomsRepository {
-  constructor(private prisma: PrismaService) {}
+  private readonly prisma = prisma;
+  constructor() {}
 
   async findUnique(params: {
     where: Prisma.ChatRoomWhereUniqueInput;

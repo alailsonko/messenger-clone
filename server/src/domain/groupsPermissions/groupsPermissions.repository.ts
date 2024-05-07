@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, GroupPermission } from '@prisma/client';
-import { PrismaService } from 'src/infra/db/prisma/prisma.service';
+import { prisma } from 'src/infra/db/prisma/prisma.service';
 
 @Injectable()
 export class GroupsPermissionsRepository {
-  constructor(private prisma: PrismaService) {}
+  private readonly prisma = prisma;
+  constructor() {}
 
   async findUnique(
     groupPermissionWhereUniqueInput: Prisma.GroupPermissionWhereUniqueInput,
