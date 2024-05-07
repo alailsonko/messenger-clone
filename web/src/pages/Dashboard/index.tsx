@@ -46,10 +46,32 @@ export const Dashboard: React.FC = () => {
   ) => {
     try {
       const query = event.target.value;
-      console.log(query);
+      let where:
+        | {
+            username?: string;
+            email?: string;
+            firstname?: string;
+            lastname?: string;
+          }
+        | undefined = undefined;
+
+      if (query) {
+        const [firstname, lastname] = query.split(' ');
+        where = {
+          username: query,
+          email: query,
+          firstname,
+          lastname,
+        };
+      }
+
       const { data } = await appContext.api.users.usersControllerGetUsers({
         skip: 0,
         take: 10,
+        email: where?.email,
+        username: where?.username,
+        firstName: where?.firstname,
+        lastName: where?.lastname,
       });
 
       setSearchUsersList(

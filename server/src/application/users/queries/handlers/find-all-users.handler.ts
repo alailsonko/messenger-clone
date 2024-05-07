@@ -23,18 +23,40 @@ export class FindAllUsersHandler {
       queryOptions,
     });
 
-    const { email, firstName, lastName, username } = queryOptions.where;
+    const { email, firstName, lastName, username } = queryOptions.where ?? {
+      email: undefined,
+      firstName: undefined,
+      lastName: undefined,
+      username: undefined,
+    };
 
     let where: Prisma.UserWhereInput | undefined = undefined;
 
     if (email || firstName || lastName || username) {
       where = {
         OR: [
-          { email: email ? { contains: email } : undefined },
-          { firstName: firstName ? { contains: firstName } : undefined },
-          { lastName: lastName ? { contains: lastName } : undefined },
-          { username: username ? { contains: username } : undefined },
+          {
+            email: email ? { contains: email, mode: 'insensitive' } : undefined,
+          },
+          {
+            firstName: firstName
+              ? { contains: firstName, mode: 'insensitive' }
+              : undefined,
+          },
+          {
+            lastName: lastName
+              ? { contains: lastName, mode: 'insensitive' }
+              : undefined,
+          },
+          {
+            username: username
+              ? { contains: username, mode: 'insensitive' }
+              : undefined,
+          },
         ],
+        NOT: {
+          avatar: null,
+        },
       };
     }
 
