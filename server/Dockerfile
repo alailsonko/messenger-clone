@@ -1,14 +1,19 @@
-# Use an official Node.js runtime as a base image
-FROM node:latest
+FROM node:latest AS builder
 
-# Set the working directory in the container
 WORKDIR /app
 
-# Copy package.json and package-lock.json to the working directory
 COPY . .
 
-# Install the project dependencies
-RUN yarn
+RUN yarn && npx prisma generate && yarn build
 
-# Define the command to run your application
-CMD ["yarn", "start"]
+FROM node:latest
+
+WORKDIR /app
+
+COPY --from=builder /app/dist ./dist
+COPY package*.json ./
+COPY --from=builder /app/prisma ./prisma
+
+RUN yarn install --production
+
+CMD ["node", "dist/src/main"]

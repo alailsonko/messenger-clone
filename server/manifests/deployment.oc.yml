@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-messenger-clone-backend
+  namespace: alailsonko-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: service-messenger-clone-backend
+  template:
+    metadata:
+      labels:
+        app: service-messenger-clone-backend
+    spec:
+      containers:
+      - name: service-messenger-clone-backend
+        image: ludka76127alailsonko1500/messenger-clone-backend:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 4000
+        resources:
+          limits:
+            cpu: "0.5"
+            memory: "512Mi"
+          requests:
+            cpu: "0.1"
+            memory: "256Mi"
+        env:
+        - name: DATABASE_URL
+          value: "postgresql://postgres:postgres@service-messenger-clone-database:5432/postgres?schema=public&connection_limit=500&pool_timeout=20"

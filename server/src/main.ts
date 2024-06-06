@@ -42,7 +42,7 @@ async function bootstrap() {
     jsonDocumentUrl: '/api-json',
   });
   app.useGlobalFilters(new AllExceptionsFilter());
-  await app.listen(4000, () => {
+  await app.listen(4000, '0.0.0.0', () => {
     const logger = app.get(LoggerService);
 
     logger.setContext('Bootstrap');
