@@ -2,7 +2,7 @@ import React from 'react';
 import { RouteObject } from 'react-router-dom';
 import Profile from '../pages/Profile';
 import Dashboard from '../pages/Dashboard';
-import { Chat } from '../components/Chat/Chat';
+import Chat from '../components/Chat/Chat';
 
 export const NoActiveChat = () => {
   return <div>no active chat</div>;

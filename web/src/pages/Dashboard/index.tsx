@@ -2,18 +2,18 @@ import React from 'react';
 import { AppContext } from '../../contexts/app-context';
 import { Grid, Paper, Stack, List, debounce } from '@mui/material';
 import { Search } from '../../components/Search/Search';
-import { ListItem } from '../../components/List/ListItem';
 import { useQuery } from '@tanstack/react-query';
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
 import { ChatRoomResponseObject } from '../../api/Api';
+import { ChatItem } from '../../components/List/ChatItem';
 
-export const Dashboard: React.FC = () => {
+const Dashboard: React.FC = () => {
   const [searchUsersList, setSearchUsersList] = React.useState<
     {
       avatarSrc: string;
-      primaryText: string;
-      secondaryText: string;
-      secondaryTypography: string;
+      fullname: string;
+      message: string;
+      messageFrom: string;
       id: string;
     }[]
   >([]);
@@ -77,9 +77,9 @@ export const Dashboard: React.FC = () => {
       setSearchUsersList(
         data.data.map((user) => ({
           avatarSrc: process.env.REACT_APP_BACKEND_URL + '/' + user.avatar.url,
-          primaryText: user.firstName + ' ' + user.lastName,
-          secondaryText: user.email,
-          secondaryTypography: '',
+          fullname: user.firstName + ' ' + user.lastName,
+          message: user.email,
+          messageFrom: '',
           id: user.id,
         }))
       );
@@ -126,6 +126,72 @@ export const Dashboard: React.FC = () => {
     navigate(`/${createdChatRoom.data.id}`);
   };
 
+  const getAvatarUrl = (chatRoom: ChatRoomResponseObject) => {
+    if (!chatRoom) {
+      throw new Error('chatRoom is not defined');
+    }
+
+    const loggedUser = appContext.user;
+
+    if (!loggedUser) {
+      throw new Error('user is not defined');
+    }
+
+    const isSelfChat =
+      chatRoom.usersChatRooms.length === 1 &&
+      chatRoom.usersChatRooms.find((u) => u.userId === loggedUser.id);
+
+    if (isSelfChat) {
+      return (
+        process.env.REACT_APP_BACKEND_URL +
+        '/' +
+        chatRoom.usersChatRooms.find((u) => u.userId === loggedUser.id)?.user
+          .avatar.url!
+      );
+    }
+
+    return (
+      process.env.REACT_APP_BACKEND_URL +
+      '/' +
+      chatRoom.usersChatRooms.find((u) => u.userId !== loggedUser.id)?.user
+        .avatar.url!
+    );
+  };
+
+  const getFullname = (chatRoom: ChatRoomResponseObject) => {
+    if (!chatRoom) {
+      throw new Error('chatRoom is not defined');
+    }
+
+    const loggedUser = appContext.user;
+
+    if (!loggedUser) {
+      throw new Error('user is not defined');
+    }
+
+    const isSelfChat =
+      chatRoom.usersChatRooms.length === 1 &&
+      chatRoom.usersChatRooms.find((u) => u.userId === loggedUser.id);
+
+    if (isSelfChat) {
+      return (
+        chatRoom.usersChatRooms.find((u) => u.userId === loggedUser.id)?.user
+          .firstName +
+        ' ' +
+        chatRoom.usersChatRooms.find((u) => u.userId === loggedUser.id)?.user
+          .lastName
+      );
+    }
+
+    return (
+      chatRoom.usersChatRooms.find((u) => u.userId !== loggedUser.id)?.user
+        .firstName +
+      ' ' +
+      chatRoom.usersChatRooms.find((u) => u.userId !== loggedUser.id)?.user
+        .lastName
+    );
+  };
+
   return (
     <Grid container spacing={2} height={'100vh'} maxHeight={'100vh'}>
       <Grid item xs={4}>
@@ -138,36 +204,18 @@ export const Dashboard: React.FC = () => {
             />
             <List sx={{ width: '100%', bgcolor: 'background.paper' }}>
               {data?.map((chatRoom) => (
-                <ListItem
+                <ChatItem
                   key={chatRoom.id}
                   id={chatRoom.id}
                   onItemClick={handleItemClick}
-                  avatarSrc={
-                    chatRoom.usersChatRooms.find(
-                      (u) => u.user.id !== appContext.user?.id
-                    )?.user.avatar
-                      ? process.env.REACT_APP_BACKEND_URL +
-                        '/' +
-                        chatRoom.usersChatRooms.find(
-                          (u) => u.user.id !== appContext.user?.id
-                        )?.user.avatar.url!
-                      : ''
-                  }
-                  primaryText={
-                    chatRoom.usersChatRooms.find(
-                      (u) => u.user.id !== appContext.user?.id
-                    )?.user.firstName! +
-                    ' ' +
-                    chatRoom.usersChatRooms.find(
-                      (u) => u.user.id !== appContext.user?.id
-                    )?.user.lastName!
-                  }
-                  secondaryText={
+                  avatarSrc={getAvatarUrl(chatRoom)}
+                  fullname={getFullname(chatRoom)}
+                  message={
                     chatRoom.id !== chatRoomId && chatRoom.messages.length
                       ? chatRoom.messages[0].content
                       : ''
                   }
-                  secondaryTypography={
+                  messageFrom={
                     chatRoom.messages.length &&
                     chatRoom.id !== chatRoomId &&
                     chatRoom.messages[0].sender?.id! === appContext.user?.id

@@ -7,11 +7,11 @@ import {
 } from '@mui/material';
 import React from 'react';
 
-interface ListItemProps {
+interface ChatItemProps {
   avatarSrc: string;
-  primaryText: string;
-  secondaryText: string;
-  secondaryTypography: string;
+  fullname: string;
+  message: string;
+  messageFrom: string;
   id: string;
   onItemClick: (
     ev: React.MouseEvent<HTMLLIElement, MouseEvent>,
@@ -19,11 +19,11 @@ interface ListItemProps {
   ) => void;
 }
 
-export const ListItem: React.FC<ListItemProps> = ({
+export const ChatItem: React.FC<ChatItemProps> = ({
   avatarSrc,
-  primaryText,
-  secondaryText,
-  secondaryTypography,
+  fullname,
+  message,
+  messageFrom,
   id,
   onItemClick,
 }) => {
@@ -42,7 +42,7 @@ export const ListItem: React.FC<ListItemProps> = ({
         <Avatar alt="Remy Sharp" src={avatarSrc} />
       </ListItemAvatar>
       <ListItemText
-        primary={primaryText}
+        primary={fullname}
         secondary={
           <React.Fragment>
             <Typography
@@ -51,9 +51,9 @@ export const ListItem: React.FC<ListItemProps> = ({
               variant="body2"
               color="text.primary"
             >
-              {secondaryTypography}
+              {messageFrom}
             </Typography>
-            {secondaryText && ` — ${secondaryText}`}
+            {message && ` — ${message}`}
           </React.Fragment>
         }
       />

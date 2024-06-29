@@ -1,12 +1,12 @@
 import { Autocomplete, TextField } from '@mui/material';
 import React from 'react';
-import { ListItem } from '../List/ListItem';
+import { ChatItem } from '../List/ChatItem';
 
 interface ListItemComponentProps {
   avatarSrc: string;
-  primaryText: string;
-  secondaryText: string;
-  secondaryTypography: string;
+  fullname: string;
+  message: string;
+  messageFrom: string;
   id: string;
 }
 
@@ -33,16 +33,16 @@ export const Search: React.FC<{
       renderInput={(params) => (
         <TextField onChange={onChange} {...params} label="Search Users" />
       )}
-      getOptionLabel={(option) => option.primaryText}
+      getOptionLabel={(option) => option.fullname}
       renderOption={(props, option) => (
-        <ListItem
+        <ChatItem
           id={option.id}
           onItemClick={onItemClick}
           key={option.id}
           avatarSrc={option.avatarSrc}
-          primaryText={option.primaryText}
-          secondaryText={option.secondaryText}
-          secondaryTypography={option.secondaryTypography}
+          fullname={option.fullname}
+          message={option.message}
+          messageFrom={option.messageFrom}
         />
       )}
     />

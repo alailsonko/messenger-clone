@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { RouteObject, useRoutes } from 'react-router-dom';
 import { Landing } from '../pages/Landing';
 import { publicRoutes } from './public';
@@ -18,18 +18,7 @@ export const AppRoutes = () => {
 
   const routes = appContext?.isAuthenticated ? protectedRoutes : publicRoutes;
 
-  const element = useRoutes([
-    ...commonRoutes,
-    ...routes,
-    {
-      path: '*',
-      element: <div>Not Found</div>,
-    },
-  ]);
+  const element = useRoutes([...commonRoutes, ...routes]);
 
-  if (appContext?.isLoading) {
-    return <LinearIndeterminate />;
-  }
-
-  return <>{element}</>;
+  return <Suspense fallback={<LinearIndeterminate />}>{element}</Suspense>;
 };

@@ -7,14 +7,15 @@ import {
   Box,
 } from '@mui/material';
 import { SendMessage } from '../SendMessage/SendMessage';
-import { ListItem } from '../List/ListItem';
+import { ChatHead } from '../List/ChatHead';
 import React, { useEffect } from 'react';
 import { AppContext } from '../../contexts/app-context';
 import { useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Events } from '../../ws/socket';
+import LinearIndeterminate from '../Loading/LinearIndeterminate';
 
-export const Chat = () => {
+const Chat = () => {
   const appContext = React.useContext(AppContext);
   const messagesRef = React.useRef<HTMLUListElement>(null);
   const params = useParams<{ chatRoomId: string }>();
@@ -162,9 +163,9 @@ export const Chat = () => {
       throw new Error('user is not defined');
     }
 
-    const isSelfChat = chatRoom.usersChatRooms.find(
-      (u) => u.userId === loggedUser.id
-    );
+    const isSelfChat =
+      chatRoom.usersChatRooms.length === 1 &&
+      chatRoom.usersChatRooms.find((u) => u.userId === loggedUser.id);
 
     if (isSelfChat) {
       return (
@@ -194,9 +195,9 @@ export const Chat = () => {
       throw new Error('user is not defined');
     }
 
-    const isSelfChat = chatRoom.usersChatRooms.find(
-      (u) => u.userId === loggedUser.id
-    );
+    const isSelfChat =
+      chatRoom.usersChatRooms.length === 1 &&
+      chatRoom.usersChatRooms.find((u) => u.userId === loggedUser.id);
 
     if (isSelfChat) {
       return (
@@ -217,63 +218,64 @@ export const Chat = () => {
     );
   };
 
+  if (!chatRoom) {
+    return <LinearIndeterminate />;
+  }
+
   return (
-    chatRoom && (
-      <Box sx={{ display: 'flex', flexDirection: 'column', height: '98vh' }}>
-        <Box sx={{ display: 'flex', top: 0 }}>
-          <ListItem
-            avatarSrc={getAvatarUrl()}
-            primaryText={getFullname()}
-            secondaryText={''}
-            secondaryTypography={'online'}
-            id={''}
-            onItemClick={handleItemClick}
-          />
-        </Box>
-        <List
-          sx={{
-            width: '100%',
-            bgcolor: 'background.paper',
-            display: 'grid',
-            overflow: 'auto',
-            marginTop: 'auto',
-          }}
-          ref={messagesRef}
-        >
-          {chatRoomMessages?.data.map((message) => (
-            <ListItemMUI
-              key={message.id}
-              sx={{
-                justifyContent:
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '98vh' }}>
+      <Box sx={{ display: 'flex', top: 0 }}>
+        <ChatHead
+          avatarSrc={getAvatarUrl()}
+          fullname={getFullname()}
+          status={'online'}
+          id={''}
+          onItemClick={handleItemClick}
+        />
+      </Box>
+      <List
+        sx={{
+          width: '100%',
+          bgcolor: 'background.paper',
+          display: 'grid',
+          overflow: 'auto',
+          marginTop: 'auto',
+        }}
+        ref={messagesRef}
+      >
+        {chatRoomMessages?.data.map((message) => (
+          <ListItemMUI
+            key={message.id}
+            sx={{
+              justifyContent:
+                message.senderId === appContext.user?.id
+                  ? 'flex-end'
+                  : 'flex-start',
+            }}
+          >
+            <Card>
+              <Stack
+                direction="row"
+                justifyContent={
                   message.senderId === appContext.user?.id
                     ? 'flex-end'
-                    : 'flex-start',
-              }}
-            >
-              <Card>
-                <Stack
-                  direction="row"
-                  justifyContent={
-                    message.senderId === appContext.user?.id
-                      ? 'flex-end'
-                      : 'flex-start'
-                  }
-                  alignItems="center"
-                  spacing={2}
-                  padding={2}
-                >
-                  <ListItemText
-                    secondary={
-                      <React.Fragment>{message.content}</React.Fragment>
-                    }
-                  />
-                </Stack>
-              </Card>
-            </ListItemMUI>
-          ))}
-        </List>
-        <SendMessage onChatMessage={handleSendChatMessage} />
-      </Box>
-    )
+                    : 'flex-start'
+                }
+                alignItems="center"
+                spacing={2}
+                padding={2}
+              >
+                <ListItemText
+                  secondary={<React.Fragment>{message.content}</React.Fragment>}
+                />
+              </Stack>
+            </Card>
+          </ListItemMUI>
+        ))}
+      </List>
+      <SendMessage onChatMessage={handleSendChatMessage} />
+    </Box>
   );
 };
+
+export default Chat;
