@@ -151,73 +151,129 @@ export const Chat = () => {
     await sendMessageMutation.mutateAsync(message);
   };
 
+  const getAvatarUrl = () => {
+    if (!chatRoom) {
+      throw new Error('chatRoom is not defined');
+    }
+
+    const loggedUser = appContext.user;
+
+    if (!loggedUser) {
+      throw new Error('user is not defined');
+    }
+
+    const isSelfChat = chatRoom.usersChatRooms.find(
+      (u) => u.userId === loggedUser.id
+    );
+
+    if (isSelfChat) {
+      return (
+        process.env.REACT_APP_BACKEND_URL +
+        '/' +
+        chatRoom.usersChatRooms.find((u) => u.userId === loggedUser.id)?.user
+          .avatar.url!
+      );
+    }
+
+    return (
+      process.env.REACT_APP_BACKEND_URL +
+      '/' +
+      chatRoom.usersChatRooms.find((u) => u.userId !== loggedUser.id)?.user
+        .avatar.url!
+    );
+  };
+
+  const getFullname = () => {
+    if (!chatRoom) {
+      throw new Error('chatRoom is not defined');
+    }
+
+    const loggedUser = appContext.user;
+
+    if (!loggedUser) {
+      throw new Error('user is not defined');
+    }
+
+    const isSelfChat = chatRoom.usersChatRooms.find(
+      (u) => u.userId === loggedUser.id
+    );
+
+    if (isSelfChat) {
+      return (
+        chatRoom.usersChatRooms.find((u) => u.userId === loggedUser.id)?.user
+          .firstName +
+        ' ' +
+        chatRoom.usersChatRooms.find((u) => u.userId === loggedUser.id)?.user
+          .lastName
+      );
+    }
+
+    return (
+      chatRoom.usersChatRooms.find((u) => u.userId !== loggedUser.id)?.user
+        .firstName +
+      ' ' +
+      chatRoom.usersChatRooms.find((u) => u.userId !== loggedUser.id)?.user
+        .lastName
+    );
+  };
+
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '98vh' }}>
-      <Box sx={{ display: 'flex', top: 0 }}>
-        <ListItem
-          avatarSrc={
-            process.env.REACT_APP_BACKEND_URL +
-            '/' +
-            chatRoom?.usersChatRooms.find(
-              (u) => u.userId !== appContext.user?.id
-            )?.user.avatar.url!
-          }
-          primaryText={
-            chatRoom?.usersChatRooms.find(
-              (u) => u.userId !== appContext.user?.id
-            )?.user.firstName +
-            ' ' +
-            chatRoom?.usersChatRooms.find(
-              (u) => u.userId !== appContext.user?.id
-            )?.user.lastName
-          }
-          secondaryText={''}
-          secondaryTypography={'online'}
-          id={''}
-          onItemClick={handleItemClick}
-        />
-      </Box>
-      <List
-        sx={{
-          width: '100%',
-          bgcolor: 'background.paper',
-          display: 'grid',
-          overflow: 'auto',
-          marginTop: 'auto',
-        }}
-        ref={messagesRef}
-      >
-        {chatRoomMessages?.data.map((message) => (
-          <ListItemMUI
-            key={message.id}
-            sx={{
-              justifyContent:
-                message.senderId === appContext.user?.id
-                  ? 'flex-end'
-                  : 'flex-start',
-            }}
-          >
-            <Card>
-              <Stack
-                direction="row"
-                justifyContent={
+    chatRoom && (
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '98vh' }}>
+        <Box sx={{ display: 'flex', top: 0 }}>
+          <ListItem
+            avatarSrc={getAvatarUrl()}
+            primaryText={getFullname()}
+            secondaryText={''}
+            secondaryTypography={'online'}
+            id={''}
+            onItemClick={handleItemClick}
+          />
+        </Box>
+        <List
+          sx={{
+            width: '100%',
+            bgcolor: 'background.paper',
+            display: 'grid',
+            overflow: 'auto',
+            marginTop: 'auto',
+          }}
+          ref={messagesRef}
+        >
+          {chatRoomMessages?.data.map((message) => (
+            <ListItemMUI
+              key={message.id}
+              sx={{
+                justifyContent:
                   message.senderId === appContext.user?.id
                     ? 'flex-end'
-                    : 'flex-start'
-                }
-                alignItems="center"
-                spacing={2}
-                padding={2}
-              >
-                <ListItemText
-                  secondary={<React.Fragment>{message.content}</React.Fragment>}
-                />
-              </Stack>
-            </Card>
-          </ListItemMUI>
-        ))}
-      </List>
-      <SendMessage onChatMessage={handleSendChatMessage} />
-    </Box>
+                    : 'flex-start',
+              }}
+            >
+              <Card>
+                <Stack
+                  direction="row"
+                  justifyContent={
+                    message.senderId === appContext.user?.id
+                      ? 'flex-end'
+                      : 'flex-start'
+                  }
+                  alignItems="center"
+                  spacing={2}
+                  padding={2}
+                >
+                  <ListItemText
+                    secondary={
+                      <React.Fragment>{message.content}</React.Fragment>
+                    }
+                  />
+                </Stack>
+              </Card>
+            </ListItemMUI>
+          ))}
+        </List>
+        <SendMessage onChatMessage={handleSendChatMessage} />
+      </Box>
+    )
   );
 };

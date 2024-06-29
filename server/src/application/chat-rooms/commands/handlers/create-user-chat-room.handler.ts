@@ -25,8 +25,8 @@ export class CreateUserChatRoomHandler
 
     this.logger.log(`Chat room created with ID ${response.id}`);
 
-    await this.usersChatRoomsRepository.createTrx([
-      {
+    if (data.userIds.find((userId) => userId === creatorUserId)) {
+      await this.usersChatRoomsRepository.create({
         user: {
           connect: {
             id: creatorUserId,
@@ -37,20 +37,35 @@ export class CreateUserChatRoomHandler
             id: response.id,
           },
         },
-      },
-      ...data.userIds.map((userId) => ({
-        user: {
-          connect: {
-            id: userId,
+      });
+    } else {
+      await this.usersChatRoomsRepository.createTrx([
+        {
+          user: {
+            connect: {
+              id: creatorUserId,
+            },
+          },
+          chatRoom: {
+            connect: {
+              id: response.id,
+            },
           },
         },
-        chatRoom: {
-          connect: {
-            id: response.id,
+        ...data.userIds.map((userId) => ({
+          user: {
+            connect: {
+              id: userId,
+            },
           },
-        },
-      })),
-    ]);
+          chatRoom: {
+            connect: {
+              id: response.id,
+            },
+          },
+        })),
+      ]);
+    }
 
     return {
       id: response.id,

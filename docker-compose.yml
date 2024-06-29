@@ -50,6 +50,8 @@ services:
       POSTGRESQL_USER: postgres
       POSTGRESQL_PASSWORD: postgres
       POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - pg_data:/var/lib/postgresql/data
 
   database-replica-mc:
     container_name: database-replica-mc
