@@ -14,6 +14,7 @@ import { useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Events } from '../../ws/socket';
 import LinearIndeterminate from '../Loading/LinearIndeterminate';
+import { avatarUrl, fullname } from '../../mappers/chat-room.mapper';
 
 const Chat = () => {
   const appContext = React.useContext(AppContext);
@@ -152,72 +153,6 @@ const Chat = () => {
     await sendMessageMutation.mutateAsync(message);
   };
 
-  const getAvatarUrl = () => {
-    if (!chatRoom) {
-      throw new Error('chatRoom is not defined');
-    }
-
-    const loggedUser = appContext.user;
-
-    if (!loggedUser) {
-      throw new Error('user is not defined');
-    }
-
-    const isSelfChat =
-      chatRoom.usersChatRooms.length === 1 &&
-      chatRoom.usersChatRooms.find((u) => u.userId === loggedUser.id);
-
-    if (isSelfChat) {
-      return (
-        process.env.REACT_APP_BACKEND_URL +
-        '/' +
-        chatRoom.usersChatRooms.find((u) => u.userId === loggedUser.id)?.user
-          .avatar.url!
-      );
-    }
-
-    return (
-      process.env.REACT_APP_BACKEND_URL +
-      '/' +
-      chatRoom.usersChatRooms.find((u) => u.userId !== loggedUser.id)?.user
-        .avatar.url!
-    );
-  };
-
-  const getFullname = () => {
-    if (!chatRoom) {
-      throw new Error('chatRoom is not defined');
-    }
-
-    const loggedUser = appContext.user;
-
-    if (!loggedUser) {
-      throw new Error('user is not defined');
-    }
-
-    const isSelfChat =
-      chatRoom.usersChatRooms.length === 1 &&
-      chatRoom.usersChatRooms.find((u) => u.userId === loggedUser.id);
-
-    if (isSelfChat) {
-      return (
-        chatRoom.usersChatRooms.find((u) => u.userId === loggedUser.id)?.user
-          .firstName +
-        ' ' +
-        chatRoom.usersChatRooms.find((u) => u.userId === loggedUser.id)?.user
-          .lastName
-      );
-    }
-
-    return (
-      chatRoom.usersChatRooms.find((u) => u.userId !== loggedUser.id)?.user
-        .firstName +
-      ' ' +
-      chatRoom.usersChatRooms.find((u) => u.userId !== loggedUser.id)?.user
-        .lastName
-    );
-  };
-
   if (!chatRoom) {
     return <LinearIndeterminate />;
   }
@@ -226,8 +161,8 @@ const Chat = () => {
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '98vh' }}>
       <Box sx={{ display: 'flex', top: 0 }}>
         <ChatHead
-          avatarSrc={getAvatarUrl()}
-          fullname={getFullname()}
+          avatarSrc={avatarUrl(chatRoom, appContext.user!)}
+          fullname={fullname(chatRoom, appContext.user!)}
           status={'online'}
           id={''}
           onItemClick={handleItemClick}

@@ -6,17 +6,19 @@ import { useQuery } from '@tanstack/react-query';
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
 import { ChatRoomResponseObject } from '../../api/Api';
 import { ChatItem } from '../../components/List/ChatItem';
+import {
+  avatarUrl,
+  fullname,
+  message,
+  messageFrom,
+} from '../../mappers/chat-room.mapper';
+import { SearchUsersListType } from '../../types';
+import { toSearchUsersList } from '../../mappers/search-users-list.mapper';
+import { QueryKeysEnum } from '../../enums/query-keys.enum';
 
 const Dashboard: React.FC = () => {
-  const [searchUsersList, setSearchUsersList] = React.useState<
-    {
-      avatarSrc: string;
-      fullname: string;
-      message: string;
-      messageFrom: string;
-      id: string;
-    }[]
-  >([]);
+  const [searchUsersList, setSearchUsersList] =
+    React.useState<SearchUsersListType>([]);
   const navigate = useNavigate();
   const appContext = React.useContext(AppContext);
   const { chatRoomId } = useParams<{ chatRoomId: string }>();
@@ -26,7 +28,7 @@ const Dashboard: React.FC = () => {
     isLoading,
     refetch: refetchUserChatRooms,
   } = useQuery({
-    queryKey: ['/users/{userId}/chat-rooms'],
+    queryKey: [QueryKeysEnum.USER_CHAT_ROOMS],
     queryFn: async () => {
       const { data } =
         await appContext.api.users.usersControllerGetUserChatRooms(
@@ -46,43 +48,19 @@ const Dashboard: React.FC = () => {
   ) => {
     try {
       const query = event.target.value;
-      let where:
-        | {
-            username?: string;
-            email?: string;
-            firstname?: string;
-            lastname?: string;
-          }
-        | undefined = undefined;
 
-      if (query) {
-        const [firstname, lastname] = query.split(' ');
-        where = {
-          username: query,
-          email: query,
-          firstname,
-          lastname,
-        };
-      }
+      const [firstname, lastname] = query.split(' ');
 
       const { data } = await appContext.api.users.usersControllerGetUsers({
         skip: 0,
         take: 10,
-        email: where?.email,
-        username: where?.username,
-        firstName: where?.firstname,
-        lastName: where?.lastname,
+        email: query,
+        username: query,
+        firstName: firstname,
+        lastName: lastname,
       });
 
-      setSearchUsersList(
-        data.data.map((user) => ({
-          avatarSrc: process.env.REACT_APP_BACKEND_URL + '/' + user.avatar.url,
-          fullname: user.firstName + ' ' + user.lastName,
-          message: user.email,
-          messageFrom: '',
-          id: user.id,
-        }))
-      );
+      setSearchUsersList(toSearchUsersList(data.data));
     } catch (error) {
       throw error;
     }
@@ -126,72 +104,6 @@ const Dashboard: React.FC = () => {
     navigate(`/${createdChatRoom.data.id}`);
   };
 
-  const getAvatarUrl = (chatRoom: ChatRoomResponseObject) => {
-    if (!chatRoom) {
-      throw new Error('chatRoom is not defined');
-    }
-
-    const loggedUser = appContext.user;
-
-    if (!loggedUser) {
-      throw new Error('user is not defined');
-    }
-
-    const isSelfChat =
-      chatRoom.usersChatRooms.length === 1 &&
-      chatRoom.usersChatRooms.find((u) => u.userId === loggedUser.id);
-
-    if (isSelfChat) {
-      return (
-        process.env.REACT_APP_BACKEND_URL +
-        '/' +
-        chatRoom.usersChatRooms.find((u) => u.userId === loggedUser.id)?.user
-          .avatar.url!
-      );
-    }
-
-    return (
-      process.env.REACT_APP_BACKEND_URL +
-      '/' +
-      chatRoom.usersChatRooms.find((u) => u.userId !== loggedUser.id)?.user
-        .avatar.url!
-    );
-  };
-
-  const getFullname = (chatRoom: ChatRoomResponseObject) => {
-    if (!chatRoom) {
-      throw new Error('chatRoom is not defined');
-    }
-
-    const loggedUser = appContext.user;
-
-    if (!loggedUser) {
-      throw new Error('user is not defined');
-    }
-
-    const isSelfChat =
-      chatRoom.usersChatRooms.length === 1 &&
-      chatRoom.usersChatRooms.find((u) => u.userId === loggedUser.id);
-
-    if (isSelfChat) {
-      return (
-        chatRoom.usersChatRooms.find((u) => u.userId === loggedUser.id)?.user
-          .firstName +
-        ' ' +
-        chatRoom.usersChatRooms.find((u) => u.userId === loggedUser.id)?.user
-          .lastName
-      );
-    }
-
-    return (
-      chatRoom.usersChatRooms.find((u) => u.userId !== loggedUser.id)?.user
-        .firstName +
-      ' ' +
-      chatRoom.usersChatRooms.find((u) => u.userId !== loggedUser.id)?.user
-        .lastName
-    );
-  };
-
   return (
     <Grid container spacing={2} height={'100vh'} maxHeight={'100vh'}>
       <Grid item xs={4}>
@@ -208,20 +120,14 @@ const Dashboard: React.FC = () => {
                   key={chatRoom.id}
                   id={chatRoom.id}
                   onItemClick={handleItemClick}
-                  avatarSrc={getAvatarUrl(chatRoom)}
-                  fullname={getFullname(chatRoom)}
-                  message={
-                    chatRoom.id !== chatRoomId && chatRoom.messages.length
-                      ? chatRoom.messages[0].content
-                      : ''
-                  }
-                  messageFrom={
-                    chatRoom.messages.length &&
-                    chatRoom.id !== chatRoomId &&
-                    chatRoom.messages[0].sender?.id! === appContext.user?.id
-                      ? 'You: '
-                      : ''
-                  }
+                  avatarSrc={avatarUrl(chatRoom, appContext.user!)}
+                  fullname={fullname(chatRoom, appContext.user!)}
+                  message={message(chatRoom, chatRoomId!)}
+                  messageFrom={messageFrom(
+                    chatRoom,
+                    chatRoomId!,
+                    appContext.user?.id!
+                  )}
                 />
               ))}
             </List>

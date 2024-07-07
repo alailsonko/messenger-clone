@@ -1,17 +1,10 @@
 import { Autocomplete, TextField } from '@mui/material';
 import React from 'react';
 import { ChatItem } from '../List/ChatItem';
-
-interface ListItemComponentProps {
-  avatarSrc: string;
-  fullname: string;
-  message: string;
-  messageFrom: string;
-  id: string;
-}
+import { SearchUsersListType } from '../../types';
 
 export const Search: React.FC<{
-  list: ListItemComponentProps[];
+  list: SearchUsersListType;
   onChange: (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;

@@ -12,7 +12,6 @@ import { teal } from '@mui/material/colors';
 import React from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { AppContext } from '../../contexts/app-context';
-import { CloudUpload } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
 type RegisterInputs = {
