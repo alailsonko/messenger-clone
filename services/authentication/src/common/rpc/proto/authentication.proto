@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package auth;
+
+service AuthService {
+  rpc createUsernameAndPassword (CreateUsernameAndPasswordRequest) returns (CreateUsernameAndPasswordResponse);
+}
+
+message CreateUsernameAndPasswordRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message CreateUsernameAndPasswordResponse {
+  string clientId = 1;
+}

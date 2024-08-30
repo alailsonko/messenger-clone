@@ -1,0 +1,15 @@
+import { Injectable } from '@nestjs/common';
+import { Prisma, Credential } from '@prisma/client';
+import { PrismaService } from 'src/infra/database/postgresql/prisma.service';
+
+@Injectable()
+export class CredentialsRepository {
+  constructor(private readonly prismaService: PrismaService) {}
+  async createCredential(
+    data: Prisma.CredentialCreateInput,
+  ): Promise<Credential> {
+    return this.prismaService.credential.create({
+      data,
+    });
+  }
+}
