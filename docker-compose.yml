@@ -103,5 +103,29 @@ services:
     depends_on:
       - postgres
 
+  authentication:
+    build:
+      context: ./services/authentication
+    command: ["npm", "run", "start:dev"]
+    volumes:
+      - ./services/authentication:/app
+    environment:
+      DATABASE_URL: postgres://admin:admin@postgres:5432/authentication
+    depends_on:
+      - postgres
+    ports:
+      - 8888:8080
+
+  authorization:
+    build:
+      context: ./services/authorization
+    command: ["npm", "run", "start:dev"]
+    volumes:
+      - ./services/authorization:/app
+    environment:
+      DATABASE_URL: postgres://admin:admin@postgres:5432/authorization
+    depends_on:
+      - postgres
+
 volumes:
   postgres_data:
