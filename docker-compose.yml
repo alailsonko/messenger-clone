@@ -1,72 +1,107 @@
-version: '3'
+version: '3.8'
 
 services:
-  backend:
+  postgres:
     build:
-      context: ./server
-    image: ludka76127alailsonko1500/messenger-clone-backend:latest
-    depends_on:
-      - database-mc
-    command: ["yarn", "start:dev"]
+      context: ./services/database
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: postgres
     volumes:
-      - ./server:/app
-    env_file:
-      - ./server/.env.docker
-    deploy:
-      mode: replicated
-      replicas: 2
-
-  nginx:
-    image: ludka76127alailsonko1500/messenger-clone-proxy:latest
-    build:
-      context: ./nginx
-    ports:
-      - "4000:443"
-    depends_on:
-      - backend
-
-  frontend:
-    container_name: frontend
-    build:
-      context: ./web
-    image: ludka76127alailsonko1500/messenger-clone-frontend:latest
-    ports:
-      - "3000:3000"
-    command: ["yarn", "start"]
-    depends_on:
-      - backend
-    volumes:
-      - ./web:/app
-
-  database-mc:
-    container_name: database-mc
-    build:
-      context: ./database
-    image: ludka76127alailsonko1500/messenger-clone-database:latest
+      - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-    environment:
-      POSTGRESQL_DATABASE: postgres
-      POSTGRESQL_USER: postgres
-      POSTGRESQL_PASSWORD: postgres
-      POSTGRES_HOST_AUTH_METHOD: trust
-    volumes:
-      - pg_data:/var/lib/postgresql/data
 
-  database-replica-mc:
-    container_name: database-replica-mc
+  accounts:
     build:
-      context: ./database-replica
-    image: ludka76127alailsonko1500/messenger-clone-database-replica:latest
-    ports:
-      - "5433:5432"
+      context: ./services/accounts
+    command: ["npm", "run", "start:dev"]
+    volumes:
+      - ./services/accounts:/app
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      DATABASE_HOST_MASTER: database-mc
-      DATABASE_PORT_MASTER: 5432
+      DATABASE_URL: postgres://admin:admin@postgres:5432/accounts
     depends_on:
-      - database-mc
+      - postgres
+
+  chats:
+    build:
+      context: ./services/chats
+    command: ["npm", "run", "start:dev"]
+    volumes:
+      - ./services/chats:/app
+    environment:
+      DATABASE_URL: postgres://admin:admin@postgres:5432/chats
+    depends_on:
+      - postgres
+
+  messages:
+    build:
+      context: ./services/messages
+    command: ["npm", "run", "start:dev"]
+    volumes:
+      - ./services/messages:/app
+    environment:
+      DATABASE_URL: postgres://admin:admin@postgres:5432/messages
+    depends_on:
+      - postgres
+
+  orchestrator:
+    build:
+      context: ./services/orchestrator
+    command: ["npm", "run", "start:dev"]
+    volumes:
+      - ./services/orchestrator:/app
+    environment:
+      DATABASE_URL: postgres://admin:admin@postgres:5432/orchestrator
+    depends_on:
+      - postgres
+
+  posts:
+    build:
+      context: ./services/posts
+    command: ["npm", "run", "start:dev"]
+    volumes:
+      - ./services/posts:/app
+    environment:
+      DATABASE_URL: postgres://admin:admin@postgres:5432/posts
+    depends_on:
+      - postgres
+
+  rbac:
+    build:
+      context: ./services/rbac
+    command: ["npm", "run", "start:dev"]
+    volumes:
+      - ./services/rbac:/app
+    environment:
+      DATABASE_URL: postgres://admin:admin@postgres:5432/rbac
+    depends_on:
+      - postgres
+
+  users:
+    build:
+      context: ./services/users
+    command: ["npm", "run", "start:dev"]
+    volumes:
+      - ./services/users:/app
+    environment:
+      DATABASE_URL: postgres://admin:admin@postgres:5432/users
+    depends_on:
+      - postgres
+
+  web:
+    build:
+      context: ./services/web
+    command: ["npm", "run", "dev"]
+    volumes:
+      - ./services/web:/app
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgres://admin:admin@postgres:5432/web
+    depends_on:
+      - postgres
 
 volumes:
-  pg_data:
+  postgres_data:
