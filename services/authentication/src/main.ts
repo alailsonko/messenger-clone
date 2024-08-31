@@ -1,10 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import {
-  MicroserviceOptions,
-  ServerGrpc,
-  Transport,
-} from '@nestjs/microservices';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { protobufPackages } from './common/rpc/protobuf-packages';
 import { Logger } from 'nestjs-pino';
 

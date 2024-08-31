@@ -8,8 +8,7 @@ import * as grpc from '@grpc/grpc-js';
 import { ReasonPhrases } from 'http-status-codes';
 import { CredentialsApplicationService } from 'src/application/credentials/credential.service';
 import { CreateCredentialDto } from './dto/create-credential.dto';
-import { plainToClass } from 'class-transformer';
-import { validate } from 'class-validator';
+import { validateDto } from 'src/common/utils/dto-validator.util';
 
 @Controller()
 export class AuthenticationController {
@@ -32,19 +31,7 @@ export class AuthenticationController {
       auth.CreateUsernameAndPasswordResponse
     >,
   ): Promise<auth.ICreateUsernameAndPasswordResponse> {
-    const createCredentialDto = plainToClass(CreateCredentialDto, data);
-    const errors = await validate(createCredentialDto);
-
-    if (errors.length > 0) {
-      const errorMessages = errors
-        .map((err) => Object.values(err.constraints).join(', '))
-        .join('; ');
-      throw new RpcException({
-        code: grpc.status.INVALID_ARGUMENT,
-        message: `Validation failed: ${errorMessages}`,
-        metadata,
-      });
-    }
+    await validateDto(CreateCredentialDto, data, metadata);
 
     const {
       CreateUsernameAndPasswordRequest,
