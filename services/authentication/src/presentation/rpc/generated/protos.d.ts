@@ -978,10 +978,10 @@ export namespace auth {
   /** Properties of an IssueTokenResponse. */
   interface IIssueTokenResponse {
     /** IssueTokenResponse accessToken */
-    accessToken?: string | null;
+    accessToken?: Uint8Array | null;
 
     /** IssueTokenResponse refreshToken */
-    refreshToken?: string | null;
+    refreshToken?: Uint8Array | null;
   }
 
   /** Represents an IssueTokenResponse. */
@@ -993,10 +993,10 @@ export namespace auth {
     constructor(properties?: auth.IIssueTokenResponse);
 
     /** IssueTokenResponse accessToken. */
-    public accessToken: string;
+    public accessToken: Uint8Array;
 
     /** IssueTokenResponse refreshToken. */
-    public refreshToken: string;
+    public refreshToken: Uint8Array;
 
     /**
      * Creates a new IssueTokenResponse instance using the specified properties.

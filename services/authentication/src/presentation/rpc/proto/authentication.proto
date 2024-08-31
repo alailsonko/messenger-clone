@@ -44,6 +44,6 @@ message IssueTokenRequest {
 }
 
 message IssueTokenResponse {
-  string accessToken = 1;
-  string refreshToken = 2;
+  bytes accessToken = 1;
+  bytes refreshToken = 2;
 }

@@ -19,7 +19,7 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       catchError((err) => {
-        this.logger.error({ ...err, metadata });
+        this.logger.error({ error: err.toString(), metadata });
 
         if (err instanceof RpcException) {
           const errorResponse = err.getError() as {

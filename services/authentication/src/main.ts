@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { protobufPackages } from './common/rpc/protobuf-packages';
+import { protobufPackages } from './presentation/rpc/protobuf-packages';
 import { Logger } from 'nestjs-pino';
 
 async function bootstrap() {

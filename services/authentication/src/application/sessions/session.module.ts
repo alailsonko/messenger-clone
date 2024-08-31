@@ -1,13 +1,11 @@
 import { Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
-import { CredentialsApplicationService } from './credential.service';
 import { CqrsModule } from '@nestjs/cqrs';
-import { commandHandlers } from './commands/handlers';
 import { DataModule } from 'src/data/data.module';
-import { InfraModule } from 'src/infra/infra.module';
-import { queryHandlers } from './queries/handlers';
 import { DomainModule } from 'src/domain/domain.module';
-import { SessionModule } from '../sessions/session.module';
+import { InfraModule } from 'src/infra/infra.module';
+import { CredentialsApplicationService } from '../credentials/credential.service';
+import { commandHandlers } from './commands/handlers';
+import { JwtModule } from '@nestjs/jwt';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 
@@ -17,7 +15,6 @@ import { join } from 'path';
     DataModule,
     InfraModule,
     DomainModule,
-    SessionModule,
     JwtModule.register({
       async secretOrKeyProvider(requestType, tokenOrPayload, options) {
         const privateKey = await readFile(
@@ -40,11 +37,7 @@ import { join } from 'path';
       },
     }),
   ],
-  providers: [
-    CredentialsApplicationService,
-    ...commandHandlers,
-    ...queryHandlers,
-  ],
+  providers: [CredentialsApplicationService, ...commandHandlers],
   exports: [CredentialsApplicationService],
 })
-export class CredentialModule {}
+export class SessionModule {}

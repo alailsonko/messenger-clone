@@ -12,6 +12,8 @@ import { v4 as uuidv4 } from 'uuid';
 export class RequestIdInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const ctx = context.switchToRpc().getContext() as Metadata;
+    const ipAddr = context.getArgByIndex(2).getPeer().split(':')[0];
+
     const metadata = ctx;
 
     const requestId = uuidv4();
@@ -19,6 +21,7 @@ export class RequestIdInterceptor implements NestInterceptor {
 
     metadata.set('x-request-id', requestId);
     metadata.set('x-correlation-id', correlationId);
+    metadata.set('ip-address', ipAddr);
 
     return next.handle();
   }

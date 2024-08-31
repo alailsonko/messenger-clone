@@ -18,7 +18,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "proto:generate": "pbjs -t static-module -w commonjs -o src/common/rpc/generated/protos.js src/common/rpc/proto/*.proto && pbts -o src/common/rpc/generated/protos.d.ts src/common/rpc/generated/protos.js"
+    "proto:generate": "pbjs -t static-module -w commonjs -o src/presentation/rpc/generated/protos.js src/presentation/rpc/proto/*.proto && pbts -o src/presentation/rpc/generated/protos.d.ts src/presentation/rpc/generated/protos.js"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.11.1",
@@ -43,6 +43,7 @@
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
+    "@nestjs/jwt": "^10.2.0",
     "@nestjs/schematics": "^10.0.0",
     "@nestjs/testing": "^10.0.0",
     "@types/bcrypt": "^5.0.2",
