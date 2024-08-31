@@ -15,9 +15,11 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
   constructor(private readonly logger: PinoLogger) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    const metadata = context.switchToRpc().getContext();
+
     return next.handle().pipe(
       catchError((err) => {
-        this.logger.error(err);
+        this.logger.error({ ...err, metadata });
 
         if (err instanceof RpcException) {
           const errorResponse = err.getError() as {
@@ -30,7 +32,7 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
               new RpcException({
                 code: errorResponse.code || status.UNKNOWN,
                 message: errorResponse.message || 'An unknown error occurred',
-                metadata: errorResponse.metadata,
+                metadata: errorResponse.metadata ?? metadata,
               }),
           );
         }
@@ -40,6 +42,7 @@ export class ErrorHandlingInterceptor implements NestInterceptor {
             new RpcException({
               code: status.UNKNOWN,
               message: 'An unknown error occurred',
+              metadata,
             }),
         );
       }),

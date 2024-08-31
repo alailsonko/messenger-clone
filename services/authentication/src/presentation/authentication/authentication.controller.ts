@@ -7,6 +7,9 @@ import { protobufPackages } from 'src/common/rpc/protobuf-packages';
 import * as grpc from '@grpc/grpc-js';
 import { ReasonPhrases } from 'http-status-codes';
 import { CredentialsApplicationService } from 'src/application/credentials/credential.service';
+import { CreateCredentialDto } from './dto/create-credential.dto';
+import { plainToClass } from 'class-transformer';
+import { validate } from 'class-validator';
 
 @Controller()
 export class AuthenticationController {
@@ -22,13 +25,27 @@ export class AuthenticationController {
     protobufPackages.authentication.methods.createUsernameAndPassword,
   )
   async createUsernameAndPassword(
-    data: auth.ICreateUsernameAndPasswordRequest,
+    data: CreateCredentialDto,
     metadata: Metadata,
     call: ServerUnaryCall<
       auth.CreateUsernameAndPasswordRequest,
       auth.CreateUsernameAndPasswordResponse
     >,
   ): Promise<auth.ICreateUsernameAndPasswordResponse> {
+    const createCredentialDto = plainToClass(CreateCredentialDto, data);
+    const errors = await validate(createCredentialDto);
+
+    if (errors.length > 0) {
+      const errorMessages = errors
+        .map((err) => Object.values(err.constraints).join(', '))
+        .join('; ');
+      throw new RpcException({
+        code: grpc.status.INVALID_ARGUMENT,
+        message: `Validation failed: ${errorMessages}`,
+        metadata,
+      });
+    }
+
     const {
       CreateUsernameAndPasswordRequest,
       CreateUsernameAndPasswordResponse,
