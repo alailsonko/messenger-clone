@@ -22,4 +22,20 @@ export class CredentialsRepository {
       data,
     });
   }
+
+  async deleteCredential(
+    where: Prisma.CredentialWhereUniqueInput,
+  ): Promise<Credential> {
+    return this.prismaService.credential.delete({
+      where,
+    });
+  }
+
+  async findCredential(
+    where: Prisma.CredentialWhereUniqueInput,
+  ): Promise<Credential> {
+    return this.prismaService.credential.findUnique({
+      where,
+    });
+  }
 }

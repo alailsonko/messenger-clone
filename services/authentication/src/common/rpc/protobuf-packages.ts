@@ -6,6 +6,9 @@ export enum ProtobufServiceNames {
 
 export enum AuthenticationMethods {
   CREATE_CREDENTIAL = 'createCredential',
+  FIND_CREDENTIAL = 'findCredential',
+  VALIDATE_CREDENTIAL = 'validateCredential',
+  ISSUE_TOKEN = 'issueToken',
 }
 
 export const protobufPackages = {
@@ -15,6 +18,9 @@ export const protobufPackages = {
     service: ProtobufServiceNames.AUTHENTICATION,
     methods: {
       createCredential: AuthenticationMethods.CREATE_CREDENTIAL,
+      findCredential: AuthenticationMethods.FIND_CREDENTIAL,
+      validateCredential: AuthenticationMethods.VALIDATE_CREDENTIAL,
+      issueToken: AuthenticationMethods.ISSUE_TOKEN,
     },
   },
 };

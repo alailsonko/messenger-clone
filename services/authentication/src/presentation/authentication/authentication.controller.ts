@@ -59,4 +59,80 @@ export class AuthenticationController {
 
     return response;
   }
+
+  @GrpcMethod(
+    ProtobufServiceNames.AUTHENTICATION,
+    AuthenticationMethods.FIND_CREDENTIAL,
+  )
+  async findCredential(
+    data: auth.FindCredentialRequest,
+    metadata: Metadata,
+    call: ServerUnaryCall<
+      auth.FindCredentialRequest,
+      auth.FindCredentialResponse
+    >,
+  ): Promise<auth.IFindCredentialResponse> {
+    const { FindCredentialResponse } = auth;
+
+    const credential = await this.credentialApplicationService.findCredential(
+      data.id,
+    );
+
+    const response = new FindCredentialResponse({
+      id: credential.id,
+      username: credential.username,
+      createdAt: credential.createdAt.toISOString(),
+      updatedAt: credential.updatedAt.toISOString(),
+    });
+
+    const isNotValidResponse = FindCredentialResponse.verify(response);
+
+    if (isNotValidResponse) {
+      throw new RpcException({
+        code: grpc.status.INTERNAL,
+        message: ReasonPhrases.INTERNAL_SERVER_ERROR,
+        metadata,
+      });
+    }
+
+    call.sendMetadata(metadata);
+
+    return response;
+  }
+
+  @GrpcMethod(
+    ProtobufServiceNames.AUTHENTICATION,
+    AuthenticationMethods.VALIDATE_CREDENTIAL,
+  )
+  async validateCredential(
+    data: auth.ValidateCredentialRequest,
+    metadata: Metadata,
+    call: ServerUnaryCall<
+      auth.ValidateCredentialRequest,
+      auth.ValidateCredentialResponse
+    >,
+  ): Promise<auth.IValidateCredentialResponse> {
+    const { ValidateCredentialResponse } = auth;
+
+    const isValid =
+      await this.credentialApplicationService.validateCredential(data);
+
+    const response = new ValidateCredentialResponse({
+      isValid,
+    });
+
+    const isNotValidResponse = ValidateCredentialResponse.verify(response);
+
+    if (isNotValidResponse) {
+      throw new RpcException({
+        code: grpc.status.INTERNAL,
+        message: ReasonPhrases.INTERNAL_SERVER_ERROR,
+        metadata,
+      });
+    }
+
+    call.sendMetadata(metadata);
+
+    return response;
+  }
 }

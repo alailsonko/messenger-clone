@@ -93,4 +93,14 @@ export class CredentialModel implements CredentialEntity {
       },
     );
   }
+
+  toEntity(): CredentialEntity {
+    return {
+      id: this._id,
+      username: this._username,
+      passwordHash: this._passwordHash,
+      createdAt: this._createdAt,
+      updatedAt: this._updatedAt,
+    };
+  }
 }
