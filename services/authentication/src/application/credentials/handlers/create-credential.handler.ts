@@ -14,8 +14,15 @@ export class CreateCredentialHandler {
   async execute(command: CreateCredentialCommand): Promise<Credential> {
     const { data } = command;
 
-    data.passwordHash = await this.hashService.hash(data.passwordHash);
+    const credentialToInsert = {
+      username: data.username,
+      passwordHash: '',
+    };
 
-    return this.credentialsRepository.createCredential(data);
+    credentialToInsert.passwordHash = await this.hashService.hash(
+      data.password,
+    );
+
+    return this.credentialsRepository.createCredential(credentialToInsert);
   }
 }

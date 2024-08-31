@@ -51,60 +51,60 @@ $root.auth = (function() {
         };
 
         /**
-         * Callback as used by {@link auth.AuthService#createUsernameAndPassword}.
+         * Callback as used by {@link auth.AuthService#createCredential}.
          * @memberof auth.AuthService
-         * @typedef createUsernameAndPasswordCallback
+         * @typedef createCredentialCallback
          * @type {function}
          * @param {Error|null} error Error, if any
-         * @param {auth.CreateUsernameAndPasswordResponse} [response] CreateUsernameAndPasswordResponse
+         * @param {auth.CreateCredentialResponse} [response] CreateCredentialResponse
          */
 
         /**
-         * Calls createUsernameAndPassword.
-         * @function createUsernameAndPassword
+         * Calls createCredential.
+         * @function createCredential
          * @memberof auth.AuthService
          * @instance
-         * @param {auth.ICreateUsernameAndPasswordRequest} request CreateUsernameAndPasswordRequest message or plain object
-         * @param {auth.AuthService.createUsernameAndPasswordCallback} callback Node-style callback called with the error, if any, and CreateUsernameAndPasswordResponse
+         * @param {auth.ICreateCredentialRequest} request CreateCredentialRequest message or plain object
+         * @param {auth.AuthService.createCredentialCallback} callback Node-style callback called with the error, if any, and CreateCredentialResponse
          * @returns {undefined}
          * @variation 1
          */
-        Object.defineProperty(AuthService.prototype.createUsernameAndPassword = function createUsernameAndPassword(request, callback) {
-            return this.rpcCall(createUsernameAndPassword, $root.auth.CreateUsernameAndPasswordRequest, $root.auth.CreateUsernameAndPasswordResponse, request, callback);
-        }, "name", { value: "createUsernameAndPassword" });
+        Object.defineProperty(AuthService.prototype.createCredential = function createCredential(request, callback) {
+            return this.rpcCall(createCredential, $root.auth.CreateCredentialRequest, $root.auth.CreateCredentialResponse, request, callback);
+        }, "name", { value: "createCredential" });
 
         /**
-         * Calls createUsernameAndPassword.
-         * @function createUsernameAndPassword
+         * Calls createCredential.
+         * @function createCredential
          * @memberof auth.AuthService
          * @instance
-         * @param {auth.ICreateUsernameAndPasswordRequest} request CreateUsernameAndPasswordRequest message or plain object
-         * @returns {Promise<auth.CreateUsernameAndPasswordResponse>} Promise
+         * @param {auth.ICreateCredentialRequest} request CreateCredentialRequest message or plain object
+         * @returns {Promise<auth.CreateCredentialResponse>} Promise
          * @variation 2
          */
 
         return AuthService;
     })();
 
-    auth.CreateUsernameAndPasswordRequest = (function() {
+    auth.CreateCredentialRequest = (function() {
 
         /**
-         * Properties of a CreateUsernameAndPasswordRequest.
+         * Properties of a CreateCredentialRequest.
          * @memberof auth
-         * @interface ICreateUsernameAndPasswordRequest
-         * @property {string|null} [username] CreateUsernameAndPasswordRequest username
-         * @property {string|null} [password] CreateUsernameAndPasswordRequest password
+         * @interface ICreateCredentialRequest
+         * @property {string|null} [username] CreateCredentialRequest username
+         * @property {string|null} [password] CreateCredentialRequest password
          */
 
         /**
-         * Constructs a new CreateUsernameAndPasswordRequest.
+         * Constructs a new CreateCredentialRequest.
          * @memberof auth
-         * @classdesc Represents a CreateUsernameAndPasswordRequest.
-         * @implements ICreateUsernameAndPasswordRequest
+         * @classdesc Represents a CreateCredentialRequest.
+         * @implements ICreateCredentialRequest
          * @constructor
-         * @param {auth.ICreateUsernameAndPasswordRequest=} [properties] Properties to set
+         * @param {auth.ICreateCredentialRequest=} [properties] Properties to set
          */
-        function CreateUsernameAndPasswordRequest(properties) {
+        function CreateCredentialRequest(properties) {
             if (properties)
                 for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
@@ -112,43 +112,43 @@ $root.auth = (function() {
         }
 
         /**
-         * CreateUsernameAndPasswordRequest username.
+         * CreateCredentialRequest username.
          * @member {string} username
-         * @memberof auth.CreateUsernameAndPasswordRequest
+         * @memberof auth.CreateCredentialRequest
          * @instance
          */
-        CreateUsernameAndPasswordRequest.prototype.username = "";
+        CreateCredentialRequest.prototype.username = "";
 
         /**
-         * CreateUsernameAndPasswordRequest password.
+         * CreateCredentialRequest password.
          * @member {string} password
-         * @memberof auth.CreateUsernameAndPasswordRequest
+         * @memberof auth.CreateCredentialRequest
          * @instance
          */
-        CreateUsernameAndPasswordRequest.prototype.password = "";
+        CreateCredentialRequest.prototype.password = "";
 
         /**
-         * Creates a new CreateUsernameAndPasswordRequest instance using the specified properties.
+         * Creates a new CreateCredentialRequest instance using the specified properties.
          * @function create
-         * @memberof auth.CreateUsernameAndPasswordRequest
+         * @memberof auth.CreateCredentialRequest
          * @static
-         * @param {auth.ICreateUsernameAndPasswordRequest=} [properties] Properties to set
-         * @returns {auth.CreateUsernameAndPasswordRequest} CreateUsernameAndPasswordRequest instance
+         * @param {auth.ICreateCredentialRequest=} [properties] Properties to set
+         * @returns {auth.CreateCredentialRequest} CreateCredentialRequest instance
          */
-        CreateUsernameAndPasswordRequest.create = function create(properties) {
-            return new CreateUsernameAndPasswordRequest(properties);
+        CreateCredentialRequest.create = function create(properties) {
+            return new CreateCredentialRequest(properties);
         };
 
         /**
-         * Encodes the specified CreateUsernameAndPasswordRequest message. Does not implicitly {@link auth.CreateUsernameAndPasswordRequest.verify|verify} messages.
+         * Encodes the specified CreateCredentialRequest message. Does not implicitly {@link auth.CreateCredentialRequest.verify|verify} messages.
          * @function encode
-         * @memberof auth.CreateUsernameAndPasswordRequest
+         * @memberof auth.CreateCredentialRequest
          * @static
-         * @param {auth.ICreateUsernameAndPasswordRequest} message CreateUsernameAndPasswordRequest message or plain object to encode
+         * @param {auth.ICreateCredentialRequest} message CreateCredentialRequest message or plain object to encode
          * @param {$protobuf.Writer} [writer] Writer to encode to
          * @returns {$protobuf.Writer} Writer
          */
-        CreateUsernameAndPasswordRequest.encode = function encode(message, writer) {
+        CreateCredentialRequest.encode = function encode(message, writer) {
             if (!writer)
                 writer = $Writer.create();
             if (message.username != null && Object.hasOwnProperty.call(message, "username"))
@@ -159,33 +159,33 @@ $root.auth = (function() {
         };
 
         /**
-         * Encodes the specified CreateUsernameAndPasswordRequest message, length delimited. Does not implicitly {@link auth.CreateUsernameAndPasswordRequest.verify|verify} messages.
+         * Encodes the specified CreateCredentialRequest message, length delimited. Does not implicitly {@link auth.CreateCredentialRequest.verify|verify} messages.
          * @function encodeDelimited
-         * @memberof auth.CreateUsernameAndPasswordRequest
+         * @memberof auth.CreateCredentialRequest
          * @static
-         * @param {auth.ICreateUsernameAndPasswordRequest} message CreateUsernameAndPasswordRequest message or plain object to encode
+         * @param {auth.ICreateCredentialRequest} message CreateCredentialRequest message or plain object to encode
          * @param {$protobuf.Writer} [writer] Writer to encode to
          * @returns {$protobuf.Writer} Writer
          */
-        CreateUsernameAndPasswordRequest.encodeDelimited = function encodeDelimited(message, writer) {
+        CreateCredentialRequest.encodeDelimited = function encodeDelimited(message, writer) {
             return this.encode(message, writer).ldelim();
         };
 
         /**
-         * Decodes a CreateUsernameAndPasswordRequest message from the specified reader or buffer.
+         * Decodes a CreateCredentialRequest message from the specified reader or buffer.
          * @function decode
-         * @memberof auth.CreateUsernameAndPasswordRequest
+         * @memberof auth.CreateCredentialRequest
          * @static
          * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
          * @param {number} [length] Message length if known beforehand
-         * @returns {auth.CreateUsernameAndPasswordRequest} CreateUsernameAndPasswordRequest
+         * @returns {auth.CreateCredentialRequest} CreateCredentialRequest
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        CreateUsernameAndPasswordRequest.decode = function decode(reader, length) {
+        CreateCredentialRequest.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.auth.CreateUsernameAndPasswordRequest();
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.auth.CreateCredentialRequest();
             while (reader.pos < end) {
                 var tag = reader.uint32();
                 switch (tag >>> 3) {
@@ -206,30 +206,30 @@ $root.auth = (function() {
         };
 
         /**
-         * Decodes a CreateUsernameAndPasswordRequest message from the specified reader or buffer, length delimited.
+         * Decodes a CreateCredentialRequest message from the specified reader or buffer, length delimited.
          * @function decodeDelimited
-         * @memberof auth.CreateUsernameAndPasswordRequest
+         * @memberof auth.CreateCredentialRequest
          * @static
          * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-         * @returns {auth.CreateUsernameAndPasswordRequest} CreateUsernameAndPasswordRequest
+         * @returns {auth.CreateCredentialRequest} CreateCredentialRequest
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        CreateUsernameAndPasswordRequest.decodeDelimited = function decodeDelimited(reader) {
+        CreateCredentialRequest.decodeDelimited = function decodeDelimited(reader) {
             if (!(reader instanceof $Reader))
                 reader = new $Reader(reader);
             return this.decode(reader, reader.uint32());
         };
 
         /**
-         * Verifies a CreateUsernameAndPasswordRequest message.
+         * Verifies a CreateCredentialRequest message.
          * @function verify
-         * @memberof auth.CreateUsernameAndPasswordRequest
+         * @memberof auth.CreateCredentialRequest
          * @static
          * @param {Object.<string,*>} message Plain object to verify
          * @returns {string|null} `null` if valid, otherwise the reason why it is not
          */
-        CreateUsernameAndPasswordRequest.verify = function verify(message) {
+        CreateCredentialRequest.verify = function verify(message) {
             if (typeof message !== "object" || message === null)
                 return "object expected";
             if (message.username != null && message.hasOwnProperty("username"))
@@ -242,17 +242,17 @@ $root.auth = (function() {
         };
 
         /**
-         * Creates a CreateUsernameAndPasswordRequest message from a plain object. Also converts values to their respective internal types.
+         * Creates a CreateCredentialRequest message from a plain object. Also converts values to their respective internal types.
          * @function fromObject
-         * @memberof auth.CreateUsernameAndPasswordRequest
+         * @memberof auth.CreateCredentialRequest
          * @static
          * @param {Object.<string,*>} object Plain object
-         * @returns {auth.CreateUsernameAndPasswordRequest} CreateUsernameAndPasswordRequest
+         * @returns {auth.CreateCredentialRequest} CreateCredentialRequest
          */
-        CreateUsernameAndPasswordRequest.fromObject = function fromObject(object) {
-            if (object instanceof $root.auth.CreateUsernameAndPasswordRequest)
+        CreateCredentialRequest.fromObject = function fromObject(object) {
+            if (object instanceof $root.auth.CreateCredentialRequest)
                 return object;
-            var message = new $root.auth.CreateUsernameAndPasswordRequest();
+            var message = new $root.auth.CreateCredentialRequest();
             if (object.username != null)
                 message.username = String(object.username);
             if (object.password != null)
@@ -261,15 +261,15 @@ $root.auth = (function() {
         };
 
         /**
-         * Creates a plain object from a CreateUsernameAndPasswordRequest message. Also converts values to other types if specified.
+         * Creates a plain object from a CreateCredentialRequest message. Also converts values to other types if specified.
          * @function toObject
-         * @memberof auth.CreateUsernameAndPasswordRequest
+         * @memberof auth.CreateCredentialRequest
          * @static
-         * @param {auth.CreateUsernameAndPasswordRequest} message CreateUsernameAndPasswordRequest
+         * @param {auth.CreateCredentialRequest} message CreateCredentialRequest
          * @param {$protobuf.IConversionOptions} [options] Conversion options
          * @returns {Object.<string,*>} Plain object
          */
-        CreateUsernameAndPasswordRequest.toObject = function toObject(message, options) {
+        CreateCredentialRequest.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
             var object = {};
@@ -285,52 +285,52 @@ $root.auth = (function() {
         };
 
         /**
-         * Converts this CreateUsernameAndPasswordRequest to JSON.
+         * Converts this CreateCredentialRequest to JSON.
          * @function toJSON
-         * @memberof auth.CreateUsernameAndPasswordRequest
+         * @memberof auth.CreateCredentialRequest
          * @instance
          * @returns {Object.<string,*>} JSON object
          */
-        CreateUsernameAndPasswordRequest.prototype.toJSON = function toJSON() {
+        CreateCredentialRequest.prototype.toJSON = function toJSON() {
             return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
         };
 
         /**
-         * Gets the default type url for CreateUsernameAndPasswordRequest
+         * Gets the default type url for CreateCredentialRequest
          * @function getTypeUrl
-         * @memberof auth.CreateUsernameAndPasswordRequest
+         * @memberof auth.CreateCredentialRequest
          * @static
          * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
          * @returns {string} The default type url
          */
-        CreateUsernameAndPasswordRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+        CreateCredentialRequest.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
             if (typeUrlPrefix === undefined) {
                 typeUrlPrefix = "type.googleapis.com";
             }
-            return typeUrlPrefix + "/auth.CreateUsernameAndPasswordRequest";
+            return typeUrlPrefix + "/auth.CreateCredentialRequest";
         };
 
-        return CreateUsernameAndPasswordRequest;
+        return CreateCredentialRequest;
     })();
 
-    auth.CreateUsernameAndPasswordResponse = (function() {
+    auth.CreateCredentialResponse = (function() {
 
         /**
-         * Properties of a CreateUsernameAndPasswordResponse.
+         * Properties of a CreateCredentialResponse.
          * @memberof auth
-         * @interface ICreateUsernameAndPasswordResponse
-         * @property {string|null} [clientId] CreateUsernameAndPasswordResponse clientId
+         * @interface ICreateCredentialResponse
+         * @property {string|null} [clientId] CreateCredentialResponse clientId
          */
 
         /**
-         * Constructs a new CreateUsernameAndPasswordResponse.
+         * Constructs a new CreateCredentialResponse.
          * @memberof auth
-         * @classdesc Represents a CreateUsernameAndPasswordResponse.
-         * @implements ICreateUsernameAndPasswordResponse
+         * @classdesc Represents a CreateCredentialResponse.
+         * @implements ICreateCredentialResponse
          * @constructor
-         * @param {auth.ICreateUsernameAndPasswordResponse=} [properties] Properties to set
+         * @param {auth.ICreateCredentialResponse=} [properties] Properties to set
          */
-        function CreateUsernameAndPasswordResponse(properties) {
+        function CreateCredentialResponse(properties) {
             if (properties)
                 for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
@@ -338,35 +338,35 @@ $root.auth = (function() {
         }
 
         /**
-         * CreateUsernameAndPasswordResponse clientId.
+         * CreateCredentialResponse clientId.
          * @member {string} clientId
-         * @memberof auth.CreateUsernameAndPasswordResponse
+         * @memberof auth.CreateCredentialResponse
          * @instance
          */
-        CreateUsernameAndPasswordResponse.prototype.clientId = "";
+        CreateCredentialResponse.prototype.clientId = "";
 
         /**
-         * Creates a new CreateUsernameAndPasswordResponse instance using the specified properties.
+         * Creates a new CreateCredentialResponse instance using the specified properties.
          * @function create
-         * @memberof auth.CreateUsernameAndPasswordResponse
+         * @memberof auth.CreateCredentialResponse
          * @static
-         * @param {auth.ICreateUsernameAndPasswordResponse=} [properties] Properties to set
-         * @returns {auth.CreateUsernameAndPasswordResponse} CreateUsernameAndPasswordResponse instance
+         * @param {auth.ICreateCredentialResponse=} [properties] Properties to set
+         * @returns {auth.CreateCredentialResponse} CreateCredentialResponse instance
          */
-        CreateUsernameAndPasswordResponse.create = function create(properties) {
-            return new CreateUsernameAndPasswordResponse(properties);
+        CreateCredentialResponse.create = function create(properties) {
+            return new CreateCredentialResponse(properties);
         };
 
         /**
-         * Encodes the specified CreateUsernameAndPasswordResponse message. Does not implicitly {@link auth.CreateUsernameAndPasswordResponse.verify|verify} messages.
+         * Encodes the specified CreateCredentialResponse message. Does not implicitly {@link auth.CreateCredentialResponse.verify|verify} messages.
          * @function encode
-         * @memberof auth.CreateUsernameAndPasswordResponse
+         * @memberof auth.CreateCredentialResponse
          * @static
-         * @param {auth.ICreateUsernameAndPasswordResponse} message CreateUsernameAndPasswordResponse message or plain object to encode
+         * @param {auth.ICreateCredentialResponse} message CreateCredentialResponse message or plain object to encode
          * @param {$protobuf.Writer} [writer] Writer to encode to
          * @returns {$protobuf.Writer} Writer
          */
-        CreateUsernameAndPasswordResponse.encode = function encode(message, writer) {
+        CreateCredentialResponse.encode = function encode(message, writer) {
             if (!writer)
                 writer = $Writer.create();
             if (message.clientId != null && Object.hasOwnProperty.call(message, "clientId"))
@@ -375,33 +375,33 @@ $root.auth = (function() {
         };
 
         /**
-         * Encodes the specified CreateUsernameAndPasswordResponse message, length delimited. Does not implicitly {@link auth.CreateUsernameAndPasswordResponse.verify|verify} messages.
+         * Encodes the specified CreateCredentialResponse message, length delimited. Does not implicitly {@link auth.CreateCredentialResponse.verify|verify} messages.
          * @function encodeDelimited
-         * @memberof auth.CreateUsernameAndPasswordResponse
+         * @memberof auth.CreateCredentialResponse
          * @static
-         * @param {auth.ICreateUsernameAndPasswordResponse} message CreateUsernameAndPasswordResponse message or plain object to encode
+         * @param {auth.ICreateCredentialResponse} message CreateCredentialResponse message or plain object to encode
          * @param {$protobuf.Writer} [writer] Writer to encode to
          * @returns {$protobuf.Writer} Writer
          */
-        CreateUsernameAndPasswordResponse.encodeDelimited = function encodeDelimited(message, writer) {
+        CreateCredentialResponse.encodeDelimited = function encodeDelimited(message, writer) {
             return this.encode(message, writer).ldelim();
         };
 
         /**
-         * Decodes a CreateUsernameAndPasswordResponse message from the specified reader or buffer.
+         * Decodes a CreateCredentialResponse message from the specified reader or buffer.
          * @function decode
-         * @memberof auth.CreateUsernameAndPasswordResponse
+         * @memberof auth.CreateCredentialResponse
          * @static
          * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
          * @param {number} [length] Message length if known beforehand
-         * @returns {auth.CreateUsernameAndPasswordResponse} CreateUsernameAndPasswordResponse
+         * @returns {auth.CreateCredentialResponse} CreateCredentialResponse
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        CreateUsernameAndPasswordResponse.decode = function decode(reader, length) {
+        CreateCredentialResponse.decode = function decode(reader, length) {
             if (!(reader instanceof $Reader))
                 reader = $Reader.create(reader);
-            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.auth.CreateUsernameAndPasswordResponse();
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.auth.CreateCredentialResponse();
             while (reader.pos < end) {
                 var tag = reader.uint32();
                 switch (tag >>> 3) {
@@ -418,30 +418,30 @@ $root.auth = (function() {
         };
 
         /**
-         * Decodes a CreateUsernameAndPasswordResponse message from the specified reader or buffer, length delimited.
+         * Decodes a CreateCredentialResponse message from the specified reader or buffer, length delimited.
          * @function decodeDelimited
-         * @memberof auth.CreateUsernameAndPasswordResponse
+         * @memberof auth.CreateCredentialResponse
          * @static
          * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-         * @returns {auth.CreateUsernameAndPasswordResponse} CreateUsernameAndPasswordResponse
+         * @returns {auth.CreateCredentialResponse} CreateCredentialResponse
          * @throws {Error} If the payload is not a reader or valid buffer
          * @throws {$protobuf.util.ProtocolError} If required fields are missing
          */
-        CreateUsernameAndPasswordResponse.decodeDelimited = function decodeDelimited(reader) {
+        CreateCredentialResponse.decodeDelimited = function decodeDelimited(reader) {
             if (!(reader instanceof $Reader))
                 reader = new $Reader(reader);
             return this.decode(reader, reader.uint32());
         };
 
         /**
-         * Verifies a CreateUsernameAndPasswordResponse message.
+         * Verifies a CreateCredentialResponse message.
          * @function verify
-         * @memberof auth.CreateUsernameAndPasswordResponse
+         * @memberof auth.CreateCredentialResponse
          * @static
          * @param {Object.<string,*>} message Plain object to verify
          * @returns {string|null} `null` if valid, otherwise the reason why it is not
          */
-        CreateUsernameAndPasswordResponse.verify = function verify(message) {
+        CreateCredentialResponse.verify = function verify(message) {
             if (typeof message !== "object" || message === null)
                 return "object expected";
             if (message.clientId != null && message.hasOwnProperty("clientId"))
@@ -451,32 +451,32 @@ $root.auth = (function() {
         };
 
         /**
-         * Creates a CreateUsernameAndPasswordResponse message from a plain object. Also converts values to their respective internal types.
+         * Creates a CreateCredentialResponse message from a plain object. Also converts values to their respective internal types.
          * @function fromObject
-         * @memberof auth.CreateUsernameAndPasswordResponse
+         * @memberof auth.CreateCredentialResponse
          * @static
          * @param {Object.<string,*>} object Plain object
-         * @returns {auth.CreateUsernameAndPasswordResponse} CreateUsernameAndPasswordResponse
+         * @returns {auth.CreateCredentialResponse} CreateCredentialResponse
          */
-        CreateUsernameAndPasswordResponse.fromObject = function fromObject(object) {
-            if (object instanceof $root.auth.CreateUsernameAndPasswordResponse)
+        CreateCredentialResponse.fromObject = function fromObject(object) {
+            if (object instanceof $root.auth.CreateCredentialResponse)
                 return object;
-            var message = new $root.auth.CreateUsernameAndPasswordResponse();
+            var message = new $root.auth.CreateCredentialResponse();
             if (object.clientId != null)
                 message.clientId = String(object.clientId);
             return message;
         };
 
         /**
-         * Creates a plain object from a CreateUsernameAndPasswordResponse message. Also converts values to other types if specified.
+         * Creates a plain object from a CreateCredentialResponse message. Also converts values to other types if specified.
          * @function toObject
-         * @memberof auth.CreateUsernameAndPasswordResponse
+         * @memberof auth.CreateCredentialResponse
          * @static
-         * @param {auth.CreateUsernameAndPasswordResponse} message CreateUsernameAndPasswordResponse
+         * @param {auth.CreateCredentialResponse} message CreateCredentialResponse
          * @param {$protobuf.IConversionOptions} [options] Conversion options
          * @returns {Object.<string,*>} Plain object
          */
-        CreateUsernameAndPasswordResponse.toObject = function toObject(message, options) {
+        CreateCredentialResponse.toObject = function toObject(message, options) {
             if (!options)
                 options = {};
             var object = {};
@@ -488,32 +488,32 @@ $root.auth = (function() {
         };
 
         /**
-         * Converts this CreateUsernameAndPasswordResponse to JSON.
+         * Converts this CreateCredentialResponse to JSON.
          * @function toJSON
-         * @memberof auth.CreateUsernameAndPasswordResponse
+         * @memberof auth.CreateCredentialResponse
          * @instance
          * @returns {Object.<string,*>} JSON object
          */
-        CreateUsernameAndPasswordResponse.prototype.toJSON = function toJSON() {
+        CreateCredentialResponse.prototype.toJSON = function toJSON() {
             return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
         };
 
         /**
-         * Gets the default type url for CreateUsernameAndPasswordResponse
+         * Gets the default type url for CreateCredentialResponse
          * @function getTypeUrl
-         * @memberof auth.CreateUsernameAndPasswordResponse
+         * @memberof auth.CreateCredentialResponse
          * @static
          * @param {string} [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
          * @returns {string} The default type url
          */
-        CreateUsernameAndPasswordResponse.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
+        CreateCredentialResponse.getTypeUrl = function getTypeUrl(typeUrlPrefix) {
             if (typeUrlPrefix === undefined) {
                 typeUrlPrefix = "type.googleapis.com";
             }
-            return typeUrlPrefix + "/auth.CreateUsernameAndPasswordResponse";
+            return typeUrlPrefix + "/auth.CreateCredentialResponse";
         };
 
-        return CreateUsernameAndPasswordResponse;
+        return CreateCredentialResponse;
     })();
 
     return auth;

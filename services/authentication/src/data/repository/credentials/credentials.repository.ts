@@ -12,4 +12,14 @@ export class CredentialsRepository {
       data,
     });
   }
+
+  async updateCredential(
+    where: Prisma.CredentialWhereUniqueInput,
+    data: Prisma.CredentialUpdateInput,
+  ): Promise<Credential> {
+    return this.prismaService.credential.update({
+      where,
+      data,
+    });
+  }
 }

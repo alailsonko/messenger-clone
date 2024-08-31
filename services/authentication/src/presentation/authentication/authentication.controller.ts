@@ -3,7 +3,10 @@ import { Controller } from '@nestjs/common';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { PinoLogger } from 'nestjs-pino';
 import { auth } from 'src/common/rpc/generated/protos';
-import { protobufPackages } from 'src/common/rpc/protobuf-packages';
+import {
+  AuthenticationMethods,
+  ProtobufServiceNames,
+} from 'src/common/rpc/protobuf-packages';
 import * as grpc from '@grpc/grpc-js';
 import { ReasonPhrases } from 'http-status-codes';
 import { CredentialsApplicationService } from 'src/application/credentials/credential.service';
@@ -20,50 +23,29 @@ export class AuthenticationController {
   }
 
   @GrpcMethod(
-    protobufPackages.authentication.service,
-    protobufPackages.authentication.methods.createUsernameAndPassword,
+    ProtobufServiceNames.AUTHENTICATION,
+    AuthenticationMethods.CREATE_CREDENTIAL,
   )
-  async createUsernameAndPassword(
+  async createCredential(
     data: CreateCredentialDto,
     metadata: Metadata,
     call: ServerUnaryCall<
-      auth.CreateUsernameAndPasswordRequest,
-      auth.CreateUsernameAndPasswordResponse
+      auth.CreateCredentialRequest,
+      auth.CreateCredentialResponse
     >,
-  ): Promise<auth.ICreateUsernameAndPasswordResponse> {
+  ): Promise<auth.ICreateCredentialResponse> {
     await validateDto(CreateCredentialDto, data, metadata);
 
-    const {
-      CreateUsernameAndPasswordRequest,
-      CreateUsernameAndPasswordResponse,
-    } = auth;
+    const { CreateCredentialResponse } = auth;
 
-    const authModel = new CreateUsernameAndPasswordRequest(data);
+    const credential =
+      await this.credentialApplicationService.createCredential(data);
 
-    const isNotValidRequest =
-      CreateUsernameAndPasswordRequest.verify(authModel);
-
-    if (isNotValidRequest) {
-      throw new RpcException({
-        code: grpc.status.INVALID_ARGUMENT,
-        message: ReasonPhrases.BAD_REQUEST,
-        metadata,
-      });
-    }
-
-    const credential = await this.credentialApplicationService.createCredential(
-      {
-        username: authModel.username,
-        passwordHash: authModel.password,
-      },
-    );
-
-    const response = new CreateUsernameAndPasswordResponse({
+    const response = new CreateCredentialResponse({
       clientId: credential.id,
     });
 
-    const isNotValidResponse =
-      CreateUsernameAndPasswordResponse.verify(response);
+    const isNotValidResponse = CreateCredentialResponse.verify(response);
 
     if (isNotValidResponse) {
       throw new RpcException({

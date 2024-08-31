@@ -30,267 +30,263 @@ export namespace auth {
     ): AuthService;
 
     /**
-     * Calls createUsernameAndPassword.
-     * @param request CreateUsernameAndPasswordRequest message or plain object
-     * @param callback Node-style callback called with the error, if any, and CreateUsernameAndPasswordResponse
+     * Calls createCredential.
+     * @param request CreateCredentialRequest message or plain object
+     * @param callback Node-style callback called with the error, if any, and CreateCredentialResponse
      */
-    public createUsernameAndPassword(
-      request: auth.ICreateUsernameAndPasswordRequest,
-      callback: auth.AuthService.createUsernameAndPasswordCallback,
+    public createCredential(
+      request: auth.ICreateCredentialRequest,
+      callback: auth.AuthService.createCredentialCallback,
     ): void;
 
     /**
-     * Calls createUsernameAndPassword.
-     * @param request CreateUsernameAndPasswordRequest message or plain object
+     * Calls createCredential.
+     * @param request CreateCredentialRequest message or plain object
      * @returns Promise
      */
-    public createUsernameAndPassword(
-      request: auth.ICreateUsernameAndPasswordRequest,
-    ): Promise<auth.CreateUsernameAndPasswordResponse>;
+    public createCredential(
+      request: auth.ICreateCredentialRequest,
+    ): Promise<auth.CreateCredentialResponse>;
   }
 
   namespace AuthService {
     /**
-     * Callback as used by {@link auth.AuthService#createUsernameAndPassword}.
+     * Callback as used by {@link auth.AuthService#createCredential}.
      * @param error Error, if any
-     * @param [response] CreateUsernameAndPasswordResponse
+     * @param [response] CreateCredentialResponse
      */
-    type createUsernameAndPasswordCallback = (
+    type createCredentialCallback = (
       error: Error | null,
-      response?: auth.CreateUsernameAndPasswordResponse,
+      response?: auth.CreateCredentialResponse,
     ) => void;
   }
 
-  /** Properties of a CreateUsernameAndPasswordRequest. */
-  interface ICreateUsernameAndPasswordRequest {
-    /** CreateUsernameAndPasswordRequest username */
+  /** Properties of a CreateCredentialRequest. */
+  interface ICreateCredentialRequest {
+    /** CreateCredentialRequest username */
     username?: string | null;
 
-    /** CreateUsernameAndPasswordRequest password */
+    /** CreateCredentialRequest password */
     password?: string | null;
   }
 
-  /** Represents a CreateUsernameAndPasswordRequest. */
-  class CreateUsernameAndPasswordRequest
-    implements ICreateUsernameAndPasswordRequest
-  {
+  /** Represents a CreateCredentialRequest. */
+  class CreateCredentialRequest implements ICreateCredentialRequest {
     /**
-     * Constructs a new CreateUsernameAndPasswordRequest.
+     * Constructs a new CreateCredentialRequest.
      * @param [properties] Properties to set
      */
-    constructor(properties?: auth.ICreateUsernameAndPasswordRequest);
+    constructor(properties?: auth.ICreateCredentialRequest);
 
-    /** CreateUsernameAndPasswordRequest username. */
+    /** CreateCredentialRequest username. */
     public username: string;
 
-    /** CreateUsernameAndPasswordRequest password. */
+    /** CreateCredentialRequest password. */
     public password: string;
 
     /**
-     * Creates a new CreateUsernameAndPasswordRequest instance using the specified properties.
+     * Creates a new CreateCredentialRequest instance using the specified properties.
      * @param [properties] Properties to set
-     * @returns CreateUsernameAndPasswordRequest instance
+     * @returns CreateCredentialRequest instance
      */
     public static create(
-      properties?: auth.ICreateUsernameAndPasswordRequest,
-    ): auth.CreateUsernameAndPasswordRequest;
+      properties?: auth.ICreateCredentialRequest,
+    ): auth.CreateCredentialRequest;
 
     /**
-     * Encodes the specified CreateUsernameAndPasswordRequest message. Does not implicitly {@link auth.CreateUsernameAndPasswordRequest.verify|verify} messages.
-     * @param message CreateUsernameAndPasswordRequest message or plain object to encode
+     * Encodes the specified CreateCredentialRequest message. Does not implicitly {@link auth.CreateCredentialRequest.verify|verify} messages.
+     * @param message CreateCredentialRequest message or plain object to encode
      * @param [writer] Writer to encode to
      * @returns Writer
      */
     public static encode(
-      message: auth.ICreateUsernameAndPasswordRequest,
+      message: auth.ICreateCredentialRequest,
       writer?: $protobuf.Writer,
     ): $protobuf.Writer;
 
     /**
-     * Encodes the specified CreateUsernameAndPasswordRequest message, length delimited. Does not implicitly {@link auth.CreateUsernameAndPasswordRequest.verify|verify} messages.
-     * @param message CreateUsernameAndPasswordRequest message or plain object to encode
+     * Encodes the specified CreateCredentialRequest message, length delimited. Does not implicitly {@link auth.CreateCredentialRequest.verify|verify} messages.
+     * @param message CreateCredentialRequest message or plain object to encode
      * @param [writer] Writer to encode to
      * @returns Writer
      */
     public static encodeDelimited(
-      message: auth.ICreateUsernameAndPasswordRequest,
+      message: auth.ICreateCredentialRequest,
       writer?: $protobuf.Writer,
     ): $protobuf.Writer;
 
     /**
-     * Decodes a CreateUsernameAndPasswordRequest message from the specified reader or buffer.
+     * Decodes a CreateCredentialRequest message from the specified reader or buffer.
      * @param reader Reader or buffer to decode from
      * @param [length] Message length if known beforehand
-     * @returns CreateUsernameAndPasswordRequest
+     * @returns CreateCredentialRequest
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
     public static decode(
       reader: $protobuf.Reader | Uint8Array,
       length?: number,
-    ): auth.CreateUsernameAndPasswordRequest;
+    ): auth.CreateCredentialRequest;
 
     /**
-     * Decodes a CreateUsernameAndPasswordRequest message from the specified reader or buffer, length delimited.
+     * Decodes a CreateCredentialRequest message from the specified reader or buffer, length delimited.
      * @param reader Reader or buffer to decode from
-     * @returns CreateUsernameAndPasswordRequest
+     * @returns CreateCredentialRequest
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
     public static decodeDelimited(
       reader: $protobuf.Reader | Uint8Array,
-    ): auth.CreateUsernameAndPasswordRequest;
+    ): auth.CreateCredentialRequest;
 
     /**
-     * Verifies a CreateUsernameAndPasswordRequest message.
+     * Verifies a CreateCredentialRequest message.
      * @param message Plain object to verify
      * @returns `null` if valid, otherwise the reason why it is not
      */
     public static verify(message: { [k: string]: any }): string | null;
 
     /**
-     * Creates a CreateUsernameAndPasswordRequest message from a plain object. Also converts values to their respective internal types.
+     * Creates a CreateCredentialRequest message from a plain object. Also converts values to their respective internal types.
      * @param object Plain object
-     * @returns CreateUsernameAndPasswordRequest
+     * @returns CreateCredentialRequest
      */
     public static fromObject(object: {
       [k: string]: any;
-    }): auth.CreateUsernameAndPasswordRequest;
+    }): auth.CreateCredentialRequest;
 
     /**
-     * Creates a plain object from a CreateUsernameAndPasswordRequest message. Also converts values to other types if specified.
-     * @param message CreateUsernameAndPasswordRequest
+     * Creates a plain object from a CreateCredentialRequest message. Also converts values to other types if specified.
+     * @param message CreateCredentialRequest
      * @param [options] Conversion options
      * @returns Plain object
      */
     public static toObject(
-      message: auth.CreateUsernameAndPasswordRequest,
+      message: auth.CreateCredentialRequest,
       options?: $protobuf.IConversionOptions,
     ): { [k: string]: any };
 
     /**
-     * Converts this CreateUsernameAndPasswordRequest to JSON.
+     * Converts this CreateCredentialRequest to JSON.
      * @returns JSON object
      */
     public toJSON(): { [k: string]: any };
 
     /**
-     * Gets the default type url for CreateUsernameAndPasswordRequest
+     * Gets the default type url for CreateCredentialRequest
      * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
      * @returns The default type url
      */
     public static getTypeUrl(typeUrlPrefix?: string): string;
   }
 
-  /** Properties of a CreateUsernameAndPasswordResponse. */
-  interface ICreateUsernameAndPasswordResponse {
-    /** CreateUsernameAndPasswordResponse clientId */
+  /** Properties of a CreateCredentialResponse. */
+  interface ICreateCredentialResponse {
+    /** CreateCredentialResponse clientId */
     clientId?: string | null;
   }
 
-  /** Represents a CreateUsernameAndPasswordResponse. */
-  class CreateUsernameAndPasswordResponse
-    implements ICreateUsernameAndPasswordResponse
-  {
+  /** Represents a CreateCredentialResponse. */
+  class CreateCredentialResponse implements ICreateCredentialResponse {
     /**
-     * Constructs a new CreateUsernameAndPasswordResponse.
+     * Constructs a new CreateCredentialResponse.
      * @param [properties] Properties to set
      */
-    constructor(properties?: auth.ICreateUsernameAndPasswordResponse);
+    constructor(properties?: auth.ICreateCredentialResponse);
 
-    /** CreateUsernameAndPasswordResponse clientId. */
+    /** CreateCredentialResponse clientId. */
     public clientId: string;
 
     /**
-     * Creates a new CreateUsernameAndPasswordResponse instance using the specified properties.
+     * Creates a new CreateCredentialResponse instance using the specified properties.
      * @param [properties] Properties to set
-     * @returns CreateUsernameAndPasswordResponse instance
+     * @returns CreateCredentialResponse instance
      */
     public static create(
-      properties?: auth.ICreateUsernameAndPasswordResponse,
-    ): auth.CreateUsernameAndPasswordResponse;
+      properties?: auth.ICreateCredentialResponse,
+    ): auth.CreateCredentialResponse;
 
     /**
-     * Encodes the specified CreateUsernameAndPasswordResponse message. Does not implicitly {@link auth.CreateUsernameAndPasswordResponse.verify|verify} messages.
-     * @param message CreateUsernameAndPasswordResponse message or plain object to encode
+     * Encodes the specified CreateCredentialResponse message. Does not implicitly {@link auth.CreateCredentialResponse.verify|verify} messages.
+     * @param message CreateCredentialResponse message or plain object to encode
      * @param [writer] Writer to encode to
      * @returns Writer
      */
     public static encode(
-      message: auth.ICreateUsernameAndPasswordResponse,
+      message: auth.ICreateCredentialResponse,
       writer?: $protobuf.Writer,
     ): $protobuf.Writer;
 
     /**
-     * Encodes the specified CreateUsernameAndPasswordResponse message, length delimited. Does not implicitly {@link auth.CreateUsernameAndPasswordResponse.verify|verify} messages.
-     * @param message CreateUsernameAndPasswordResponse message or plain object to encode
+     * Encodes the specified CreateCredentialResponse message, length delimited. Does not implicitly {@link auth.CreateCredentialResponse.verify|verify} messages.
+     * @param message CreateCredentialResponse message or plain object to encode
      * @param [writer] Writer to encode to
      * @returns Writer
      */
     public static encodeDelimited(
-      message: auth.ICreateUsernameAndPasswordResponse,
+      message: auth.ICreateCredentialResponse,
       writer?: $protobuf.Writer,
     ): $protobuf.Writer;
 
     /**
-     * Decodes a CreateUsernameAndPasswordResponse message from the specified reader or buffer.
+     * Decodes a CreateCredentialResponse message from the specified reader or buffer.
      * @param reader Reader or buffer to decode from
      * @param [length] Message length if known beforehand
-     * @returns CreateUsernameAndPasswordResponse
+     * @returns CreateCredentialResponse
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
     public static decode(
       reader: $protobuf.Reader | Uint8Array,
       length?: number,
-    ): auth.CreateUsernameAndPasswordResponse;
+    ): auth.CreateCredentialResponse;
 
     /**
-     * Decodes a CreateUsernameAndPasswordResponse message from the specified reader or buffer, length delimited.
+     * Decodes a CreateCredentialResponse message from the specified reader or buffer, length delimited.
      * @param reader Reader or buffer to decode from
-     * @returns CreateUsernameAndPasswordResponse
+     * @returns CreateCredentialResponse
      * @throws {Error} If the payload is not a reader or valid buffer
      * @throws {$protobuf.util.ProtocolError} If required fields are missing
      */
     public static decodeDelimited(
       reader: $protobuf.Reader | Uint8Array,
-    ): auth.CreateUsernameAndPasswordResponse;
+    ): auth.CreateCredentialResponse;
 
     /**
-     * Verifies a CreateUsernameAndPasswordResponse message.
+     * Verifies a CreateCredentialResponse message.
      * @param message Plain object to verify
      * @returns `null` if valid, otherwise the reason why it is not
      */
     public static verify(message: { [k: string]: any }): string | null;
 
     /**
-     * Creates a CreateUsernameAndPasswordResponse message from a plain object. Also converts values to their respective internal types.
+     * Creates a CreateCredentialResponse message from a plain object. Also converts values to their respective internal types.
      * @param object Plain object
-     * @returns CreateUsernameAndPasswordResponse
+     * @returns CreateCredentialResponse
      */
     public static fromObject(object: {
       [k: string]: any;
-    }): auth.CreateUsernameAndPasswordResponse;
+    }): auth.CreateCredentialResponse;
 
     /**
-     * Creates a plain object from a CreateUsernameAndPasswordResponse message. Also converts values to other types if specified.
-     * @param message CreateUsernameAndPasswordResponse
+     * Creates a plain object from a CreateCredentialResponse message. Also converts values to other types if specified.
+     * @param message CreateCredentialResponse
      * @param [options] Conversion options
      * @returns Plain object
      */
     public static toObject(
-      message: auth.CreateUsernameAndPasswordResponse,
+      message: auth.CreateCredentialResponse,
       options?: $protobuf.IConversionOptions,
     ): { [k: string]: any };
 
     /**
-     * Converts this CreateUsernameAndPasswordResponse to JSON.
+     * Converts this CreateCredentialResponse to JSON.
      * @returns JSON object
      */
     public toJSON(): { [k: string]: any };
 
     /**
-     * Gets the default type url for CreateUsernameAndPasswordResponse
+     * Gets the default type url for CreateCredentialResponse
      * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
      * @returns The default type url
      */
