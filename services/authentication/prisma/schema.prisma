@@ -24,15 +24,15 @@ model Credential {
 }
 
 model Session {
-  id           String   @id @default(cuid())
+  id           String     @id @default(cuid())
   credentialId String
-  token        String   @unique
+  token        String     @unique
+  refreshToken String     @unique
   ipAddress    String?
   userAgent    String?
-  createdAt    DateTime @default(now())
+  createdAt    DateTime   @default(now())
   expiresAt    DateTime
-  lastActive   DateTime @updatedAt
+  lastActive   DateTime   @updatedAt
 
-  // Define the foreign key relationship
   credential   Credential @relation(fields: [credentialId], references: [id])
 }
