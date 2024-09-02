@@ -13,7 +13,7 @@ import { CredentialsApplicationService } from '../../application/credentials/cre
 import { CreateCredentialDto } from './dto/create-credential.dto';
 import { validateDto } from 'src/common/utils/dto-validator.util';
 import { ValidateCredentialDto } from './dto/validate-credential.dto';
-import * as zlib from 'zlib';
+import { IssueTokenDto } from './dto/issue-token.dto';
 
 @Controller()
 export class AuthenticationController {
@@ -145,26 +145,20 @@ export class AuthenticationController {
     AuthenticationMethods.ISSUE_TOKEN,
   )
   async issueToken(
-    data: auth.IssueTokenRequest,
+    data: IssueTokenDto,
     metadata: Metadata,
     call: ServerUnaryCall<auth.IssueTokenRequest, auth.IssueTokenResponse>,
   ): Promise<auth.IIssueTokenResponse> {
-    const { IssueTokenResponse } = auth;
+    await validateDto(IssueTokenDto, data, metadata);
 
-    this.logger.info('Issuing token');
+    const { IssueTokenResponse } = auth;
 
     const tokens = await this.credentialApplicationService.issueToken(
       data,
       metadata,
     );
 
-    const accessTokenBytes = new TextEncoder().encode(tokens.accessToken);
-    const refreshTokenBytes = new TextEncoder().encode(tokens.refreshToken);
-
-    const response = new IssueTokenResponse({
-      accessToken: accessTokenBytes,
-      refreshToken: refreshTokenBytes,
-    });
+    const response = new IssueTokenResponse(tokens);
 
     const isNotValidResponse = IssueTokenResponse.verify(response);
 
@@ -178,9 +172,6 @@ export class AuthenticationController {
 
     call.sendMetadata(metadata);
 
-    return {
-      accessToken: accessTokenBytes,
-      refreshToken: refreshTokenBytes,
-    };
+    return tokens;
   }
 }

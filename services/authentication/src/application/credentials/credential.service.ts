@@ -15,9 +15,8 @@ import { RpcException } from '@nestjs/microservices';
 import { ReasonPhrases } from 'http-status-codes';
 import * as grpc from '@grpc/grpc-js';
 import { PinoLogger } from 'nestjs-pino';
-import { readFile } from 'fs/promises';
-import { join } from 'path';
 import { CreateSessionCommand } from '../sessions/commands/impl';
+import { EncryptDecryptService } from 'src/infra/cryptography/encrypt-decrypt.service';
 
 @Injectable()
 export class CredentialsApplicationService {
@@ -26,6 +25,7 @@ export class CredentialsApplicationService {
     private readonly queryBus: QueryBus,
     private readonly jwtService: JwtService,
     private readonly logger: PinoLogger,
+    private readonly encryptDecryptService: EncryptDecryptService,
   ) {
     this.logger.setContext(CredentialsApplicationService.name);
   }
@@ -104,12 +104,12 @@ export class CredentialsApplicationService {
 
     await this.commandBus.execute(
       new CreateSessionCommand({
-        refreshToken: refreshToken,
-        token: token,
-        expiresAt: new Date(decodedToken.payload.exp),
+        refreshToken: await this.encryptDecryptService.encrypt(refreshToken),
+        token: await this.encryptDecryptService.encrypt(token),
+        expiresAt: new Date(decodedToken.payload.exp * 1000),
         credentialId: credential.id,
         ipAddress: ipAddress,
-        lastActive: new Date(),
+        lastActive: new Date(decodedToken.payload.iat * 1000),
         userAgent: userAgent,
       }),
     );

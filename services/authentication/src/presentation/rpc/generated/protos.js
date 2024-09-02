@@ -1754,8 +1754,8 @@ $root.auth = (function() {
          * Properties of an IssueTokenResponse.
          * @memberof auth
          * @interface IIssueTokenResponse
-         * @property {Uint8Array|null} [accessToken] IssueTokenResponse accessToken
-         * @property {Uint8Array|null} [refreshToken] IssueTokenResponse refreshToken
+         * @property {string|null} [accessToken] IssueTokenResponse accessToken
+         * @property {string|null} [refreshToken] IssueTokenResponse refreshToken
          */
 
         /**
@@ -1775,19 +1775,19 @@ $root.auth = (function() {
 
         /**
          * IssueTokenResponse accessToken.
-         * @member {Uint8Array} accessToken
+         * @member {string} accessToken
          * @memberof auth.IssueTokenResponse
          * @instance
          */
-        IssueTokenResponse.prototype.accessToken = $util.newBuffer([]);
+        IssueTokenResponse.prototype.accessToken = "";
 
         /**
          * IssueTokenResponse refreshToken.
-         * @member {Uint8Array} refreshToken
+         * @member {string} refreshToken
          * @memberof auth.IssueTokenResponse
          * @instance
          */
-        IssueTokenResponse.prototype.refreshToken = $util.newBuffer([]);
+        IssueTokenResponse.prototype.refreshToken = "";
 
         /**
          * Creates a new IssueTokenResponse instance using the specified properties.
@@ -1814,9 +1814,9 @@ $root.auth = (function() {
             if (!writer)
                 writer = $Writer.create();
             if (message.accessToken != null && Object.hasOwnProperty.call(message, "accessToken"))
-                writer.uint32(/* id 1, wireType 2 =*/10).bytes(message.accessToken);
+                writer.uint32(/* id 1, wireType 2 =*/10).string(message.accessToken);
             if (message.refreshToken != null && Object.hasOwnProperty.call(message, "refreshToken"))
-                writer.uint32(/* id 2, wireType 2 =*/18).bytes(message.refreshToken);
+                writer.uint32(/* id 2, wireType 2 =*/18).string(message.refreshToken);
             return writer;
         };
 
@@ -1852,11 +1852,11 @@ $root.auth = (function() {
                 var tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1: {
-                        message.accessToken = reader.bytes();
+                        message.accessToken = reader.string();
                         break;
                     }
                 case 2: {
-                        message.refreshToken = reader.bytes();
+                        message.refreshToken = reader.string();
                         break;
                     }
                 default:
@@ -1895,11 +1895,11 @@ $root.auth = (function() {
             if (typeof message !== "object" || message === null)
                 return "object expected";
             if (message.accessToken != null && message.hasOwnProperty("accessToken"))
-                if (!(message.accessToken && typeof message.accessToken.length === "number" || $util.isString(message.accessToken)))
-                    return "accessToken: buffer expected";
+                if (!$util.isString(message.accessToken))
+                    return "accessToken: string expected";
             if (message.refreshToken != null && message.hasOwnProperty("refreshToken"))
-                if (!(message.refreshToken && typeof message.refreshToken.length === "number" || $util.isString(message.refreshToken)))
-                    return "refreshToken: buffer expected";
+                if (!$util.isString(message.refreshToken))
+                    return "refreshToken: string expected";
             return null;
         };
 
@@ -1916,15 +1916,9 @@ $root.auth = (function() {
                 return object;
             var message = new $root.auth.IssueTokenResponse();
             if (object.accessToken != null)
-                if (typeof object.accessToken === "string")
-                    $util.base64.decode(object.accessToken, message.accessToken = $util.newBuffer($util.base64.length(object.accessToken)), 0);
-                else if (object.accessToken.length >= 0)
-                    message.accessToken = object.accessToken;
+                message.accessToken = String(object.accessToken);
             if (object.refreshToken != null)
-                if (typeof object.refreshToken === "string")
-                    $util.base64.decode(object.refreshToken, message.refreshToken = $util.newBuffer($util.base64.length(object.refreshToken)), 0);
-                else if (object.refreshToken.length >= 0)
-                    message.refreshToken = object.refreshToken;
+                message.refreshToken = String(object.refreshToken);
             return message;
         };
 
@@ -1942,25 +1936,13 @@ $root.auth = (function() {
                 options = {};
             var object = {};
             if (options.defaults) {
-                if (options.bytes === String)
-                    object.accessToken = "";
-                else {
-                    object.accessToken = [];
-                    if (options.bytes !== Array)
-                        object.accessToken = $util.newBuffer(object.accessToken);
-                }
-                if (options.bytes === String)
-                    object.refreshToken = "";
-                else {
-                    object.refreshToken = [];
-                    if (options.bytes !== Array)
-                        object.refreshToken = $util.newBuffer(object.refreshToken);
-                }
+                object.accessToken = "";
+                object.refreshToken = "";
             }
             if (message.accessToken != null && message.hasOwnProperty("accessToken"))
-                object.accessToken = options.bytes === String ? $util.base64.encode(message.accessToken, 0, message.accessToken.length) : options.bytes === Array ? Array.prototype.slice.call(message.accessToken) : message.accessToken;
+                object.accessToken = message.accessToken;
             if (message.refreshToken != null && message.hasOwnProperty("refreshToken"))
-                object.refreshToken = options.bytes === String ? $util.base64.encode(message.refreshToken, 0, message.refreshToken.length) : options.bytes === Array ? Array.prototype.slice.call(message.refreshToken) : message.refreshToken;
+                object.refreshToken = message.refreshToken;
             return object;
         };
 

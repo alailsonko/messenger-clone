@@ -8,8 +8,7 @@ import { InfraModule } from 'src/infra/infra.module';
 import { queryHandlers } from './queries/handlers';
 import { DomainModule } from 'src/domain/domain.module';
 import { SessionModule } from '../sessions/session.module';
-import { readFile } from 'fs/promises';
-import { join } from 'path';
+import { JwtAuthModule } from 'src/infra/auth/auth.module';
 
 @Module({
   imports: [
@@ -18,27 +17,7 @@ import { join } from 'path';
     InfraModule,
     DomainModule,
     SessionModule,
-    JwtModule.register({
-      async secretOrKeyProvider(requestType, tokenOrPayload, options) {
-        const privateKey = await readFile(
-          join(__dirname, '../../../private/private.key'),
-          'utf8',
-        );
-
-        return privateKey;
-      },
-      verifyOptions: {
-        algorithms: ['ES256'],
-        audience: 'authorization',
-        issuer: 'authentication',
-      },
-      signOptions: {
-        expiresIn: '180s',
-        algorithm: 'ES256',
-        audience: 'authorization',
-        issuer: 'authentication',
-      },
-    }),
+    JwtAuthModule,
   ],
   providers: [
     CredentialsApplicationService,
