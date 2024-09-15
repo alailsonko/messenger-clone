@@ -4,6 +4,10 @@ WORKDIR /app
 
 COPY package.json ./
 
+RUN npm config set @buf:registry https://buf.build/gen/npm/v1/
+
+RUN npm cache clean --force 
+
 RUN npm install
 
 COPY . .
@@ -15,6 +19,10 @@ FROM node:latest
 WORKDIR /app
 
 COPY --from=build /app/package.json ./
+
+RUN npm config set @buf:registry https://buf.build/gen/npm/v1/
+
+RUN npm cache clean --force 
 
 RUN npm install --only=production
 

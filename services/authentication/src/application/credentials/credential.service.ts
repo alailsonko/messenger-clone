@@ -70,7 +70,7 @@ export class CredentialsApplicationService {
       {
         id: credential.id,
         username: credential.username,
-        grant_type: 'access_token',
+        token_type: 'access_token',
       },
       {
         subject: credential.id,
@@ -84,7 +84,7 @@ export class CredentialsApplicationService {
       {
         id: credential.id,
         username: credential.username,
-        grant_type: 'refresh_token',
+        token_type: 'refresh_token',
       },
       {
         subject: credential.id,
@@ -102,15 +102,20 @@ export class CredentialsApplicationService {
     const ipAddress = metadata.get('ip-address').toString();
     const userAgent = metadata.get('user-agent').toString();
 
+    const [refreshTokenEncryped, accessTokenEncrypted] = await Promise.all([
+      this.encryptDecryptService.encrypt(refreshToken),
+      this.encryptDecryptService.encrypt(token),
+    ]);
+
     await this.commandBus.execute(
       new CreateSessionCommand({
-        refreshToken: await this.encryptDecryptService.encrypt(refreshToken),
-        token: await this.encryptDecryptService.encrypt(token),
-        expiresAt: new Date(decodedToken.payload.exp * 1000),
+        refreshToken: refreshTokenEncryped,
+        token: accessTokenEncrypted,
+        expiresAt: this.toDate(decodedToken.payload.exp),
         credentialId: credential.id,
-        ipAddress: ipAddress,
-        lastActive: new Date(decodedToken.payload.iat * 1000),
-        userAgent: userAgent,
+        ipAddress,
+        lastActive: this.toDate(decodedToken.payload.iat),
+        userAgent,
       }),
     );
 
@@ -118,5 +123,9 @@ export class CredentialsApplicationService {
       accessToken: token,
       refreshToken: refreshToken,
     };
+  }
+
+  private toDate(date: number) {
+    return new Date(date * 1000);
   }
 }

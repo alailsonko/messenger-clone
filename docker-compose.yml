@@ -123,9 +123,16 @@ services:
     volumes:
       - ./services/authorization:/app
     environment:
-      DATABASE_URL: postgres://admin:admin@postgres:5432/authorization
+      DATABASE_URL: postgres://admin:admin@postgres:5432/auth
     depends_on:
       - postgres
+
+  permify:
+    image: permify/permify
+    container_name: permify
+    environment:
+      PERMIFY_DATABASE_URI: postgres://admin:admin@postgres:5432/auth
+      PERMIFY_DATABASE_ENGINE: postgres
 
 volumes:
   postgres_data:
