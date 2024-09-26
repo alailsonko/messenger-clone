@@ -1,17 +1,15 @@
 import { Metadata, ServerUnaryCall } from '@grpc/grpc-js';
 import { Controller } from '@nestjs/common';
-import { GrpcMethod, RpcException } from '@nestjs/microservices';
+import { GrpcMethod } from '@nestjs/microservices';
 import { PinoLogger } from 'nestjs-pino';
-import { auth } from 'src/presentation/rpc/generated/protos';
+import { auth } from '@messenger-clone/rpc/gen/ts/authentication/authentication';
 import {
   AuthenticationMethods,
   ProtobufServiceNames,
 } from '../../presentation/rpc/protobuf-packages';
-import * as grpc from '@grpc/grpc-js';
-import { ReasonPhrases } from 'http-status-codes';
 import { CredentialsApplicationService } from '../../application/credentials/credential.service';
 import { CreateCredentialDto } from './dto/create-credential.dto';
-import { validateDto } from 'src/common/utils/dto-validator.util';
+import { validateDto } from '@messenger-clone/common';
 import { ValidateCredentialDto } from './dto/validate-credential.dto';
 import { IssueTokenDto } from './dto/issue-token.dto';
 
@@ -35,7 +33,7 @@ export class AuthenticationController {
       auth.CreateCredentialRequest,
       auth.CreateCredentialResponse
     >,
-  ): Promise<auth.ICreateCredentialResponse> {
+  ): Promise<auth.CreateCredentialResponse> {
     await validateDto(CreateCredentialDto, data, metadata);
 
     const { CreateCredentialResponse } = auth;
@@ -46,16 +44,6 @@ export class AuthenticationController {
     const response = new CreateCredentialResponse({
       clientId: credential.id,
     });
-
-    const isNotValidResponse = CreateCredentialResponse.verify(response);
-
-    if (isNotValidResponse) {
-      throw new RpcException({
-        code: grpc.status.INTERNAL,
-        message: ReasonPhrases.INTERNAL_SERVER_ERROR,
-        metadata,
-      });
-    }
 
     call.sendMetadata(metadata);
 
@@ -73,7 +61,7 @@ export class AuthenticationController {
       auth.FindCredentialRequest,
       auth.FindCredentialResponse
     >,
-  ): Promise<auth.IFindCredentialResponse> {
+  ): Promise<auth.FindCredentialResponse> {
     const { FindCredentialResponse } = auth;
 
     const credential = await this.credentialApplicationService.findCredential(
@@ -86,16 +74,6 @@ export class AuthenticationController {
       createdAt: credential.createdAt.toISOString(),
       updatedAt: credential.updatedAt.toISOString(),
     });
-
-    const isNotValidResponse = FindCredentialResponse.verify(response);
-
-    if (isNotValidResponse) {
-      throw new RpcException({
-        code: grpc.status.INTERNAL,
-        message: ReasonPhrases.INTERNAL_SERVER_ERROR,
-        metadata,
-      });
-    }
 
     call.sendMetadata(metadata);
 
@@ -113,7 +91,7 @@ export class AuthenticationController {
       auth.ValidateCredentialRequest,
       auth.ValidateCredentialResponse
     >,
-  ): Promise<auth.IValidateCredentialResponse> {
+  ): Promise<auth.ValidateCredentialResponse> {
     await validateDto(ValidateCredentialDto, data, metadata);
 
     const { ValidateCredentialResponse } = auth;
@@ -124,16 +102,6 @@ export class AuthenticationController {
     const response = new ValidateCredentialResponse({
       isValid,
     });
-
-    const isNotValidResponse = ValidateCredentialResponse.verify(response);
-
-    if (isNotValidResponse) {
-      throw new RpcException({
-        code: grpc.status.INTERNAL,
-        message: ReasonPhrases.INTERNAL_SERVER_ERROR,
-        metadata,
-      });
-    }
 
     call.sendMetadata(metadata);
 
@@ -148,7 +116,7 @@ export class AuthenticationController {
     data: IssueTokenDto,
     metadata: Metadata,
     call: ServerUnaryCall<auth.IssueTokenRequest, auth.IssueTokenResponse>,
-  ): Promise<auth.IIssueTokenResponse> {
+  ): Promise<auth.IssueTokenResponse> {
     await validateDto(IssueTokenDto, data, metadata);
 
     const { IssueTokenResponse } = auth;
@@ -160,18 +128,8 @@ export class AuthenticationController {
 
     const response = new IssueTokenResponse(tokens);
 
-    const isNotValidResponse = IssueTokenResponse.verify(response);
-
-    if (isNotValidResponse) {
-      throw new RpcException({
-        code: grpc.status.INTERNAL,
-        message: ReasonPhrases.INTERNAL_SERVER_ERROR,
-        metadata,
-      });
-    }
-
     call.sendMetadata(metadata);
 
-    return tokens;
+    return response;
   }
 }

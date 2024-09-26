@@ -1,0 +1,35 @@
+{
+  "name": "messenger-clone",
+  "version": "1.0.0",
+  "private": true,
+  "repository": "https://github.com/alailsonko/messenger-clone.git",
+  "author": "alailsonko <aalailson3@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "accounts:start:dev": "yarn workspace @messenger-clone/accounts run start:dev",
+    "authentication:start:dev": "yarn workspace @messenger-clone/authentication run start:dev",
+    "authorization:start:dev": "yarn workspace @messenger-clone/authorization run start:dev",
+    "chats:start:dev": "yarn workspace @messenger-clone/chats run start:dev",
+    "messages:start:dev": "yarn workspace @messenger-clone/messages run start:dev",
+    "orchestrator:start:dev": "yarn workspace @messenger-clone/orchestrator run start:dev",
+    "posts:start:dev": "yarn workspace @messenger-clone/posts run start:dev",
+    "rbac:start:dev": "yarn workspace @messenger-clone/rbac run start:dev",
+    "users:start:dev": "yarn workspace @messenger-clone/users run start:dev",
+    "web:start:dev": "yarn workspace @messenger-clone/web run dev",
+    "accounts:build": "yarn workspace @messenger-clone/accounts run build",
+    "authentication:build": "yarn workspace @messenger-clone/authentication run build",
+    "authorization:build": "yarn workspace @messenger-clone/authorization run build",
+    "chats:build": "yarn workspace @messenger-clone/chats run build",
+    "messages:build": "yarn workspace @messenger-clone/messages run build",
+    "orchestrator:build": "yarn workspace @messenger-clone/orchestrator run build",
+    "posts:build": "yarn workspace @messenger-clone/posts run build",
+    "rbac:build": "yarn workspace @messenger-clone/rbac run build",
+    "users:build": "yarn workspace @messenger-clone/users run build",
+    "web:build": "yarn workspace @messenger-clone/web run build",
+    "all:build": "yarn workspaces run build",
+    "web:start:prod": "yarn workspace @messenger-clone/web run start"
+  },
+  "workspaces": [
+    "services/*"
+  ]
+}

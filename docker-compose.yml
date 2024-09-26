@@ -15,10 +15,11 @@ services:
 
   accounts:
     build:
-      context: ./services/accounts
-    command: ["npm", "run", "start:dev"]
+      context: ./
+      dockerfile: ./services/accounts/Dockerfile
+    command: ["npm", "run", "accounts:start:dev"]
     volumes:
-      - ./services/accounts:/app
+      - ./:/app
     environment:
       DATABASE_URL: postgres://admin:admin@postgres:5432/accounts
     depends_on:
@@ -26,10 +27,11 @@ services:
 
   chats:
     build:
-      context: ./services/chats
-    command: ["npm", "run", "start:dev"]
+      context: ./
+      dockerfile: ./services/chats/Dockerfile
+    command: ["npm", "run", "chats:start:dev"]
     volumes:
-      - ./services/chats:/app
+      - ./:/app
     environment:
       DATABASE_URL: postgres://admin:admin@postgres:5432/chats
     depends_on:
@@ -37,10 +39,11 @@ services:
 
   messages:
     build:
-      context: ./services/messages
-    command: ["npm", "run", "start:dev"]
+      context: ./
+      dockerfile: ./services/messages/Dockerfile
+    command: ["npm", "run", "messages:start:dev"]
     volumes:
-      - ./services/messages:/app
+      - ./:/app
     environment:
       DATABASE_URL: postgres://admin:admin@postgres:5432/messages
     depends_on:
@@ -48,10 +51,11 @@ services:
 
   orchestrator:
     build:
-      context: ./services/orchestrator
-    command: ["npm", "run", "start:dev"]
+      context: ./
+      dockerfile: ./services/orchestrator/Dockerfile
+    command: ["npm", "run", "orchestrator:start:dev"]
     volumes:
-      - ./services/orchestrator:/app
+      - ./:/app
     environment:
       DATABASE_URL: postgres://admin:admin@postgres:5432/orchestrator
     depends_on:
@@ -59,10 +63,11 @@ services:
 
   posts:
     build:
-      context: ./services/posts
-    command: ["npm", "run", "start:dev"]
+      context: ./
+      dockerfile: ./services/posts/Dockerfile
+    command: ["npm", "run", "posts:start:dev"]
     volumes:
-      - ./services/posts:/app
+      - ./:/app
     environment:
       DATABASE_URL: postgres://admin:admin@postgres:5432/posts
     depends_on:
@@ -70,10 +75,11 @@ services:
 
   rbac:
     build:
-      context: ./services/rbac
-    command: ["npm", "run", "start:dev"]
+      context: ./
+      dockerfile: ./services/rbac/Dockerfile
+    command: ["npm", "run", "rbac:start:dev"]
     volumes:
-      - ./services/rbac:/app
+      - ./:/app
     environment:
       DATABASE_URL: postgres://admin:admin@postgres:5432/rbac
     depends_on:
@@ -81,10 +87,11 @@ services:
 
   users:
     build:
-      context: ./services/users
-    command: ["npm", "run", "start:dev"]
+      context: ./
+      dockerfile: ./services/users/Dockerfile
+    command: ["npm", "run", "users:start:dev"]
     volumes:
-      - ./services/users:/app
+      - ./:/app
     environment:
       DATABASE_URL: postgres://admin:admin@postgres:5432/users
     depends_on:
@@ -92,10 +99,11 @@ services:
 
   web:
     build:
-      context: ./services/web
-    command: ["npm", "run", "dev"]
+      context: ./
+      dockerfile: ./services/web/Dockerfile
+    command: ["npm", "run", "web:start:dev"]
     volumes:
-      - ./services/web:/app
+      - ./:/app
     ports:
       - "3000:3000"
     environment:
@@ -105,10 +113,11 @@ services:
 
   authentication:
     build:
-      context: ./services/authentication
-    command: ["npm", "run", "start:dev"]
+      context: ./
+      dockerfile: ./services/authentication/Dockerfile
+    command: ["npm", "run", "authentication:start:dev"]
     volumes:
-      - ./services/authentication:/app
+      - ./:/app
     environment:
       DATABASE_URL: postgres://admin:admin@postgres:5432/authentication
     depends_on:
@@ -118,10 +127,11 @@ services:
 
   authorization:
     build:
-      context: ./services/authorization
-    command: ["npm", "run", "start:dev"]
+      context: ./
+      dockerfile: ./services/authorization/Dockerfile
+    command: ["npm", "run", "authorization:start:dev"]
     volumes:
-      - ./services/authorization:/app
+      - ./:/app
     environment:
       DATABASE_URL: postgres://admin:admin@postgres:5432/auth
     depends_on:
@@ -131,7 +141,7 @@ services:
     image: permify/permify
     container_name: permify
     environment:
-      PERMIFY_DATABASE_URI: postgres://admin:admin@postgres:5432/auth
+      PERMIFY_DATABASE_URI: postgres://admin:admin@postgres:5432/permify
       PERMIFY_DATABASE_ENGINE: postgres
 
 volumes:

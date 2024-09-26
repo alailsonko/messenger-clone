@@ -3,7 +3,7 @@
   "collection": "@nestjs/schematics",
   "sourceRoot": "src",
   "compilerOptions": {
-    "assets": ["**/*.proto", "presentation/rpc/generated"],
+    "assets": ["**/*.proto", "presentation/rpc/generated", "presentation/rpc/gen"],
     "watchAssets": true,
     "deleteOutDir": true
   }

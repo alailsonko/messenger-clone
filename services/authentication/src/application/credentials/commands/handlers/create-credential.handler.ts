@@ -1,8 +1,8 @@
 import { CommandHandler } from '@nestjs/cqrs';
 import { CreateCredentialCommand } from '../impl';
 import { CredentialsRepository } from 'src/data/repository/credentials/credentials.repository';
-import { Credential } from '@prisma/client';
 import { HashService } from 'src/infra/cryptography/hash.service';
+import { Credential } from '../../../../../prisma/client/prisma';
 
 @CommandHandler(CreateCredentialCommand)
 export class CreateCredentialHandler {

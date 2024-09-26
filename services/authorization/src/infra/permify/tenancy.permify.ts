@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { base } from './generated/ts/base/v1/service';
+import { base } from '@messenger-clone/rpc/gen/ts/base/v1/service';
 import * as grpc from '@grpc/grpc-js';
 
 @Injectable()

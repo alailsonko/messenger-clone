@@ -14,7 +14,7 @@ export enum AuthenticationMethods {
 export const protobufPackages = {
   authentication: {
     name: 'auth',
-    filePath: join(__dirname, `./proto/authentication.proto`),
+    filePath: join(__dirname, `./../../../../rpc/proto/authentication/authentication.proto`),
     service: ProtobufServiceNames.AUTHENTICATION,
     methods: {
       createCredential: AuthenticationMethods.CREATE_CREDENTIAL,

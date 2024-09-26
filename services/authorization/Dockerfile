@@ -2,30 +2,16 @@ FROM node:latest AS build
 
 WORKDIR /app
 
-COPY package.json ./
-
-RUN npm config set @buf:registry https://buf.build/gen/npm/v1/
-
-RUN npm cache clean --force 
-
-RUN npm install
-
 COPY . .
 
-RUN npm run build
+RUN yarn install
+
+RUN yarn run all:build
 
 FROM node:latest
 
 WORKDIR /app
 
-COPY --from=build /app/package.json ./
+COPY --from=build /app ./
 
-RUN npm config set @buf:registry https://buf.build/gen/npm/v1/
-
-RUN npm cache clean --force 
-
-RUN npm install --only=production
-
-COPY --from=build /app/dist ./dist
-
-CMD ["node", "dist/main.js"]
+CMD ["node", "services/authorization/dist/main.js"]

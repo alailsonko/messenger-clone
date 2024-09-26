@@ -1,0 +1,17 @@
+{
+  "name": "@messenger-clone/rpc",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "generate": "./generate.sh",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "protoc-gen-ts": "latest"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.2"
+  }
+}

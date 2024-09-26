@@ -1,5 +1,5 @@
 {
-  "name": "authorization",
+  "name": "@messenger-clone/authorization",
   "version": "0.0.1",
   "description": "",
   "author": "",
@@ -29,7 +29,8 @@
     "google-protobuf": "^3.21.4",
     "protoc-gen-ts": "^0.8.7",
     "reflect-metadata": "^0.2.0",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "@messenger-clone/rpc": "*"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",

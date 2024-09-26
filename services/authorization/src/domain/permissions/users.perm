@@ -1,0 +1,57 @@
+entity user {
+
+    // Owner
+    relation owner @user
+
+    // Subject
+    relation subject @user
+
+    // Users can follow other users
+    relation following @user
+
+    // Users can be followed by other users
+    relation followers @user
+
+    // Users can block other users
+    relation blocked_users @user
+
+    // Users own posts and stories
+    relation owns_posts @post
+    relation owns_stories @story
+
+    // User account settings
+    attribute is_public boolean
+    attribute comments_allowed boolean
+    attribute comments_from_following_only boolean
+
+    // Users can view the profile if they're the owner, not blocked, and either the account is public or they are a follower
+    action view = is_public or followers or owner
+}
+
+entity post {
+    // Posts are owned by users
+    relation owner @user
+
+    // Users can view the story if they can view the owner's profile
+    action view = owner.view
+}
+
+entity story {
+    // Stories are owned by users
+    relation owner @user
+
+    // Users can view the story if they can view the owner's profile
+    action view = owner.view
+}
+
+
+entity chat {
+    // Chats involve participants
+    relation participants @user
+}
+
+entity message {
+    // Messages are part of a chat and have a sender
+    relation chat @chat
+    relation sender @user
+}

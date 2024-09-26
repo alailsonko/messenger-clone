@@ -2,22 +2,16 @@ FROM node:latest AS build
 
 WORKDIR /app
 
-COPY package.json ./
-
-RUN npm install
-
 COPY . .
 
-RUN npm run build
+RUN yarn install
+
+RUN yarn run all:build
 
 FROM node:latest
 
 WORKDIR /app
 
-COPY --from=build /app/package.json ./
+COPY --from=build /app ./
 
-RUN npm install --only=production
-
-COPY --from=build /app/dist ./dist
-
-CMD ["node", "dist/main.js"]
+CMD ["node", "services/accounts/dist/main.js"]

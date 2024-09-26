@@ -23,7 +23,7 @@ create_database() {
 }
 
 # List of databases to create
-databases=("accounts" "chats" "orchestrator" "posts" "rbac" "users" "authentication" "auth")
+databases=("accounts" "chats" "orchestrator" "posts" "rbac" "users" "authentication" "auth" "permify")
 
 # Loop through the list and create each database
 for db in "${databases[@]}"; do

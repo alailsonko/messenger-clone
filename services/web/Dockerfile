@@ -4,17 +4,15 @@ FROM node:latest AS builder
 # Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
-COPY package.json package-lock.json ./
-
-# Install dependencies
-RUN npm install
+RUN yarn install
 
 # Copy the rest of the application code
 COPY . .
 
+RUN yarn install
+
 # Build the Next.js application
-RUN npm run build
+RUN yarn run all:build
 
 # Stage 2: Serve the application
 FROM node:latest
@@ -23,13 +21,10 @@ FROM node:latest
 WORKDIR /app
 
 # Copy only the necessary files from the builder stage
-COPY --from=builder /app/package.json /app/package-lock.json ./
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app ./
 
 # Expose the port the app runs on
 EXPOSE 3000
 
 # Start the Next.js application
-CMD ["npm", "start"]
+CMD ["yarn", "run", "web:start:prod"]

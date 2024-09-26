@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CreateSessionCommand } from '../impl';
 import { SessionsRepository } from 'src/data/repository/sessions/sessions.repository';
-import { Session } from '@prisma/client';
+import { Session } from '../../../../../prisma/client/prisma';
 
 @CommandHandler(CreateSessionCommand)
 export class CreateSessionHandler
