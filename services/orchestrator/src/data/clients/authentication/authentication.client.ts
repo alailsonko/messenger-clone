@@ -53,7 +53,9 @@ export class AuthenticationClient {
     });
   }
 
-  findCredential(data: auth.FindCredentialRequest): Promise<auth.FindCredentialResponse> {
+  findCredential(
+    data: auth.FindCredentialRequest,
+  ): Promise<auth.FindCredentialResponse> {
     return new Promise((resolve, reject) => {
       this.client.findCredential(data, (error, response) => {
         if (error) {

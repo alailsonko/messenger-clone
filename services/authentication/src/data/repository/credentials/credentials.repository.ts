@@ -8,6 +8,7 @@ export class CredentialsRepository {
   async createCredential(
     data: Prisma.CredentialCreateInput,
   ): Promise<Credential> {
+
     return this.prismaService.credential.create({
       data,
     });

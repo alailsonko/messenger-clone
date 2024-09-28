@@ -1,8 +1,9 @@
-import { Module } from "@nestjs/common";
-import { AuthenticationClient } from "./authentication/authentication.client";
+import { Module } from '@nestjs/common';
+import { AuthenticationClient } from './authentication/authentication.client';
+import { UsersClient } from './users/users.client';
 
 @Module({
-    providers: [AuthenticationClient],
-    exports: [AuthenticationClient],
+  providers: [AuthenticationClient, UsersClient],
+  exports: [AuthenticationClient, UsersClient],
 })
 export class ClientsModule {}
