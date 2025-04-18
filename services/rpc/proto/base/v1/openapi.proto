@@ -1,4 +1,0 @@
-syntax = "proto3";
-package base.v1;
-
-// import "openapiv2/options/annotations.proto";
