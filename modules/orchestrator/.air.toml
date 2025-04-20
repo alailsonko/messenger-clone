@@ -1,0 +1,19 @@
+[build]
+cmd = "go build -o tmp/main ./"
+bin = "tmp/main run"
+include_ext = ["go", "tpl", "tmpl", "html"]
+exclude_dir = ["assets", "tmp", "vendor"]
+
+[log]
+time = true
+
+[color]
+main = "yellow"
+watcher = "cyan"
+build = "green"
+runner = "magenta"
+
+[watch]
+# Directly watch the directories containing .go files to ensure the build trigger works.
+include = ["./"]
+exclude_dir = ["./tmp", "./vendor", "./build", "./.vscode"]

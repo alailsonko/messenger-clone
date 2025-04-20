@@ -1,5 +1,7 @@
 services:
   proxy:
+    container_name: proxy
+    hostname: proxy
     build:
       context: ./modules/proxy
       dockerfile: Dockerfile
@@ -8,4 +10,22 @@ services:
     volumes:
       - ./modules/proxy:/app
     environment:
-      - RUST_LOG=debug
+      - RUST_LOG=info
+      - BACON_REFRESH=500ms  # Customize refresh rate
+    tty: true  # Required for bacon's interactive output
+
+  orchestrator:
+    container_name: orchestrator
+    hostname: orchestrator
+    build:
+      context: ./modules/orchestrator
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./modules/orchestrator:/app
+  jaeger:
+    container_name: jaeger
+    hostname: jaeger
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"   # Jaeger UI
+      - "4317:4317"     # OTLP gRPC

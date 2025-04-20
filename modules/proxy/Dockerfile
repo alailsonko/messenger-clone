@@ -1,13 +1,18 @@
-# Development stage
-FROM rust:1.86-slim as dev
+FROM rust:latest
 
-# Update package manager to minimize vulnerabilities
-RUN apt-get update && apt-get upgrade -y && apt-get clean
+# Install bacon and dependencies
+RUN cargo install bacon && \
+    apt-get update && \
+    apt-get install -y inotify-tools cmake make lsof
 
 WORKDIR /app
-RUN cargo install cargo-watch
-
 COPY . .
 
-# Use this for development with hot reload
-CMD ["cargo", "watch", "-x", "run"]
+# Copy and make our start script executable
+COPY start.sh /app/start.sh
+RUN chmod +x /app/start.sh
+
+# Make sure the script is executable
+RUN chmod +x start.sh
+
+CMD ["/app/start.sh"]
