@@ -1,8 +1,8 @@
 package main
 
 import (
-	"orchestrator/app"
-	"orchestrator/routes"
+	"github.com/alailsonko/messenger-clone/modules/orchestrator/app"
+	"github.com/alailsonko/messenger-clone/modules/orchestrator/routes"
 )
 
 func main() {

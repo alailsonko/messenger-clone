@@ -1,4 +1,4 @@
-module orchestrator
+module github.com/alailsonko/messenger-clone/modules/orchestrator
 
 go 1.24.0
 

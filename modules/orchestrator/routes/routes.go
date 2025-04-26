@@ -1,8 +1,8 @@
 package routes
 
 import (
-	"orchestrator/app"
-	"orchestrator/handlers/users"
+	"github.com/alailsonko/messenger-clone/modules/orchestrator/app"
+	"github.com/alailsonko/messenger-clone/modules/orchestrator/handlers/users"
 )
 
 func SetupRoutes(app *app.App) {

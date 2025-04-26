@@ -1,8 +1,7 @@
 package users
 
 import (
-	"orchestrator/app"
-
+	"github.com/alailsonko/messenger-clone/modules/orchestrator/app"
 	"github.com/gofiber/fiber/v3"
 	"go.uber.org/zap"
 )
