@@ -5,16 +5,35 @@ import (
 	user_pb "github.com/alailsonko/messenger-clone/modules/shared/protobuf"
 	"github.com/gofiber/fiber/v3"
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 )
 
 func GetUsers(c fiber.Ctx) error {
 	app.Instance.Logger.Info("GetUsers called", zap.String("path", c.Path()))
 
-	request := user_pb.ListUsersRequest{
-		Page:     1,
-		PageSize: 10,
+	conn, err := grpc.NewClient("users", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		app.Instance.Logger.Error("Failed to create gRPC client", zap.Error(err))
+		return c.Status(500).SendString("Internal Server Error")
 	}
-	app.Instance.Logger.Info("ListUsersRequest created", zap.Any("request", request))
+	defer conn.Close()
+
+	client := user_pb.NewUsersServiceClient(conn)
+
+	ctx := c.Context()
+	request := &user_pb.GetUserRequest{
+		Id: "example-id", // Replace with the actual user ID
+	}
+	response, err := client.GetUser(ctx, request, grpc.WaitForReady(true), grpc.Header(&metadata.MD{
+		"authorization": []string{"Bearer example-token"}, // Replace with actual token
+	}))
+	if err != nil {
+		app.Instance.Logger.Error("Failed to get user", zap.Error(err))
+		return c.Status(500).SendString("Internal Server Error")
+	}
+	app.Instance.Logger.Info("GetUser response received", zap.Any("response", response))
 
 	return c.SendString("Get Users")
 }

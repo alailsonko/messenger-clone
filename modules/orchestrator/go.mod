@@ -32,3 +32,7 @@ require (
 	go.uber.org/zap v1.27.0
 	golang.org/x/sys v0.30.0 // indirect
 )
+
+replace (
+	github.com/alailsonko/messenger-clone/modules/shared => ../shared
+)
