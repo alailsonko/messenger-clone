@@ -1,2 +1,3 @@
 target
 modules/**/tmp
+modules/**/**/vendor
