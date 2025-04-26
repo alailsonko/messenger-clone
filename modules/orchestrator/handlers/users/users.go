@@ -2,12 +2,18 @@ package users
 
 import (
 	"github.com/alailsonko/messenger-clone/modules/orchestrator/app"
+	"github.com/alailsonko/messenger-clone/modules/shared/user_pb"
 	"github.com/gofiber/fiber/v3"
 	"go.uber.org/zap"
 )
 
 func GetUsers(c fiber.Ctx) error {
 	app.Instance.Logger.Info("GetUsers called", zap.String("path", c.Path()))
+
+	user_pb.ListUsersRequest{
+		Page:     1,
+		PageSize: 10,
+	}
 
 	return c.SendString("Get Users")
 }
