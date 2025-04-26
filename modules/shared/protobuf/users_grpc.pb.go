@@ -4,7 +4,7 @@
 // - protoc             v4.24.4
 // source: protobuf/users.proto
 
-package users_pb
+package protobuf
 
 import (
 	context "context"

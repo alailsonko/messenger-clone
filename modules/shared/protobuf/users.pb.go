@@ -4,7 +4,7 @@
 // 	protoc        v4.24.4
 // source: protobuf/users.proto
 
-package users_pb
+package protobuf
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -249,7 +249,7 @@ const file_protobuf_users_proto_rawDesc = "" +
 	"totalCount2\x8d\x01\n" +
 	"\fUsersService\x125\n" +
 	"\aGetUser\x12\x18.users_pb.GetUserRequest\x1a\x0e.users_pb.User\"\x00\x12F\n" +
-	"\tListUsers\x12\x1a.users_pb.ListUsersRequest\x1a\x1b.users_pb.ListUsersResponse\"\x00BHZFgithub.com/alailsonko/messenger-clone/modules/shared/protobuf/users_pbb\x06proto3"
+	"\tListUsers\x12\x1a.users_pb.ListUsersRequest\x1a\x1b.users_pb.ListUsersResponse\"\x00BHZFgithub.com/alailsonko/messenger-clone/modules/shared/protobuf/protobufb\x06proto3"
 
 var (
 	file_protobuf_users_proto_rawDescOnce sync.Once

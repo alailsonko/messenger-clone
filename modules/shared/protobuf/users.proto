@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package users_pb;
-option go_package = "github.com/alailsonko/messenger-clone/modules/shared/protobuf/users_pb";
+option go_package = "github.com/alailsonko/messenger-clone/modules/shared/protobuf/protobuf";
 
 service UsersService {
   rpc GetUser(GetUserRequest) returns (User) {}
