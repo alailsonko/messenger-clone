@@ -1,7 +1,7 @@
 package app
 
 import (
-	"github.com/alailsonko/messenger-clone/modules/orchestrator/logger"
+	"github.com/alailsonko/messenger-clone/modules/shared/logger"
 	"github.com/gofiber/fiber/v3"
 	"go.uber.org/zap"
 )

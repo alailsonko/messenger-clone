@@ -5,8 +5,8 @@ import (
 	"github.com/alailsonko/messenger-clone/modules/orchestrator/handlers/users"
 )
 
-func SetupRoutes(app *app.App) {
-	apiUsers := app.Api.Group("/api/users")
+func SetupRoutes() {
+	apiUsers := app.Instance.Api.Group("/api/users")
 
 	apiUsers.Get("/", users.GetUsers).Name("GetUser")
 	apiUsers.Get("/:id", users.GetUserById).Name("GetUserById")

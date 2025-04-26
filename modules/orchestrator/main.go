@@ -11,7 +11,7 @@ func main() {
 	defer app.Stop()
 	defer app.Sync()
 
-	routes.SetupRoutes(app)
+	routes.SetupRoutes()
 
 	app.Start()
 }
