@@ -10,10 +10,11 @@ import (
 func GetUsers(c fiber.Ctx) error {
 	app.Instance.Logger.Info("GetUsers called", zap.String("path", c.Path()))
 
-	user_pb.ListUsersRequest{
+	request := user_pb.ListUsersRequest{
 		Page:     1,
 		PageSize: 10,
 	}
+	app.Instance.Logger.Info("ListUsersRequest created", zap.Any("request", request))
 
 	return c.SendString("Get Users")
 }

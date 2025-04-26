@@ -12,10 +12,13 @@ require (
 	golang.org/x/crypto v0.33.0 // indirect
 	golang.org/x/net v0.35.0 // indirect
 	golang.org/x/text v0.22.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250218202821-56aae31c358a // indirect
+	google.golang.org/grpc v1.72.0 // indirect
+	google.golang.org/protobuf v1.36.6 // indirect
 )
 
 require (
-	github.com/alailsonko/messenger-clone/modules/shared v0.0.0-20250426193253-e5b5f130fb4e
+	github.com/alailsonko/messenger-clone/modules/shared v0.0.0-20250426202111-b395d411e07d
 	github.com/andybalholm/brotli v1.1.1 // indirect
 	github.com/gofiber/fiber/v3 v3.0.0-beta.4
 	github.com/google/uuid v1.6.0 // indirect
