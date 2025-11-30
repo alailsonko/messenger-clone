@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:18
+    container_name: messenger_db_primary
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./database/postgres/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - messenger_net
+
+  db_replica:
+    image: postgres:18
+    container_name: messenger_db_replica
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
+      PGDATA: /var/lib/postgresql/data/pgdata
+      PRIMARY_HOST: db
+      PRIMARY_PORT: 5432
+      REPLICA_USER: replicator
+      REPLICA_PASSWORD: replica_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - db_replica_data:/var/lib/postgresql/data
+      - ./database/postgres/replica/replica-entrypoint.sh:/usr/local/bin/replica-entrypoint.sh:ro
+    entrypoint: ["/usr/local/bin/replica-entrypoint.sh"]
+    depends_on:
+      - db
+    networks:
+      - messenger_net
+
+volumes:
+  db_data:
+  db_replica_data:
+
+networks:
+  messenger_net:
