@@ -24,7 +24,7 @@ type Database struct {
 	DB          *gorm.DB
 }
 
-func NewDatabase(logger logger.Interface, host string, port int, user, password, database, name string) *Database {
+func NewDatabase(logger logger.Interface, host string, port int, user, password, database, name string) (*Database, error) {
 	dialect := postgres.Open(fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		host, port, user, password, database))
 	db, err := gorm.Open(dialect, &gorm.Config{
@@ -35,7 +35,7 @@ func NewDatabase(logger logger.Interface, host string, port int, user, password,
 
 	if err != nil {
 		logger.Error(ctx, "Failed to connect to database", err)
-		panic("failed to connect database")
+		return nil, err
 	}
 
 	internalCtx, cancel := context.WithCancel(ctx)
@@ -65,7 +65,7 @@ func NewDatabase(logger logger.Interface, host string, port int, user, password,
 		}
 	}()
 
-	return dbInstance
+	return dbInstance, nil
 }
 
 func (d *Database) healthcheck() error {
@@ -75,11 +75,16 @@ func (d *Database) healthcheck() error {
 		return err
 	}
 
-	return sqlDB.PingContext(d.internalCtx)
+	ctx, cancel := context.WithTimeout(d.internalCtx, 5*time.Second)
+	defer cancel()
+
+	return sqlDB.PingContext(ctx)
 }
 
 func (d *Database) reconnect() error {
-	db, err := gorm.Open(d.dialect, &gorm.Config{})
+	db, err := gorm.Open(d.dialect, &gorm.Config{
+		Logger: d.logger,
+	})
 
 	if err != nil {
 		d.logger.Error(d.internalCtx, "Failed to reconnect to database", err)
@@ -97,13 +102,14 @@ func (d *Database) keepAlive() {
 }
 
 func (d *Database) Close() error {
+	d.cancel()
+
 	sqlDB, err := d.DB.DB()
 	if err != nil {
 		d.logger.Error(d.internalCtx, "Failed to get sqlDB from gorm.DB", err)
 		return err
 	}
 
-	d.cancel()
 	errClose := sqlDB.Close()
 	if errClose != nil {
 		d.logger.Error(d.internalCtx, "Failed to close sqlDB", errClose)
