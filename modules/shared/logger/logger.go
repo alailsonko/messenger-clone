@@ -2,34 +2,76 @@ package logger
 
 import (
 	"context"
+	"errors"
+	"log"
+	"time"
 
 	"go.uber.org/zap"
 	"gorm.io/gorm/logger"
 )
 
 type gormLogger struct {
-	logger.Interface
-	zap *zap.Logger
+	zap                       *zap.Logger
+	level                     logger.LogLevel
+	slowThreshold             time.Duration
+	ignoreRecordNotFoundError bool
+}
+
+func (g gormLogger) LogMode(level logger.LogLevel) logger.Interface {
+	g.level = level
+	return g
 }
 
 func (g gormLogger) Info(ctx context.Context, msg string, data ...any) {
-	g.zap.Sugar().Infof(msg, data...)
+	if g.level < logger.Info {
+		return
+	}
+	g.zap.Sugar().Infow(msg, "data", data)
 }
 
 func (g gormLogger) Warn(ctx context.Context, msg string, data ...any) {
-	g.zap.Sugar().Warnf(msg, data...)
+	if g.level < logger.Warn {
+		return
+	}
+	g.zap.Sugar().Warnw(msg, "data", data)
 }
 
 func (g gormLogger) Error(ctx context.Context, msg string, data ...any) {
-	g.zap.Sugar().Errorf(msg, data...)
+	if g.level < logger.Error {
+		return
+	}
+	g.zap.Sugar().Errorw(msg, "data", data)
 }
 
-func (g gormLogger) Trace(ctx context.Context, begin int64, fc func() (string, int64), err error) {
+func (g gormLogger) Trace(ctx context.Context, begin time.Time, fc func() (string, int64), err error) {
+	if g.level <= logger.Silent {
+		return
+	}
 	sql, rows := fc()
-	if err != nil {
-		g.zap.Sugar().Errorf("Error: %v | Rows: %d | SQL: %s", err, rows, sql)
-	} else {
-		g.zap.Sugar().Infof("Rows: %d | SQL: %s", rows, sql)
+	elapsed := time.Since(begin)
+
+	switch {
+	case err != nil && (!g.ignoreRecordNotFoundError || !errors.Is(err, logger.ErrRecordNotFound)):
+		g.zap.Sugar().Errorw("gorm trace",
+			"err", err,
+			"elapsed", elapsed,
+			"rows", rows,
+			"sql", sql,
+		)
+	case g.slowThreshold > 0 && elapsed > g.slowThreshold:
+		g.zap.Sugar().Warnw("gorm slow query",
+			"elapsed", elapsed,
+			"rows", rows,
+			"sql", sql,
+		)
+	default:
+		if g.level >= logger.Info {
+			g.zap.Sugar().Infow("gorm trace",
+				"elapsed", elapsed,
+				"rows", rows,
+				"sql", sql,
+			)
+		}
 	}
 }
 
@@ -38,10 +80,25 @@ type Logger struct {
 }
 
 func NewLogger() *Logger {
-	logger, _ := zap.NewDevelopment()
-	return &Logger{zap: logger}
+	z, err := zap.NewDevelopment()
+	if err != nil {
+		log.Fatal("Failed to initialize zap logger:", err)
+	}
+	return &Logger{zap: z}
 }
 
 func (l *Logger) GormLoggerFromZap() gormLogger {
-	return gormLogger{zap: l.zap}
+	return gormLogger{
+		zap:                       l.zap,
+		level:                     logger.Info,
+		slowThreshold:             200 * time.Millisecond,
+		ignoreRecordNotFoundError: true,
+	}
+}
+
+func (l *Logger) Sync() {
+	err := l.zap.Sync()
+	if err != nil {
+		log.Println("Failed to sync zap logger:", err)
+	}
 }
