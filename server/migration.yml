@@ -1,0 +1,32 @@
+version: 1
+dir: ./migrations
+table: migration
+lock_table: migration_lock
+driver: postgres
+go_env: ${GO_ENV}
+
+envs:
+  development:
+    db_host: ${DB_HOST_DEV}
+    db_port: ${DB_PORT_DEV}
+    db_name: ${DB_NAME_DEV}
+    db_user: ${DB_USER_DEV}
+    db_password: ${DB_PASSWORD_DEV}
+  production:
+    db_host: ${DB_HOST_PROD}
+    db_port: ${DB_PORT_PROD}
+    db_name: ${DB_NAME_PROD}
+    db_user: ${DB_USER_PROD}
+    db_password: ${DB_PASSWORD_PROD}
+  test:
+    db_host: ${DB_HOST_TEST}
+    db_port: ${DB_PORT_TEST}
+    db_name: ${DB_NAME_TEST}
+    db_user: ${DB_USER_TEST}
+    db_password: ${DB_PASSWORD_TEST}
+  ci:
+    db_host: ${DB_HOST_CI}
+    db_port: ${DB_PORT_CI}
+    db_name: ${DB_NAME_CI}
+    db_user: ${DB_USER_CI}
+    db_password: ${DB_PASSWORD_CI}

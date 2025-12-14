@@ -3,7 +3,7 @@ services:
     image: postgres:18
     container_name: messenger_db_primary
     environment:
-      POSTGRES_USER: admin
+      POSTGRES_USER: root
       POSTGRES_PASSWORD: password
       POSTGRES_DB: postgres
       PGDATA: /var/lib/postgresql/data/pgdata
