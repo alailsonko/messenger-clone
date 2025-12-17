@@ -10,42 +10,30 @@ import (
 	"github.com/alailsonko/messenger-clone/server/tools/migration/config"
 	"github.com/alailsonko/messenger-clone/server/tools/migration/models"
 	"github.com/alailsonko/messenger-clone/server/tools/migration/registry"
+	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
+const (
+	DownCmdFlag = "down"
+)
+
+func DownCmdFactory(cfg *config.Config, db *database.Database, log *logger.Logger) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   DownCmdFlag,
+		Short: "Apply the down migration",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			Down(db, log, cfg)
+			return nil
+		},
+	}
+	return cmd
+}
+
 func Down(
-	configPath string,
-) {
-	configInstance, err := config.NewConfig(configPath)
-	if err != nil {
-		panic(err)
-	}
-	err = configInstance.Validate()
-	if err != nil {
-		panic(err)
-	}
-	loggerInstance := logger.NewLogger()
-	gormLogger := loggerInstance.GormLoggerFromZap()
-
-	envConfig, ok := configInstance.Envs[configInstance.GoEnv]
-	if !ok {
-		panic("environment config not found: " + configInstance.GoEnv)
-	}
-	err = envConfig.Validate()
-	if err != nil {
-		panic(err)
-	}
-
-	dbPort, err := envConfig.DBPortInt()
-	if err != nil {
-		panic(err)
-	}
-
-	databaseInstance, err := database.NewDatabase(gormLogger, envConfig.DbHost, dbPort, envConfig.DbUser, envConfig.DbPassword, envConfig.DbName, configInstance.GoEnv)
-	if err != nil {
-		panic(err)
-	}
+	databaseInstance *database.Database, loggerInstance *logger.Logger, configInstance *config.Config,
+) error {
 	migrator := databaseInstance.DB.Migrator()
 	if err := createMigrationIfNotExists(migrator); err != nil {
 		panic(err)
@@ -54,20 +42,20 @@ func Down(
 		panic(err)
 	}
 
-	if err := acquireLock(databaseInstance.DB, configInstance.LockTable); err != nil {
+	if err := acquireLock(databaseInstance.DB, configInstance.MigrationLockTable); err != nil {
 		panic(fmt.Errorf("failed to acquire lock: %w", err))
 	}
 	defer func() {
-		if err := releaseLock(databaseInstance.DB, configInstance.LockTable); err != nil {
+		if err := releaseLock(databaseInstance.DB, configInstance.MigrationLockTable); err != nil {
 			loggerInstance.Error(fmt.Sprintf("failed to release lock: %v", err))
 		}
 	}()
 
 	// Get all applied migrations from the database
-	appliedMigration, err := getLastAppliedMigration(databaseInstance.DB, configInstance.Table)
+	appliedMigration, err := getLastAppliedMigration(databaseInstance.DB, configInstance.MigrationTable)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		loggerInstance.Info("No migrations to rollback")
-		return
+		return nil
 	}
 
 	if err != nil {
@@ -83,11 +71,12 @@ func Down(
 		panic(fmt.Errorf("failed to execute down migration %s: %w", migration.Name, err))
 	}
 
-	if err := removeMigrationRecord(databaseInstance.DB, configInstance.Table, migration.Name); err != nil {
+	if err := removeMigrationRecord(databaseInstance.DB, configInstance.MigrationTable, migration.Name); err != nil {
 		panic(fmt.Errorf("failed to remove migration record: %w", err))
 	}
 
 	loggerInstance.Info(fmt.Sprintf("applied the down migration %s", migration.Name))
+	return nil
 }
 
 func getLastAppliedMigration(db *gorm.DB, tableName string) (string, error) {

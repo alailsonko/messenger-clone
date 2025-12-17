@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"syscall"
 	"time"
 
 	"go.uber.org/zap"
@@ -97,8 +98,7 @@ func (l *Logger) GormLoggerFromZap() gormLogger {
 }
 
 func (l *Logger) Sync() {
-	err := l.zap.Sync()
-	if err != nil {
+	if err := l.zap.Sync(); err != nil && !errors.Is(err, syscall.ENOTTY) && !errors.Is(err, syscall.EINVAL) {
 		log.Println("Failed to sync zap logger:", err)
 	}
 }

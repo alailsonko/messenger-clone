@@ -11,13 +11,13 @@ import (
 )
 
 type Config struct {
-	Version   int                  `yaml:"version"`
-	Dir       string               `yaml:"dir"`
-	Table     string               `yaml:"table"`
-	LockTable string               `yaml:"lock_table"`
-	Driver    string               `yaml:"driver"`
-	Envs      map[string]EnvConfig `yaml:"envs"`
-	GoEnv     string               `yaml:"go_env"`
+	Version            int                  `yaml:"version"`
+	Dir                string               `yaml:"dir"`
+	MigrationTable     string               `yaml:"migration_table"`
+	MigrationLockTable string               `yaml:"migration_lock_table"`
+	Driver             string               `yaml:"driver"`
+	Envs               map[string]EnvConfig `yaml:"envs"`
+	GoEnv              string               `yaml:"go_env"`
 }
 
 type EnvConfig struct {
@@ -58,7 +58,6 @@ func (e *EnvConfig) Validate() error {
 	return nil
 }
 
-// loadConfig reads and parses YAML, expanding ${VAR} from the environment.
 func loadConfig(configPath string) (*Config, error) {
 	if configPath == "" {
 		return nil, errors.New("config path is empty")
@@ -72,14 +71,12 @@ func loadConfig(configPath string) (*Config, error) {
 		return nil, fmt.Errorf("parse yaml: %w", err)
 	}
 
-	// Expand env vars in top-level fields
 	c.Dir = os.ExpandEnv(c.Dir)
-	c.Table = os.ExpandEnv(c.Table)
-	c.LockTable = os.ExpandEnv(c.LockTable)
+	c.MigrationTable = os.ExpandEnv(c.MigrationTable)
+	c.MigrationLockTable = os.ExpandEnv(c.MigrationLockTable)
 	c.Driver = os.ExpandEnv(c.Driver)
 	c.GoEnv = os.ExpandEnv(c.GoEnv)
 
-	// Expand env vars in env-specific config
 	if c.Envs == nil {
 		c.Envs = map[string]EnvConfig{}
 	}
@@ -105,7 +102,6 @@ func NewConfig(configPath string) (*Config, error) {
 	return loadConfig(configPath)
 }
 
-// DSNFor returns the DSN for a given environment (e.g., "development").
 func (c *Config) DSNFor(env string) (string, error) {
 	if env == "" {
 		return "", errors.New("env is empty")
@@ -122,11 +118,11 @@ func (c *Config) Validate() error {
 	if c.Dir == "" {
 		return errors.New("dir is required")
 	}
-	if c.Table == "" {
-		return errors.New("table is required")
+	if c.MigrationTable == "" {
+		return errors.New("migration_table is required")
 	}
-	if c.LockTable == "" {
-		return errors.New("lock_table is required")
+	if c.MigrationLockTable == "" {
+		return errors.New("migration_lock_table is required")
 	}
 	if c.Driver == "" {
 		return errors.New("driver is required")

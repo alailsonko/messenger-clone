@@ -1,60 +1,70 @@
 package main
 
 import (
-	"flag"
 	"log"
 	"os"
 	"path/filepath"
 
+	"github.com/alailsonko/messenger-clone/server/internal/infra/database"
+	"github.com/alailsonko/messenger-clone/server/internal/infra/logger"
 	"github.com/alailsonko/messenger-clone/server/tools/migration/cmd"
-)
-
-const (
-	GenerateCmd = "generate"
-	UpCmd       = "up"
-	DownCmd     = "down"
+	"github.com/alailsonko/messenger-clone/server/tools/migration/config"
+	"github.com/spf13/cobra"
 )
 
 func main() {
-	cmdFlag := flag.String("cmd", "", "command to run (e.g., up, down, generate)")
-	configPath := flag.String("config", "", "path to migration YAML (defaults to $PWD/migration.yml)")
-	migrationName := flag.String("name", "", "migration name (e.g., add_public_id)")
-	flag.Parse()
-
-	if *cmdFlag == GenerateCmd && *migrationName == "" {
-		log.Fatal("missing -name")
+	var rootCmd = &cobra.Command{
+		Use:   "gorm-migration",
+		Short: "Database migration tool",
 	}
-
-	if *cmdFlag == "" {
-		log.Fatal("missing -cmd")
-	}
-
-	wd, err := os.Getwd()
+	var (
+		configPath string
+	)
+	defaultConfigPath, err := os.Getwd()
 	if err != nil {
 		log.Fatalf("failed to get working dir: %v", err)
 	}
+	defaultConfigPath = filepath.Join(defaultConfigPath, "migration.yml")
+	rootCmd.PersistentFlags().StringVar(&configPath, "config", defaultConfigPath, "path to migration YAML (defaults to $PWD/migration.yml)")
+	rootCmd.MarkPersistentFlagRequired("config")
 
-	if *configPath == "" {
-		*configPath = filepath.Join(wd, "migration.yml")
-	} else if !filepath.IsAbs(*configPath) {
-		*configPath = filepath.Join(wd, *configPath)
+	configInstance, err := config.NewConfig(configPath)
+	if err != nil {
+		panic(err)
+	}
+	err = configInstance.Validate()
+	if err != nil {
+		panic(err)
+	}
+	loggerInstance := logger.NewLogger()
+	gormLogger := loggerInstance.GormLoggerFromZap()
+
+	defer loggerInstance.Sync()
+
+	envConfig, ok := configInstance.Envs[configInstance.GoEnv]
+	if !ok {
+		panic("environment config not found: " + configInstance.GoEnv)
+	}
+	err = envConfig.Validate()
+	if err != nil {
+		panic(err)
 	}
 
-	switch *cmdFlag {
-	case GenerateCmd:
-		cmd.Generate(
-			*configPath,
-			*migrationName,
-		)
-	case UpCmd:
-		cmd.Up(
-			*configPath,
-		)
-	case DownCmd:
-		cmd.Down(
-			*configPath,
-		)
-	default:
-		log.Fatalf("unknown command: %q", *cmdFlag)
+	dbPort, err := envConfig.DBPortInt()
+	if err != nil {
+		panic(err)
+	}
+
+	databaseInstance, err := database.NewDatabase(gormLogger, envConfig.DbHost, dbPort, envConfig.DbUser, envConfig.DbPassword, envConfig.DbName, configInstance.GoEnv)
+	if err != nil {
+		panic(err)
+	}
+	defer databaseInstance.Close()
+
+	rootCmd.AddCommand(cmd.MakeCmd, cmd.UpCmd, cmd.DownCmdFactory(configInstance, databaseInstance, loggerInstance))
+	if err := rootCmd.Execute(); err != nil {
+		log.Fatalf("command execution failed: %v", err)
+	} else {
+		loggerInstance.Info("command executed successfully")
 	}
 }

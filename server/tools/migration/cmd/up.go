@@ -13,9 +13,28 @@ import (
 	"github.com/alailsonko/messenger-clone/server/tools/migration/config"
 	"github.com/alailsonko/messenger-clone/server/tools/migration/models"
 	"github.com/alailsonko/messenger-clone/server/tools/migration/registry"
+	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
+
+const (
+	UpCmdFlag = "up"
+)
+
+var UpCmd = &cobra.Command{
+	Use:   UpCmdFlag,
+	Short: "Apply the up migration",
+	Run: func(cmd *cobra.Command, args []string) {
+		configPath, _ := cmd.Flags().GetString("config")
+		Up(configPath)
+	},
+}
+
+func init() {
+	UpCmd.Flags().StringP("config", "c", "", "path to migration YAML (defaults to $PWD/migration.yml)")
+	UpCmd.MarkFlagRequired("config")
+}
 
 func Up(
 	configPath string,
@@ -57,11 +76,11 @@ func Up(
 		panic(err)
 	}
 
-	if err := acquireLock(databaseInstance.DB, configInstance.LockTable); err != nil {
+	if err := acquireLock(databaseInstance.DB, configInstance.MigrationLockTable); err != nil {
 		panic(fmt.Errorf("failed to acquire lock: %w", err))
 	}
 	defer func() {
-		if err := releaseLock(databaseInstance.DB, configInstance.LockTable); err != nil {
+		if err := releaseLock(databaseInstance.DB, configInstance.MigrationLockTable); err != nil {
 			loggerInstance.Error(fmt.Sprintf("failed to release lock: %v", err))
 		}
 	}()
@@ -74,7 +93,7 @@ func Up(
 	sort.Strings(migrations)
 
 	for _, migration := range migrations {
-		applied, err := isMigrationApplied(*databaseInstance.DB, configInstance.Table, migration)
+		applied, err := isMigrationApplied(*databaseInstance.DB, configInstance.MigrationTable, migration)
 		if err != nil {
 			panic(fmt.Errorf("failed to check if migration applied: %w", err))
 		}
@@ -92,7 +111,7 @@ func Up(
 					return fmt.Errorf("failed to execute migration %s: %w", migration.Name, err)
 				}
 
-				if err := recordMigration(tx, configInstance.Table, migration.Name); err != nil {
+				if err := recordMigration(tx, configInstance.MigrationTable, migration.Name); err != nil {
 					tx.Rollback()
 					loggerInstance.Error(fmt.Sprintf("Failed to record migration %s: %v", migration.Name, err), zap.Error(err))
 					return fmt.Errorf("failed to record migration %s: %w", migration.Name, err)

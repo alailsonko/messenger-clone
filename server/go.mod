@@ -3,13 +3,18 @@ module github.com/alailsonko/messenger-clone/server
 go 1.25.4
 
 require (
+	github.com/spf13/cobra v1.10.2
 	go.uber.org/zap v1.27.1
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.31.1
 )
 
-require github.com/rogpeppe/go-internal v1.14.1 // indirect
+require (
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/rogpeppe/go-internal v1.14.1 // indirect
+	github.com/spf13/pflag v1.0.10 // indirect
+)
 
 require (
 	github.com/google/uuid v1.6.0

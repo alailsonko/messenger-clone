@@ -1,7 +1,7 @@
 version: 1
 dir: ./migrations
-table: migration
-lock_table: migration_lock
+migration_table: migration
+migration_lock_table: migration_lock
 driver: postgres
 go_env: ${GO_ENV}
 

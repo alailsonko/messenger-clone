@@ -11,9 +11,31 @@ import (
 
 	"github.com/alailsonko/messenger-clone/server/tools/migration/config"
 	"github.com/alailsonko/messenger-clone/server/tools/migration/template"
+	"github.com/spf13/cobra"
 )
 
-func Generate(
+const (
+	MakeCmdFlag = "make"
+)
+
+var MakeCmd = &cobra.Command{
+	Use:   MakeCmdFlag,
+	Short: "Create a new migration file",
+	Run: func(cmd *cobra.Command, args []string) {
+		configPath, _ := cmd.Flags().GetString("config")
+		migrationName, _ := cmd.Flags().GetString("name")
+		Make(configPath, migrationName)
+	},
+}
+
+var name string
+
+func init() {
+	MakeCmd.Flags().StringVar(&name, "name", "", "name of the migration (required)")
+	MakeCmd.MarkFlagRequired("name")
+}
+
+func Make(
 	configPath string,
 	migrationName string,
 ) {
