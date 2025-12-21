@@ -100,6 +100,8 @@ func (l *Logger) GormLoggerFromZap() gormLogger {
 func (l *Logger) Sync() {
 	if err := l.zap.Sync(); err != nil && !errors.Is(err, syscall.ENOTTY) && !errors.Is(err, syscall.EINVAL) {
 		log.Println("Failed to sync zap logger:", err)
+	} else {
+		log.Println("Zap logger synced successfully")
 	}
 }
 

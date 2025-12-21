@@ -1,14 +1,16 @@
 package cmd
 
 import (
+	"context"
+	"errors"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
 
+	"github.com/alailsonko/messenger-clone/server/internal/infra/logger"
 	"github.com/alailsonko/messenger-clone/server/tools/migration/config"
 	"github.com/alailsonko/messenger-clone/server/tools/migration/template"
 	"github.com/spf13/cobra"
@@ -18,71 +20,72 @@ const (
 	MakeCmdFlag = "make"
 )
 
-var MakeCmd = &cobra.Command{
-	Use:   MakeCmdFlag,
-	Short: "Create a new migration file",
-	Run: func(cmd *cobra.Command, args []string) {
-		configPath, _ := cmd.Flags().GetString("config")
-		migrationName, _ := cmd.Flags().GetString("name")
-		Make(configPath, migrationName)
-	},
-}
+func MakeCmdFactory(cfg *config.Config, log *logger.Logger) *cobra.Command {
+	var migrationName string
 
-var name string
-
-func init() {
-	MakeCmd.Flags().StringVar(&name, "name", "", "name of the migration (required)")
-	MakeCmd.MarkFlagRequired("name")
-}
-
-func Make(
-	configPath string,
-	migrationName string,
-) {
-	cfg, err := config.NewConfig(configPath)
-	if err != nil {
-		log.Fatalf("Failed to load config: %v", err)
-	}
-	migrationDir := cfg.Dir
-
-	// Ensure dir exists
-	if err := os.MkdirAll(migrationDir, 0o755); err != nil {
-		log.Fatalf("Create migrations dir: %v", err)
+	cmd := &cobra.Command{
+		Use:   MakeCmdFlag,
+		Short: "Create a new migration file",
+		RunE: RunExecutable(func(cmd *cobra.Command) (Executable, error) {
+			makeCommand := &MakeCommand{
+				cfg:  cfg,
+				log:  log,
+				ctx:  cmd.Context(),
+				name: migrationName,
+			}
+			return makeCommand, nil
+		}),
 	}
 
-	// Build ID and filename
+	cmd.Flags().StringVarP(&migrationName, "name", "n", "", "name of the migration (required)")
+	_ = cmd.MarkFlagRequired("name")
+	return cmd
+}
+
+type MakeCommand struct {
+	cfg  *config.Config
+	log  *logger.Logger
+	ctx  context.Context
+	name string
+}
+
+func (m *MakeCommand) Execute() error {
+	if m.cfg == nil {
+		return errors.New("config is required")
+	}
+	if m.log == nil {
+		return errors.New("logger is required")
+	}
+	if m.cfg.Dir == "" {
+		return errors.New("migration dir is not configured")
+	}
+
+	safe := m.sanitizeName(m.name)
+	if safe == "" {
+		return errors.New("migration name cannot be empty")
+	}
+
+	if err := os.MkdirAll(m.cfg.Dir, 0o755); err != nil {
+		return fmt.Errorf("create migrations dir: %w", err)
+	}
+
 	ts := time.Now().UTC().Format("20060102150405")
-	safe := sanitizeName(migrationName)
-	id := fmt.Sprintf("%s_%s", ts, safe)
-	filename := id + ".go"
-	path := filepath.Join(migrationDir, filename)
+	filename := fmt.Sprintf("%s_%s.go", ts, safe)
+	path := filepath.Join(m.cfg.Dir, filename)
 
-	// Derive package name from folder name
-	pkg := filepath.Base(migrationDir)
-	if !isValidPackageName(pkg) {
-		pkg = "migrations"
-	}
-
-	// Template content
 	content := template.MigrationTemplate(ts, safe)
-
-	// Write file
 	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
-		log.Fatalf("Write migration file: %v", err)
+		return fmt.Errorf("write migration file: %w", err)
 	}
 
-	log.Printf("Created migration: %s", path)
+	m.log.Info(fmt.Sprintf("Created migration: %s", path))
+	return nil
 }
 
-func sanitizeName(s string) string {
+func (m *MakeCommand) sanitizeName(s string) string {
 	s = strings.ToLower(strings.TrimSpace(s))
 	s = strings.ReplaceAll(s, " ", "_")
 	// keep only [a-z0-9_]
 	re := regexp.MustCompile(`[^a-z0-9_]+`)
 	return re.ReplaceAllString(s, "")
-}
-
-func isValidPackageName(s string) bool {
-	re := regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_]*$`)
-	return re.MatchString(s)
 }

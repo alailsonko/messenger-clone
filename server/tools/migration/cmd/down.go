@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -8,10 +9,9 @@ import (
 	"github.com/alailsonko/messenger-clone/server/internal/infra/logger"
 	_ "github.com/alailsonko/messenger-clone/server/migrations"
 	"github.com/alailsonko/messenger-clone/server/tools/migration/config"
-	"github.com/alailsonko/messenger-clone/server/tools/migration/models"
 	"github.com/alailsonko/messenger-clone/server/tools/migration/registry"
+	migration_repository "github.com/alailsonko/messenger-clone/server/tools/migration/repository/migration"
 	"github.com/spf13/cobra"
-	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
@@ -23,77 +23,84 @@ func DownCmdFactory(cfg *config.Config, db *database.Database, log *logger.Logge
 	cmd := &cobra.Command{
 		Use:   DownCmdFlag,
 		Short: "Apply the down migration",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			Down(db, log, cfg)
-			return nil
-		},
+		RunE: RunExecutable(func(cmd *cobra.Command) (Executable, error) {
+			downCommand := &DownCommand{
+				cfg: cfg,
+				db:  db,
+				log: log,
+				ctx: cmd.Context(),
+			}
+			return downCommand, nil
+		}),
 	}
 	return cmd
 }
 
-func Down(
-	databaseInstance *database.Database, loggerInstance *logger.Logger, configInstance *config.Config,
-) error {
-	migrator := databaseInstance.DB.Migrator()
-	if err := createMigrationIfNotExists(migrator); err != nil {
-		panic(err)
+type DownCommand struct {
+	cfg *config.Config
+	db  *database.Database
+	log *logger.Logger
+	ctx context.Context
+}
+
+func (d *DownCommand) Execute() error {
+	if d.cfg == nil {
+		return errors.New("config is required")
 	}
-	if err := createLockTableIfNotExists(migrator); err != nil {
-		panic(err)
+	if d.db == nil || d.db.DB == nil {
+		return errors.New("database is required")
+	}
+	if d.log == nil {
+		return errors.New("logger is required")
+	}
+	if d.cfg.Dir == "" {
+		return errors.New("migration dir is not configured")
+	}
+	migrationRepository := migration_repository.NewMigrationRepository(d.db.DB)
+	if err := migrationRepository.CreateTablesIfNotExists(); err != nil {
+		return fmt.Errorf("failed to create migration tables: %w", err)
 	}
 
-	if err := acquireLock(databaseInstance.DB, configInstance.MigrationLockTable); err != nil {
-		panic(fmt.Errorf("failed to acquire lock: %w", err))
+	locked, err := migrationRepository.IsLocked()
+	if err != nil {
+		return fmt.Errorf("failed to check migration lock: %w", err)
+	}
+	if locked {
+		return errors.New("migration is locked, another migration process might be running")
+	}
+
+	if err := migrationRepository.UpdateLock(true); err != nil {
+		return fmt.Errorf("failed to acquire migration lock: %w", err)
 	}
 	defer func() {
-		if err := releaseLock(databaseInstance.DB, configInstance.MigrationLockTable); err != nil {
-			loggerInstance.Error(fmt.Sprintf("failed to release lock: %v", err))
+		if err := migrationRepository.UpdateLock(false); err != nil {
+			d.log.Error(fmt.Sprintf("failed to release migration lock: %v", err))
 		}
 	}()
 
-	// Get all applied migrations from the database
-	appliedMigration, err := getLastAppliedMigration(databaseInstance.DB, configInstance.MigrationTable)
+	appliedMigration, err := migrationRepository.GetLastAppliedMigration()
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		loggerInstance.Info("No migrations to rollback")
+		d.log.Info("no applied migrations found, skipping down migration")
 		return nil
 	}
 
 	if err != nil {
-		panic(fmt.Errorf("failed to get applied migrations: %w", err))
+		return fmt.Errorf("failed to get last applied migration: %w", err)
 	}
 
-	migration, err := registry.Get(appliedMigration)
+	migration, err := registry.Get(appliedMigration.Name)
 	if err != nil {
-		panic(fmt.Errorf("failed to get migration from registry: %w", err))
+		return fmt.Errorf("failed to get migration %s from registry: %w", appliedMigration.Name, err)
 	}
 
-	if err := migration.Down(databaseInstance.DB); err != nil {
-		panic(fmt.Errorf("failed to execute down migration %s: %w", migration.Name, err))
+	if err := migration.Down(d.db.DB); err != nil {
+		return fmt.Errorf("failed to execute down migration %s: %w", migration.Name, err)
 	}
 
-	if err := removeMigrationRecord(databaseInstance.DB, configInstance.MigrationTable, migration.Name); err != nil {
-		panic(fmt.Errorf("failed to remove migration record: %w", err))
+	if err := migrationRepository.DeleteMigrationByName(migration.Name); err != nil {
+		return fmt.Errorf("failed to delete migration record: %w", err)
 	}
 
-	loggerInstance.Info(fmt.Sprintf("applied the down migration %s", migration.Name))
+	d.log.Info(fmt.Sprintf("applied the down migration %s", migration.Name))
 	return nil
-}
-
-func getLastAppliedMigration(db *gorm.DB, tableName string) (string, error) {
-	loggerInstance := logger.NewLogger()
-	loggerInstance.Info("Retrieving applied migrations from the database", zap.String("table", tableName))
-
-	var migration models.MigrationModel
-
-	result := db.Table(tableName).Last(&migration)
-	if result.Error != nil {
-		return "", result.Error
-	}
-
-	return migration.Name, nil
-}
-
-func removeMigrationRecord(db *gorm.DB, tableName string, migrationName string) error {
-	result := db.Table(tableName).Where("name = ?", migrationName).Delete(&models.MigrationModel{}).Unscoped()
-	return result.Error
 }

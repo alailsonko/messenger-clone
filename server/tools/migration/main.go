@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -13,58 +15,82 @@ import (
 )
 
 func main() {
-	var rootCmd = &cobra.Command{
-		Use:   "gorm-migration",
-		Short: "Database migration tool",
+	if err := run(context.Background()); err != nil {
+		log.Fatal(err)
 	}
-	var (
-		configPath string
-	)
-	defaultConfigPath, err := os.Getwd()
+}
+
+func run(ctx context.Context) error {
+	var configPath string
+	var databaseInstance *database.Database
+	var loggerInstance *logger.Logger
+	var configInstance *config.Config
+
+	rootCmd := &cobra.Command{
+		Use:           "gorm-migration",
+		Short:         "Database migration tool",
+		SilenceUsage:  true,
+		SilenceErrors: true,
+		PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
+			if databaseInstance != nil {
+				if err := databaseInstance.Close(); err != nil {
+					return fmt.Errorf("close db: %w", err)
+				}
+			}
+			if loggerInstance != nil {
+				loggerInstance.Sync()
+			}
+			return nil
+		},
+	}
+
+	cwd, err := os.Getwd()
 	if err != nil {
-		log.Fatalf("failed to get working dir: %v", err)
+		return fmt.Errorf("get working dir: %w", err)
 	}
-	defaultConfigPath = filepath.Join(defaultConfigPath, "migration.yml")
+	defaultConfigPath := filepath.Join(cwd, "migration.yml")
 	rootCmd.PersistentFlags().StringVar(&configPath, "config", defaultConfigPath, "path to migration YAML (defaults to $PWD/migration.yml)")
-	rootCmd.MarkPersistentFlagRequired("config")
-
-	configInstance, err := config.NewConfig(configPath)
+	cfg, err := config.NewConfig(configPath)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("load config: %w", err)
 	}
-	err = configInstance.Validate()
-	if err != nil {
-		panic(err)
+	if err := cfg.Validate(); err != nil {
+		return fmt.Errorf("invalid config: %w", err)
 	}
-	loggerInstance := logger.NewLogger()
-	gormLogger := loggerInstance.GormLoggerFromZap()
 
-	defer loggerInstance.Sync()
-
-	envConfig, ok := configInstance.Envs[configInstance.GoEnv]
+	envConfig, ok := cfg.Envs[cfg.GoEnv]
 	if !ok {
-		panic("environment config not found: " + configInstance.GoEnv)
+		return fmt.Errorf("environment config not found: %s", cfg.GoEnv)
 	}
-	err = envConfig.Validate()
-	if err != nil {
-		panic(err)
+	if err := envConfig.Validate(); err != nil {
+		return fmt.Errorf("invalid env config: %w", err)
 	}
 
 	dbPort, err := envConfig.DBPortInt()
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("db port: %w", err)
 	}
 
-	databaseInstance, err := database.NewDatabase(gormLogger, envConfig.DbHost, dbPort, envConfig.DbUser, envConfig.DbPassword, envConfig.DbName, configInstance.GoEnv)
+	logr := logger.NewLogger()
+	gormLogger := logr.GormLoggerFromZap()
+	db, err := database.NewDatabase(gormLogger, envConfig.DbHost, dbPort, envConfig.DbUser, envConfig.DbPassword, envConfig.DbName, cfg.GoEnv)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("connect db: %w", err)
 	}
-	defer databaseInstance.Close()
 
-	rootCmd.AddCommand(cmd.MakeCmd, cmd.UpCmd, cmd.DownCmdFactory(configInstance, databaseInstance, loggerInstance))
-	if err := rootCmd.Execute(); err != nil {
-		log.Fatalf("command execution failed: %v", err)
-	} else {
-		loggerInstance.Info("command executed successfully")
+	databaseInstance = db
+	loggerInstance = logr
+	configInstance = cfg
+
+	rootCmd.AddCommand(
+		cmd.MakeCmdFactory(configInstance, loggerInstance),
+		cmd.UpCmdFactory(configInstance, databaseInstance, loggerInstance),
+		cmd.DownCmdFactory(configInstance, databaseInstance, loggerInstance),
+	)
+
+	if err := rootCmd.ExecuteContext(ctx); err != nil {
+		return err
 	}
+	log.Println("Command executed successfully")
+	return nil
 }

@@ -98,6 +98,8 @@ func (d *Database) reconnect() error {
 func (d *Database) keepAlive() {
 	if err := d.healthcheck(); err != nil {
 		_ = d.reconnect()
+	} else {
+		d.logger.Info(d.internalCtx, "Database connection is healthy")
 	}
 }
 
@@ -113,6 +115,8 @@ func (d *Database) Close() error {
 	errClose := sqlDB.Close()
 	if errClose != nil {
 		d.logger.Error(d.internalCtx, "Failed to close sqlDB", errClose)
+	} else {
+		d.logger.Info(d.internalCtx, "Database connection closed successfully")
 	}
 	return errClose
 }
