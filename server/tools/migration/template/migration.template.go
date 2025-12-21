@@ -9,15 +9,15 @@ import (
 )
 
 func init() {
-	registry.Register("` + timestamp + `_` + name + `.go", Up, Down)
+	registry.Register("` + timestamp + `_` + name + `.go", Up_` + timestamp + `, Down_` + timestamp + `)
 }
 
-func Up(db *gorm.DB) error {
+func Up_` + timestamp + `(db *gorm.DB) error {
 	// Implement the migration logic here
 	return nil
 }
 
-func Down(db *gorm.DB) error {
+func Down_` + timestamp + `(db *gorm.DB) error {
 	// Implement the rollback logic here
 	return nil
 }

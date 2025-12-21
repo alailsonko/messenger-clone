@@ -7,16 +7,16 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/alailsonko/messenger-clone/server/config"
 	"github.com/alailsonko/messenger-clone/server/internal/infra/database"
 	"github.com/alailsonko/messenger-clone/server/internal/infra/logger"
 	"github.com/alailsonko/messenger-clone/server/tools/migration/cmd"
-	"github.com/alailsonko/messenger-clone/server/tools/migration/config"
 	"github.com/spf13/cobra"
 )
 
 func main() {
 	if err := run(context.Background()); err != nil {
-		log.Fatal(err)
+		log.Fatal(fmt.Errorf("migration tool failed: %w", err))
 	}
 }
 
@@ -83,6 +83,7 @@ func run(ctx context.Context) error {
 	configInstance = cfg
 
 	rootCmd.AddCommand(
+		cmd.LatestCmdFactory(configInstance, loggerInstance, databaseInstance),
 		cmd.MakeCmdFactory(configInstance, loggerInstance),
 		cmd.UpCmdFactory(configInstance, databaseInstance, loggerInstance),
 		cmd.DownCmdFactory(configInstance, databaseInstance, loggerInstance),

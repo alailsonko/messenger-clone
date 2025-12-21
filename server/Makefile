@@ -26,6 +26,13 @@ migrate-down:
 	if [ -z "$$CONFIG_PATH" ]; then CONFIG_PATH="./migration.yml"; fi; \
 	cd "$(SELF_DIR)" && go run ./tools/migration down --config "$$CONFIG_PATH"
 
+.PHONY: migrate-latest
+
+migrate-latest:
+	@CONFIG_PATH="$(CONFIG)"; \
+	if [ -z "$$CONFIG_PATH" ]; then CONFIG_PATH="./migration.yml"; fi; \
+	cd "$(SELF_DIR)" && go run ./tools/migration latest --config "$$CONFIG_PATH"
+
 .PHONY: tidy
 
 tidy:

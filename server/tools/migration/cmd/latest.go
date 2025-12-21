@@ -21,50 +21,50 @@ import (
 )
 
 const (
-	UpCmdFlag = "up"
+	LatestCmdFlag = "latest"
 )
 
-func UpCmdFactory(cfg *config.Config, db *database.Database, log *logger.Logger) *cobra.Command {
+func LatestCmdFactory(cfg *config.Config, log *logger.Logger, db *database.Database) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   UpCmdFlag,
-		Short: "Apply the up migration",
+		Use:   LatestCmdFlag,
+		Short: "Migrate all created migrations that have not been applied yet",
 		RunE: RunExecutable(func(cmd *cobra.Command) (Executable, error) {
-			upCommand := &UpCommand{
+			latestCommand := &LatestCommand{
 				cfg: cfg,
-				db:  db,
 				log: log,
+				db:  db,
 				ctx: cmd.Context(),
 			}
-			return upCommand, nil
+			return latestCommand, nil
 		}),
 	}
 	return cmd
 }
 
-type UpCommand struct {
+type LatestCommand struct {
 	cfg *config.Config
-	db  *database.Database
 	log *logger.Logger
+	db  *database.Database
 	ctx context.Context
 }
 
-func (u *UpCommand) Execute() error {
-	if u.cfg == nil {
+func (l *LatestCommand) Execute() error {
+	if l.cfg == nil {
 		return errors.New("config is required")
 	}
-	if u.db == nil || u.db.DB == nil {
-		return errors.New("database is required")
-	}
-	if u.log == nil {
+	if l.log == nil {
 		return errors.New("logger is required")
 	}
-	if u.cfg.Dir == "" {
+	if l.db == nil || l.db.DB == nil {
+		return errors.New("database is required")
+	}
+	if l.cfg.Dir == "" {
 		return errors.New("migration dir is not configured")
 	}
 
-	db := u.db.DB
-	if u.ctx != nil {
-		db = db.WithContext(u.ctx)
+	db := l.db.DB
+	if l.ctx != nil {
+		db = db.WithContext(l.ctx)
 	}
 
 	migrationRepository := migration_repository.NewMigrationRepository(db)
@@ -85,18 +85,19 @@ func (u *UpCommand) Execute() error {
 	}
 	defer func() {
 		if err := migrationRepository.UpdateLock(false); err != nil {
-			u.log.Error(fmt.Sprintf("failed to release migration lock: %v", err))
+			l.log.Error(fmt.Sprintf("failed to release migration lock: %v", err))
 		}
 	}()
 
-	migrations, err := u.readMigrationsFromDir(u.cfg.Dir)
+	migrations, err := l.readMigrationsFromDir(l.cfg.Dir)
 	if err != nil {
 		return fmt.Errorf("failed to read migrations: %w", err)
 	}
 	sort.Strings(migrations)
 
+	appliedAny := false
 	for _, migrationName := range migrations {
-		applied, err := u.isMigrationApplied(migrationName)
+		applied, err := l.isMigrationApplied(migrationName)
 		if err != nil {
 			return fmt.Errorf("failed to check if migration applied: %w", err)
 		}
@@ -109,6 +110,7 @@ func (u *UpCommand) Execute() error {
 			return fmt.Errorf("failed to get migration from registry: %w", err)
 		}
 
+		l.log.Info(fmt.Sprintf("applying migration %s", mig.Name))
 		err = db.Transaction(func(tx *gorm.DB) error {
 			if err := mig.Up(tx); err != nil {
 				return fmt.Errorf("failed to execute migration %s: %w", mig.Name, err)
@@ -121,25 +123,29 @@ func (u *UpCommand) Execute() error {
 		if err != nil {
 			return err
 		}
+		l.log.Info(fmt.Sprintf("applied migration %s", mig.Name))
+		appliedAny = true
+	}
 
-		u.log.Info(fmt.Sprintf("applied the migration %s", mig.Name))
+	if !appliedAny {
+		l.log.Info("Up to date")
 		return nil
 	}
 
-	u.log.Info("Up to date")
+	l.log.Info("all migrations are up to date")
 	return nil
 }
 
-func (u *UpCommand) isMigrationApplied(migrationName string) (bool, error) {
+func (l *LatestCommand) isMigrationApplied(migrationName string) (bool, error) {
 	var count int64
-	res := u.db.DB.Model(&models.MigrationModel{}).Where("name = ?", migrationName).Count(&count)
+	res := l.db.DB.Model(&models.MigrationModel{}).Where("name = ?", migrationName).Count(&count)
 	if res.Error != nil {
 		return false, res.Error
 	}
 	return count > 0, nil
 }
 
-func (u *UpCommand) readMigrationsFromDir(migrationDir string) ([]string, error) {
+func (l *LatestCommand) readMigrationsFromDir(migrationDir string) ([]string, error) {
 	files, err := os.ReadDir(migrationDir)
 	if err != nil {
 		return nil, err

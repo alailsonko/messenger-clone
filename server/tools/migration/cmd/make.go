@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/alailsonko/messenger-clone/server/config"
 	"github.com/alailsonko/messenger-clone/server/internal/infra/logger"
-	"github.com/alailsonko/messenger-clone/server/tools/migration/config"
 	"github.com/alailsonko/messenger-clone/server/tools/migration/template"
 	"github.com/spf13/cobra"
 )

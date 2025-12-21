@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/alailsonko/messenger-clone/server/config"
 	"github.com/alailsonko/messenger-clone/server/internal/infra/database"
 	"github.com/alailsonko/messenger-clone/server/internal/infra/logger"
 	_ "github.com/alailsonko/messenger-clone/server/migrations"
-	"github.com/alailsonko/messenger-clone/server/tools/migration/config"
 	"github.com/alailsonko/messenger-clone/server/tools/migration/registry"
 	migration_repository "github.com/alailsonko/messenger-clone/server/tools/migration/repository/migration"
 	"github.com/spf13/cobra"

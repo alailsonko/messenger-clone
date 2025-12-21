@@ -6,15 +6,15 @@ import (
 )
 
 func init() {
-	registry.Register("20251213161251_add_account_table.go", Up_20251213161251, Down_20251213161251)
+	registry.Register("20251221154500_add_user_table.go", Up_20251221154500, Down_20251221154500)
 }
 
-func Up_20251213161251(db *gorm.DB) error {
+func Up_20251221154500(db *gorm.DB) error {
 	// Implement the migration logic here
 	return nil
 }
 
-func Down_20251213161251(db *gorm.DB) error {
+func Down_20251221154500(db *gorm.DB) error {
 	// Implement the rollback logic here
 	return nil
 }
