@@ -10,3 +10,7 @@ type AccountModel struct {
 	Email    string `gorm:"uniqueIndex;size:255;not null"`
 	Password string `gorm:"type:text;not null"`
 }
+
+func (AccountModel) TableName() string {
+	return "accounts"
+}

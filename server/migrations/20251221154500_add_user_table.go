@@ -1,6 +1,7 @@
 package migrations
 
 import (
+	"github.com/alailsonko/messenger-clone/server/internal/persistence/gorm/models"
 	"github.com/alailsonko/messenger-clone/server/tools/migration/registry"
 	"gorm.io/gorm"
 )
@@ -10,11 +11,11 @@ func init() {
 }
 
 func Up_20251221154500(db *gorm.DB) error {
-	// Implement the migration logic here
-	return nil
+	err := db.Migrator().CreateTable(&models.UserModel{})
+	return err
 }
 
 func Down_20251221154500(db *gorm.DB) error {
-	// Implement the rollback logic here
-	return nil
+	err := db.Migrator().DropTable(&models.UserModel{})
+	return err
 }
