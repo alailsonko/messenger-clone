@@ -25,6 +25,7 @@ if [ -z "$(ls -A "$PGDATA")" ]; then
 
   echo "primary_conninfo = 'host=$PRIMARY_HOST port=$PRIMARY_PORT user=$REPLICA_USER password=$REPLICA_PASSWORD sslmode=prefer'" >> "$PGDATA/postgresql.auto.conf"
   echo "hot_standby = on" >> "$PGDATA/postgresql.auto.conf"
+  echo "max_connections = 500" >> "$PGDATA/postgresql.auto.conf"
 
   chown -R postgres:postgres "$PGDATA"
 fi

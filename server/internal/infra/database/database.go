@@ -25,10 +25,17 @@ type Database struct {
 }
 
 func NewDatabase(logger logger.Interface, host string, port int, user, password, database, name string) (*Database, error) {
-	dialect := postgres.Open(fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-		host, port, user, password, database))
+	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable connect_timeout=5",
+		host, port, user, password, database)
+	dialect := postgres.Open(dsn)
+
+	// GORM optimizations for high performance
 	db, err := gorm.Open(dialect, &gorm.Config{
 		Logger: logger,
+		// Skip default transaction wrapping for single queries (30% faster)
+		SkipDefaultTransaction: true,
+		// Prepare statement cache for repeated queries
+		PrepareStmt: true,
 	})
 
 	ctx := context.Background()
@@ -37,6 +44,23 @@ func NewDatabase(logger logger.Interface, host string, port int, user, password,
 		logger.Error(ctx, "Failed to connect to database", err)
 		return nil, err
 	}
+
+	// Configure connection pool to handle high concurrency
+	sqlDB, err := db.DB()
+	if err != nil {
+		logger.Error(ctx, "Failed to get underlying sql.DB", err)
+		return nil, err
+	}
+
+	// Connection pool tuning for high concurrency:
+	// - MaxOpenConns: PostgreSQL max_connections=500, leave headroom for admin
+	// - MaxIdleConns: Keep connections warm, ~50% of max open
+	// - ConnMaxLifetime: Recycle connections to prevent stale state
+	// - ConnMaxIdleTime: Close truly idle connections to free resources
+	sqlDB.SetMaxOpenConns(100)                 // Match ~20% of PostgreSQL max_connections per DB
+	sqlDB.SetMaxIdleConns(50)                  // Keep half of max open as idle (warm connections)
+	sqlDB.SetConnMaxLifetime(10 * time.Minute) // Recycle connections periodically
+	sqlDB.SetConnMaxIdleTime(5 * time.Minute)  // Close idle connections after 5 min
 
 	internalCtx, cancel := context.WithCancel(ctx)
 
@@ -91,7 +115,20 @@ func (d *Database) reconnect() error {
 		return err
 	}
 
+	// Configure connection pool on reconnect
+	sqlDB, err := db.DB()
+	if err != nil {
+		d.logger.Error(d.internalCtx, "Failed to get underlying sql.DB on reconnect", err)
+		return err
+	}
+
+	sqlDB.SetMaxOpenConns(25)
+	sqlDB.SetMaxIdleConns(10)
+	sqlDB.SetConnMaxLifetime(5 * time.Minute)
+	sqlDB.SetConnMaxIdleTime(1 * time.Minute)
+
 	d.DB = db
+	d.logger.Info(d.internalCtx, "Database reconnected successfully")
 	return nil
 }
 

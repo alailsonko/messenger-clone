@@ -5,12 +5,46 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"github.com/joho/godotenv"
 	"gopkg.in/yaml.v3"
 )
 
+// DBConfig holds database connection configuration
+type DBConfig struct {
+	Host            string `yaml:"host"`
+	Port            int    `yaml:"port"`
+	User            string `yaml:"user"`
+	Password        string `yaml:"password"`
+	Database        string `yaml:"database"`
+	MaxOpenConns    int    `yaml:"max_open_conns"`
+	MaxIdleConns    int    `yaml:"max_idle_conns"`
+	ConnMaxLifetime int    `yaml:"conn_max_lifetime_minutes"`
+}
+
+// DSN returns the PostgreSQL connection string
+func (d *DBConfig) DSN() string {
+	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+		d.Host, d.Port, d.User, d.Password, d.Database)
+}
+
+// ServerConfig holds HTTP server configuration
+type ServerConfig struct {
+	Port          string `yaml:"port"`
+	EnablePrefork bool   `yaml:"enable_prefork"`
+}
+
+// Config holds all application configuration
 type Config struct {
+	// Server configuration
+	Server ServerConfig `yaml:"server"`
+
+	// Database configuration (CQRS: separate read/write)
+	WriteDB DBConfig `yaml:"write_db"`
+	ReadDB  DBConfig `yaml:"read_db"`
+
+	// Migration configuration (legacy support)
 	Version            int                  `yaml:"version"`
 	Dir                string               `yaml:"dir"`
 	MigrationTable     string               `yaml:"migration_table"`
@@ -20,12 +54,71 @@ type Config struct {
 	GoEnv              string               `yaml:"go_env"`
 }
 
+// EnvConfig holds environment-specific database configuration (for migrations)
 type EnvConfig struct {
 	DbHost     string `yaml:"db_host"`
 	DbPort     string `yaml:"db_port"`
 	DbName     string `yaml:"db_name"`
 	DbUser     string `yaml:"db_user"`
 	DbPassword string `yaml:"db_password"`
+}
+
+// Load loads configuration from environment variables
+func Load() *Config {
+	return &Config{
+		Server: ServerConfig{
+			Port:          getEnv("PORT", "8080"),
+			EnablePrefork: getEnvBool("ENABLE_PREFORK", true),
+		},
+		WriteDB: DBConfig{
+			Host:            getEnv("DB_WRITE_HOST", "localhost"),
+			Port:            getEnvInt("DB_WRITE_PORT", 5432),
+			User:            getEnv("DB_WRITE_USER", "root"),
+			Password:        getEnv("DB_WRITE_PASSWORD", "password"),
+			Database:        getEnv("DB_WRITE_NAME", "postgres"),
+			MaxOpenConns:    getEnvInt("DB_WRITE_MAX_OPEN_CONNS", 100),
+			MaxIdleConns:    getEnvInt("DB_WRITE_MAX_IDLE_CONNS", 50),
+			ConnMaxLifetime: getEnvInt("DB_WRITE_CONN_MAX_LIFETIME", 10),
+		},
+		ReadDB: DBConfig{
+			Host:            getEnv("DB_READ_HOST", "localhost"),
+			Port:            getEnvInt("DB_READ_PORT", 5433),
+			User:            getEnv("DB_READ_USER", "root"),
+			Password:        getEnv("DB_READ_PASSWORD", "password"),
+			Database:        getEnv("DB_READ_NAME", "postgres"),
+			MaxOpenConns:    getEnvInt("DB_READ_MAX_OPEN_CONNS", 100),
+			MaxIdleConns:    getEnvInt("DB_READ_MAX_IDLE_CONNS", 50),
+			ConnMaxLifetime: getEnvInt("DB_READ_CONN_MAX_LIFETIME", 10),
+		},
+	}
+}
+
+// getEnv retrieves an environment variable or returns a default value
+func getEnv(key, defaultValue string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return defaultValue
+}
+
+// getEnvInt retrieves an environment variable as int or returns a default value
+func getEnvInt(key string, defaultValue int) int {
+	if value := os.Getenv(key); value != "" {
+		if intValue, err := strconv.Atoi(value); err == nil {
+			return intValue
+		}
+	}
+	return defaultValue
+}
+
+// getEnvBool retrieves an environment variable as bool or returns a default value
+func getEnvBool(key string, defaultValue bool) bool {
+	if value := os.Getenv(key); value != "" {
+		if boolValue, err := strconv.ParseBool(value); err == nil {
+			return boolValue
+		}
+	}
+	return defaultValue
 }
 
 func (e *EnvConfig) Dsn() string {

@@ -6,8 +6,8 @@ import (
 
 type UserModel struct {
 	common.CommonModel
-	FirstName string `gorm:"size:100;not null"`
-	LastName  string `gorm:"size:100;not null"`
+	FirstName string `gorm:"size:100;not null;index:idx_user_name"`
+	LastName  string `gorm:"size:100;not null;index:idx_user_name"`
 }
 
 func (UserModel) TableName() string {

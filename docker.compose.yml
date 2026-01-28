@@ -1,42 +1,147 @@
 services:
-  db:
+  messenger_server:
+    build:
+      context: ./server
+      target: dev
+    container_name: messenger_server
+    hostname: messenger_server
+    environment:
+      - PORT=8080
+      - DB_WRITE_HOST=messenger_db_primary
+      - DB_WRITE_PORT=5432
+      - DB_WRITE_USER=root
+      - DB_WRITE_PASSWORD=password
+      - DB_WRITE_NAME=postgres
+      - DB_READ_HOST=messenger_db_replica
+      - DB_READ_PORT=5432
+      - DB_READ_USER=root
+      - DB_READ_PASSWORD=password
+      - DB_READ_NAME=postgres
+    volumes:
+      - ./server:/app
+    ports:
+      - "8081:8080"
+    depends_on:
+      messenger_db_primary:
+        condition: service_healthy
+      messenger_db_replica:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8080/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    command: ["air", "-c", ".air.toml"]
+    networks:
+      - messenger_net
+
+  messenger_db_primary:
     image: postgres:18
     container_name: messenger_db_primary
+    hostname: messenger_db_primary
     environment:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: password
       POSTGRES_DB: postgres
       PGDATA: /var/lib/postgresql/data/pgdata
+    command:
+      - "postgres"
+      # Connection limits
+      - "-c"
+      - "max_connections=500"
+      # Memory settings
+      - "-c"
+      - "shared_buffers=256MB"
+      - "-c"
+      - "work_mem=16MB"
+      - "-c"
+      - "effective_cache_size=512MB"
+      # Write performance
+      - "-c"
+      - "synchronous_commit=off"
+      - "-c"
+      - "checkpoint_completion_target=0.9"
+      # Connection handling
+      - "-c"
+      - "idle_in_transaction_session_timeout=30000"
     ports:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
       - ./database/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     networks:
       - messenger_net
 
-  db_replica:
+  messenger_db_replica:
     image: postgres:18
     container_name: messenger_db_replica
+    hostname: messenger_db_replica
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: password
       POSTGRES_DB: postgres
       PGDATA: /var/lib/postgresql/data/pgdata
-      PRIMARY_HOST: db
+      PRIMARY_HOST: messenger_db_primary
       PRIMARY_PORT: 5432
       REPLICA_USER: replicator
       REPLICA_PASSWORD: replica_password
+    # Replica optimized for read performance
+    command:
+      - "postgres"
+      - "-c"
+      - "max_connections=500"
+      - "-c"
+      - "shared_buffers=256MB"
+      - "-c"
+      - "work_mem=16MB"
+      - "-c"
+      - "effective_cache_size=512MB"
+      - "-c"
+      - "random_page_cost=1.1"
     ports:
       - "5433:5432"
     volumes:
       - db_replica_data:/var/lib/postgresql/data
       - ./database/postgres/replica/replica-entrypoint.sh:/usr/local/bin/replica-entrypoint.sh:ro
     entrypoint: ["/usr/local/bin/replica-entrypoint.sh"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
     depends_on:
-      - db
+      messenger_db_primary:
+        condition: service_healthy
     networks:
       - messenger_net
+
+  # ==========================================================================
+  # Load Testing Service (Gatling - Java-based)
+  # ==========================================================================
+  loadtest:
+    build:
+      context: ./loadtest/gatling
+    container_name: messenger_loadtest
+    environment:
+      - BASE_URL=http://messenger_server:8080
+      - TEST_TYPE=${LOADTEST_TYPE:-load}
+      - TARGET_USERS=${LOADTEST_USERS:-100}
+      - TEST_DURATION=${LOADTEST_DURATION:-60}
+    volumes:
+      - ./loadtest/results:/results
+    depends_on:
+      messenger_server:
+        condition: service_healthy
+    networks:
+      - messenger_net
+    profiles:
+      - loadtest
 
 volumes:
   db_data:
