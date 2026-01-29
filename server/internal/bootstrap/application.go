@@ -38,6 +38,7 @@ import (
 
 	appservice "github.com/alailsonko/messenger-clone/server/internal/application/service"
 	domainservice "github.com/alailsonko/messenger-clone/server/internal/domain/service"
+	"github.com/alailsonko/messenger-clone/server/internal/infra/database/shard"
 	persistrepo "github.com/alailsonko/messenger-clone/server/internal/persistence/repository"
 	"gorm.io/gorm"
 )
@@ -60,15 +61,28 @@ import (
 //
 //   - Write operations use the primary database (strong consistency)
 //   - Read operations use the replica database (better scalability)
+//
+// # Sharding Mode
+//
+// When sharding is enabled, the service uses ShardedUserRepository which:
+//   - Routes operations to the correct shard based on user ID
+//   - Uses consistent hashing for even distribution
+//   - Supports scatter-gather for cross-shard queries
 type ApplicationService struct {
 	// UserService handles all user-related business operations
 	UserService domainservice.UserService
 
-	// writeDB is the primary database connection for write operations
+	// ShardManager is available when sharding is enabled (nil otherwise)
+	ShardManager *shard.ShardManager
+
+	// writeDB is the primary database connection for write operations (non-sharded mode)
 	writeDB *gorm.DB
 
-	// readDB is the replica database connection for read operations
+	// readDB is the replica database connection for read operations (non-sharded mode)
 	readDB *gorm.DB
+
+	// sharded indicates if sharding is enabled
+	sharded bool
 
 	// state tracks the current service state (initialized, running, terminated)
 	state string
@@ -118,11 +132,65 @@ func NewApplicationService(writeDB, readDB *gorm.DB) *ApplicationService {
 	userService := appservice.NewUserService(writeUserRepo, readUserRepo)
 
 	return &ApplicationService{
-		UserService: userService,
-		writeDB:     writeDB,
-		readDB:      readDB,
-		state:       "initialized",
+		UserService:  userService,
+		ShardManager: nil,
+		writeDB:      writeDB,
+		readDB:       readDB,
+		sharded:      false,
+		state:        "initialized",
 	}
+}
+
+// NewShardedApplicationService creates an ApplicationService with sharding support.
+//
+// This function:
+//  1. Creates a sharded user repository that distributes data across shards
+//  2. Uses consistent hashing to route operations to the correct shard
+//  3. Supports scatter-gather for cross-shard queries
+//
+// Parameters:
+//   - shardManager: The shard manager with initialized connections
+//
+// Returns:
+//   - A fully configured ApplicationService with sharding enabled
+//
+// Example:
+//
+//	shardService := bootstrap.NewShardedDatabaseService(cfg.Sharding, cfg.WriteDB)
+//	// ... start shardService ...
+//	appService := bootstrap.NewShardedApplicationService(shardService.ShardManager())
+func NewShardedApplicationService(shardManager *shard.ShardManager) *ApplicationService {
+	// ==========================================================================
+	// Sharded Repository Layer
+	// ==========================================================================
+	//
+	// Create sharded repository that routes operations to correct shard
+	// based on user ID using consistent hashing.
+
+	shardedUserRepo := persistrepo.NewShardedUserRepository(shardManager)
+
+	// ==========================================================================
+	// Application Service Layer
+	// ==========================================================================
+	//
+	// Create application service with sharded repository.
+	// Both read and write use the same sharded repository (it handles routing).
+
+	userService := appservice.NewUserService(shardedUserRepo, shardedUserRepo)
+
+	return &ApplicationService{
+		UserService:  userService,
+		ShardManager: shardManager,
+		writeDB:      nil,
+		readDB:       nil,
+		sharded:      true,
+		state:        "initialized",
+	}
+}
+
+// IsSharded returns true if the application is running in sharded mode
+func (s *ApplicationService) IsSharded() bool {
+	return s.sharded
 }
 
 // String returns the service name for logging and identification.

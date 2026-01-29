@@ -1,0 +1,503 @@
+# =============================================================================
+# Docker Compose for Development with Sharding + PgBouncer
+# =============================================================================
+#
+# 4-shard PostgreSQL cluster with streaming replication and PgBouncer pooling.
+#
+# Architecture:
+#   ┌─────────────────────────────────────────────────────────────────────┐
+#   │                       API Server (Hot Reload)                       │
+#   │                   SHARDING_ENABLED=true :8080                       │
+#   └─────────────────────────────────────────────────────────────────────┘
+#          │              │              │              │
+#          ▼              ▼              ▼              ▼
+#    ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐
+#    │PgBouncer │   │PgBouncer │   │PgBouncer │   │PgBouncer │
+#    │ Pool 0   │   │ Pool 1   │   │ Pool 2   │   │ Pool 3   │
+#    │  :6430   │   │  :6431   │   │  :6432   │   │  :6433   │
+#    └────┬─────┘   └────┬─────┘   └────┬─────┘   └────┬─────┘
+#         │              │              │              │
+#         ▼              ▼              ▼              ▼
+#    ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐
+#    │ Shard 0  │   │ Shard 1  │   │ Shard 2  │   │ Shard 3  │
+#    │ Primary  │   │ Primary  │   │ Primary  │   │ Primary  │
+#    │  :5440   │   │  :5441   │   │  :5442   │   │  :5443   │
+#    └────┬─────┘   └────┬─────┘   └────┬─────┘   └────┬─────┘
+#         │              │              │              │
+#         ▼              ▼              ▼              ▼
+#    ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐
+#    │ Shard 0  │   │ Shard 1  │   │ Shard 2  │   │ Shard 3  │
+#    │ Replica  │   │ Replica  │   │ Replica  │   │ Replica  │
+#    │  :5450   │   │  :5451   │   │  :5452   │   │  :5453   │
+#    └──────────┘   └──────────┘   └──────────┘   └──────────┘
+#
+# Usage:
+#   docker-compose up -d                    # Start shards + replicas + redis
+#   docker-compose --profile api up -d      # Include API server with hot reload
+#   docker-compose --profile loadtest up -d # Include Gatling load test
+#   docker-compose --profile pooled up -d   # Include PgBouncer connection pooling
+#
+# Ports:
+#   API Server: 8080 (with hot reload via Air)
+#   PgBouncer: 6430-6433 (connection poolers)
+#   Primary shards: 5440-5443 (read/write)
+#   Replica shards: 5450-5453 (read-only)
+#   Redis: 6379
+#
+# =============================================================================
+
+services:
+  # ===========================================================================
+  # API SERVER (with hot reload for development)
+  # ===========================================================================
+  messenger_server:
+    build:
+      context: ./server
+      target: dev
+    container_name: messenger_server
+    hostname: messenger_server
+    environment:
+      - PORT=8080
+      - SHARDING_ENABLED=true
+      - SHARDING_COUNT=4
+      - SHARDING_PER_SHARD_HOSTS=true
+      - SHARDING_BASE_HOST=shard
+      - SHARDING_BASE_PORT=5432
+      - SHARDING_REPLICA_BASE_PORT=5432
+      - DB_WRITE_USER=postgres
+      - DB_WRITE_PASSWORD=postgres
+      - DB_WRITE_NAME=messenger
+      - DB_WRITE_MAX_OPEN_CONNS=200
+      - DB_WRITE_MAX_IDLE_CONNS=100
+      - DB_WRITE_CONN_MAX_LIFETIME=5
+      - ENABLE_PREFORK=false
+    volumes:
+      - ./server:/app
+    ports:
+      - "8080:8080"
+    depends_on:
+      shard-0:
+        condition: service_healthy
+      shard-1:
+        condition: service_healthy
+      shard-2:
+        condition: service_healthy
+      shard-3:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8080/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    command: ["air", "-c", ".air.toml"]
+    networks:
+      - sharded-network
+    profiles:
+      - api
+
+  # ===========================================================================
+  # SHARD 0 - PRIMARY
+  # ===========================================================================
+  shard-0:
+    image: postgres:16-alpine
+    container_name: shard-0
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: messenger
+    ports:
+      - "5440:5432"
+    volumes:
+      - shard0_data:/var/lib/postgresql/data
+      - ./database/postgres/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d messenger"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - sharded-network
+
+  # ===========================================================================
+  # SHARD 0 - REPLICA
+  # ===========================================================================
+  shard-0-replica:
+    image: postgres:16-alpine
+    container_name: shard-0-replica
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: messenger
+      PRIMARY_HOST: shard-0
+      PRIMARY_PORT: 5432
+      REPLICA_USER: replicator
+      REPLICA_PASSWORD: replica_password
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5450:5432"
+    volumes:
+      - shard0_replica_data:/var/lib/postgresql/data
+      - ./database/postgres/replica/replica-entrypoint.sh:/replica-entrypoint.sh:ro
+    entrypoint: ["/bin/bash", "/replica-entrypoint.sh"]
+    depends_on:
+      shard-0:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d messenger"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - sharded-network
+
+  # ===========================================================================
+  # SHARD 1 - PRIMARY
+  # ===========================================================================
+  shard-1:
+    image: postgres:16-alpine
+    container_name: shard-1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: messenger
+    ports:
+      - "5441:5432"
+    volumes:
+      - shard1_data:/var/lib/postgresql/data
+      - ./database/postgres/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d messenger"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - sharded-network
+
+  # ===========================================================================
+  # SHARD 1 - REPLICA
+  # ===========================================================================
+  shard-1-replica:
+    image: postgres:16-alpine
+    container_name: shard-1-replica
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: messenger
+      PRIMARY_HOST: shard-1
+      PRIMARY_PORT: 5432
+      REPLICA_USER: replicator
+      REPLICA_PASSWORD: replica_password
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5451:5432"
+    volumes:
+      - shard1_replica_data:/var/lib/postgresql/data
+      - ./database/postgres/replica/replica-entrypoint.sh:/replica-entrypoint.sh:ro
+    entrypoint: ["/bin/bash", "/replica-entrypoint.sh"]
+    depends_on:
+      shard-1:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d messenger"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - sharded-network
+
+  # ===========================================================================
+  # SHARD 2 - PRIMARY
+  # ===========================================================================
+  shard-2:
+    image: postgres:16-alpine
+    container_name: shard-2
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: messenger
+    ports:
+      - "5442:5432"
+    volumes:
+      - shard2_data:/var/lib/postgresql/data
+      - ./database/postgres/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d messenger"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - sharded-network
+
+  # ===========================================================================
+  # SHARD 2 - REPLICA
+  # ===========================================================================
+  shard-2-replica:
+    image: postgres:16-alpine
+    container_name: shard-2-replica
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: messenger
+      PRIMARY_HOST: shard-2
+      PRIMARY_PORT: 5432
+      REPLICA_USER: replicator
+      REPLICA_PASSWORD: replica_password
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5452:5432"
+    volumes:
+      - shard2_replica_data:/var/lib/postgresql/data
+      - ./database/postgres/replica/replica-entrypoint.sh:/replica-entrypoint.sh:ro
+    entrypoint: ["/bin/bash", "/replica-entrypoint.sh"]
+    depends_on:
+      shard-2:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d messenger"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - sharded-network
+
+  # ===========================================================================
+  # SHARD 3 - PRIMARY
+  # ===========================================================================
+  shard-3:
+    image: postgres:16-alpine
+    container_name: shard-3
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: messenger
+    ports:
+      - "5443:5432"
+    volumes:
+      - shard3_data:/var/lib/postgresql/data
+      - ./database/postgres/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d messenger"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - sharded-network
+
+  # ===========================================================================
+  # SHARD 3 - REPLICA
+  # ===========================================================================
+  shard-3-replica:
+    image: postgres:16-alpine
+    container_name: shard-3-replica
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: messenger
+      PRIMARY_HOST: shard-3
+      PRIMARY_PORT: 5432
+      REPLICA_USER: replicator
+      REPLICA_PASSWORD: replica_password
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5453:5432"
+    volumes:
+      - shard3_replica_data:/var/lib/postgresql/data
+      - ./database/postgres/replica/replica-entrypoint.sh:/replica-entrypoint.sh:ro
+    entrypoint: ["/bin/bash", "/replica-entrypoint.sh"]
+    depends_on:
+      shard-3:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d messenger"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - sharded-network
+
+  # ===========================================================================
+  # PGBOUNCER 0 - Connection pooler for Shard 0
+  # ===========================================================================
+  pgbouncer-0:
+    image: edoburu/pgbouncer:1.21.0-p0
+    container_name: pgbouncer-0
+    environment:
+      DB_HOST: shard-0
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      POOL_MODE: session
+      MAX_CLIENT_CONN: 10000
+      DEFAULT_POOL_SIZE: 100
+      MIN_POOL_SIZE: 10
+      MAX_DB_CONNECTIONS: 200
+      AUTH_TYPE: md5
+    ports:
+      - "6430:5432"
+    depends_on:
+      shard-0:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "localhost", "-p", "5432"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - sharded-network
+    profiles:
+      - pooled
+
+  # ===========================================================================
+  # PGBOUNCER 1 - Connection pooler for Shard 1
+  # ===========================================================================
+  pgbouncer-1:
+    image: edoburu/pgbouncer:1.21.0-p0
+    container_name: pgbouncer-1
+    environment:
+      DB_HOST: shard-1
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      POOL_MODE: session
+      MAX_CLIENT_CONN: 10000
+      DEFAULT_POOL_SIZE: 100
+      MIN_POOL_SIZE: 10
+      MAX_DB_CONNECTIONS: 200
+      AUTH_TYPE: md5
+    ports:
+      - "6431:5432"
+    depends_on:
+      shard-1:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "localhost", "-p", "5432"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - sharded-network
+    profiles:
+      - pooled
+
+  # ===========================================================================
+  # PGBOUNCER 2 - Connection pooler for Shard 2
+  # ===========================================================================
+  pgbouncer-2:
+    image: edoburu/pgbouncer:1.21.0-p0
+    container_name: pgbouncer-2
+    environment:
+      DB_HOST: shard-2
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      POOL_MODE: session
+      MAX_CLIENT_CONN: 10000
+      DEFAULT_POOL_SIZE: 100
+      MIN_POOL_SIZE: 10
+      MAX_DB_CONNECTIONS: 200
+      AUTH_TYPE: md5
+    ports:
+      - "6432:5432"
+    depends_on:
+      shard-2:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "localhost", "-p", "5432"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - sharded-network
+    profiles:
+      - pooled
+
+  # ===========================================================================
+  # PGBOUNCER 3 - Connection pooler for Shard 3
+  # ===========================================================================
+  pgbouncer-3:
+    image: edoburu/pgbouncer:1.21.0-p0
+    container_name: pgbouncer-3
+    environment:
+      DB_HOST: shard-3
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      POOL_MODE: session
+      MAX_CLIENT_CONN: 10000
+      DEFAULT_POOL_SIZE: 100
+      MIN_POOL_SIZE: 10
+      MAX_DB_CONNECTIONS: 200
+      AUTH_TYPE: md5
+    ports:
+      - "6433:5432"
+    depends_on:
+      shard-3:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "localhost", "-p", "5432"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - sharded-network
+    profiles:
+      - pooled
+
+  # ===========================================================================
+  # Redis (for caching)
+  # ===========================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sharded-network
+
+  # ===========================================================================
+  # Load Testing Service (Gatling)
+  # ===========================================================================
+  loadtest:
+    build:
+      context: ./loadtest/gatling
+    container_name: messenger_loadtest
+    environment:
+      - BASE_URL=${LOADTEST_BASE_URL:-http://host.docker.internal:8080}
+      - TEST_TYPE=${LOADTEST_TYPE:-load}
+      - SIMULATION=${LOADTEST_SIMULATION:-messenger.CreateUserSimulation}
+      - TARGET_USERS=${LOADTEST_USERS:-100}
+      - TEST_DURATION=${LOADTEST_DURATION:-60}
+      - RAMP_DURATION=${LOADTEST_RAMP:-30}
+      - REQUESTS_PER_SECOND=${LOADTEST_RPS:-1000}
+    volumes:
+      - ./loadtest/gatling/results:/results
+    networks:
+      - sharded-network
+    profiles:
+      - loadtest
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  shard0_data:
+  shard0_replica_data:
+  shard1_data:
+  shard1_replica_data:
+  shard2_data:
+  shard2_replica_data:
+  shard3_data:
+  shard3_replica_data:
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  sharded-network:
+    driver: bridge

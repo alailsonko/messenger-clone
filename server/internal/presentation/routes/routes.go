@@ -34,10 +34,13 @@ Routes receive application services and create handlers with those dependencies:
 package routes
 
 import (
+	"context"
 	"log"
 	"time"
 
 	"github.com/alailsonko/messenger-clone/server/internal/domain/service"
+	"github.com/alailsonko/messenger-clone/server/internal/infra/database/shard"
+	persistrepo "github.com/alailsonko/messenger-clone/server/internal/persistence/repository"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/recover"
 	"github.com/gofiber/fiber/v3/middleware/timeout"
@@ -60,8 +63,8 @@ import (
 //
 //	app := fiber.New()
 //	userService := appservice.NewUserService(writeRepo, readRepo)
-//	routes.SetupRoutes(app, userService)
-func SetupRoutes(app *fiber.App, userService service.UserService) {
+//	routes.SetupRoutes(app, userService, nil)
+func SetupRoutes(app *fiber.App, userService service.UserService, shardManager *shard.ShardManager) {
 	// ==========================================================================
 	// Recovery Middleware - Prevents panics from crashing the server
 	// ==========================================================================
@@ -83,9 +86,16 @@ func SetupRoutes(app *fiber.App, userService service.UserService) {
 
 	// Health check endpoint for load balancers and monitoring
 	app.Get("/health", func(c fiber.Ctx) error {
-		return c.JSON(fiber.Map{
+		response := fiber.Map{
 			"status": "ok",
-		})
+		}
+		if shardManager != nil {
+			response["shards"] = shardManager.ShardCount()
+			response["mode"] = "sharded"
+		} else {
+			response["mode"] = "single"
+		}
+		return c.JSON(response)
 	})
 
 	// API v1 routes
@@ -93,4 +103,50 @@ func SetupRoutes(app *fiber.App, userService service.UserService) {
 
 	// Setup all domain route groups
 	SetupUserRoutes(api, userService)
+
+	// Shard statistics endpoint (only available in sharded mode)
+	if shardManager != nil {
+		SetupShardRoutes(api, shardManager)
+	}
+}
+
+// SetupShardRoutes configures shard-related endpoints
+//
+// These endpoints are only available when running in sharded mode.
+// They provide visibility into shard distribution and health.
+//
+// Routes:
+//
+//	GET /api/v1/shards/stats → Get user distribution across shards
+func SetupShardRoutes(api fiber.Router, shardManager *shard.ShardManager) {
+	shards := api.Group("/shards")
+
+	// Get shard statistics (user distribution)
+	shards.Get("/stats", func(c fiber.Ctx) error {
+		// Create a sharded repository just for stats
+		repo := persistrepo.NewShardedUserRepository(shardManager).(*persistrepo.ShardedUserRepository)
+
+		stats, err := repo.GetShardStats(context.Background())
+		if err != nil {
+			return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+		}
+
+		var totalUsers int64
+		shardStats := make([]fiber.Map, len(stats))
+		for i, s := range stats {
+			totalUsers += s.UserCount
+			shardStats[i] = fiber.Map{
+				"shard_id":   s.ShardID,
+				"shard_name": s.ShardName,
+				"user_count": s.UserCount,
+				"healthy":    true,
+			}
+		}
+
+		return c.JSON(fiber.Map{
+			"shards":      shardStats,
+			"total_users": totalUsers,
+			"shard_count": shardManager.ShardCount(),
+		})
+	})
 }

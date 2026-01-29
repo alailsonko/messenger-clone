@@ -54,8 +54,8 @@ class CreateUserSimulation extends Simulation {
       .post("/api/v1/users/")
       .body(StringBody(
         """{
-          |  "firstName": "${firstName}",
-          |  "lastName": "${lastName}"
+          |  "first_name": "${firstName}",
+          |  "last_name": "${lastName}"
           |}""".stripMargin
       )).asJson
       .check(status.in(200, 201))

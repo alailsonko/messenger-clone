@@ -3,8 +3,7 @@ Package main is the entry point for the Messenger Clone API server.
 
 # Architecture Overview
 
-This server implements a CQRS (Command Query Responsibility Segregation) pattern
-with separate read and write database connections for optimal performance and scalability.
+This server uses horizontal database sharding with consistent hashing for scalability.
 
 	┌─────────────────────────────────────────────────────────────────────────┐
 	│                           HTTP Requests                                  │
@@ -30,24 +29,24 @@ with separate read and write database connections for optimal performance and sc
 	┌─────────────────────────────────────────────────────────────────────────┐
 	│                         Application Layer                                │
 	│  - UserService (business logic orchestration)                            │
-	│  - Encapsulates CQRS pattern (handlers don't know about buses)           │
-	│  - Write operations → Primary DB                                         │
-	│  - Read operations → Replica DB                                          │
+	│  - ShardManager routes to correct shard via consistent hashing           │
 	└─────────────────────────────────────────────────────────────────────────┘
 	                                    │
-	                    ┌───────────────┴───────────────┐
-	                    ▼                               ▼
-	┌───────────────────────────────┐   ┌───────────────────────────────┐
-	│      Write Repository         │   │       Read Repository         │
-	│   (Primary Database)          │   │    (Replica Database)         │
-	└───────────────────────────────┘   └───────────────────────────────┘
-	                    │                               │
-	                    ▼                               ▼
-	┌───────────────────────────────┐   ┌───────────────────────────────┐
-	│    PostgreSQL Primary         │   │    PostgreSQL Replica         │
-	│    (messenger_db_primary)     │   │    (messenger_db_replica)     │
-	│    Port: 5432                 │   │    Port: 5433                 │
-	└───────────────────────────────┘   └───────────────────────────────┘
+	          ┌─────────────────────────┼─────────────────────────┐
+	          │           │             │             │           │
+	          ▼           ▼             ▼             ▼           ▼
+	   ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
+	   │   Shard 0   │ │   Shard 1   │ │   Shard 2   │ │   Shard 3   │
+	   │  Primary    │ │  Primary    │ │  Primary    │ │  Primary    │
+	   │   :5440     │ │   :5441     │ │   :5442     │ │   :5443     │
+	   └──────┬──────┘ └──────┬──────┘ └──────┬──────┘ └──────┬──────┘
+	          │               │               │               │
+	          ▼               ▼               ▼               ▼
+	   ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
+	   │   Shard 0   │ │   Shard 1   │ │   Shard 2   │ │   Shard 3   │
+	   │  Replica    │ │  Replica    │ │  Replica    │ │  Replica    │
+	   │   :5450     │ │   :5451     │ │   :5452     │ │   :5453     │
+	   └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘
 
 # Service Lifecycle Management
 
@@ -55,12 +54,12 @@ The application uses Fiber's built-in service lifecycle management. Services imp
 the fiber.Service interface and are automatically started/stopped by Fiber:
 
 	Startup Order:
-	  1. DatabaseService.Start() - Verifies database connections are alive
-	  2. ApplicationService.Start() - Initializes UserService with CQRS repositories
+	  1. ShardedDatabaseService.Start() - Connects to all shards
+	  2. ApplicationService.Start() - Initializes UserService with ShardManager
 
 	Shutdown Order (reverse):
 	  1. ApplicationService.Terminate() - Flushes pending operations
-	  2. DatabaseService.Terminate() - Closes database connections
+	  2. ShardedDatabaseService.Terminate() - Closes all shard connections
 
 Each service receives a context with a configurable timeout (default: 30s) that allows
 for graceful startup/shutdown with proper cancellation handling.
@@ -73,19 +72,11 @@ Configuration is loaded from environment variables:
 	  - PORT: HTTP server port (default: 8080)
 	  - ENABLE_PREFORK: Enable prefork mode for multi-core (default: true)
 
-	Write Database (Primary):
-	  - DB_WRITE_HOST: Primary database host (default: localhost)
-	  - DB_WRITE_PORT: Primary database port (default: 5432)
-	  - DB_WRITE_USER: Database user (default: root)
-	  - DB_WRITE_PASSWORD: Database password (default: password)
-	  - DB_WRITE_NAME: Database name (default: postgres)
-
-	Read Database (Replica):
-	  - DB_READ_HOST: Replica database host (default: localhost)
-	  - DB_READ_PORT: Replica database port (default: 5433)
-	  - DB_READ_USER: Database user (default: root)
-	  - DB_READ_PASSWORD: Database password (default: password)
-	  - DB_READ_NAME: Database name (default: postgres)
+	Sharding:
+	  - SHARDING_COUNT: Number of shards (default: 4)
+	  - SHARDING_VIRTUAL_NODES: Virtual nodes per shard (default: 150)
+	  - SHARDING_BASE_HOST: Base hostname (default: localhost)
+	  - SHARDING_BASE_PORT: Starting port (default: 5440)
 
 # Graceful Shutdown
 
@@ -99,14 +90,14 @@ The server handles graceful shutdown automatically:
 
 # Usage
 
+	# Start shards
+	docker-compose up -d
+
 	# Development (with hot reload via Air)
 	make dev
 
-	# Production (with Docker Compose)
-	make compose-up
-
-	# Stop all services
-	make compose-down
+	# Production
+	./messenger-api
 */
 package main
 
@@ -117,11 +108,8 @@ import (
 
 	"github.com/alailsonko/messenger-clone/server/config"
 	"github.com/alailsonko/messenger-clone/server/internal/bootstrap"
-	"github.com/alailsonko/messenger-clone/server/internal/infra/database"
 	"github.com/alailsonko/messenger-clone/server/internal/presentation/routes"
-	"github.com/alailsonko/messenger-clone/server/tools/migration/runner"
 	"github.com/gofiber/fiber/v3"
-	"gorm.io/gorm/logger"
 )
 
 // main is the application entry point.
@@ -150,69 +138,31 @@ func main() {
 	cfg := config.Load()
 
 	// ==========================================================================
-	// Database Connections
+	// Database Setup (Sharded Mode)
 	// ==========================================================================
 	//
-	// Create the connection manager with separate connections for read and write
-	// operations (CQRS pattern). This allows:
+	// The server uses horizontal sharding with consistent hashing:
+	//   - Data distributed across multiple shards (default: 4)
+	//   - MD5 consistent hashing with virtual nodes for even distribution
+	//   - Each shard has streaming replication to a hot standby
 	//
-	//   - Write operations → Primary database (strong consistency)
-	//   - Read operations  → Replica database (eventual consistency, better scalability)
-	//
-	// The connection manager handles:
-	//   - Connection pooling
-	//   - Automatic retries on connection failure
-	//   - Health checks via Ping()
-	//
-	// Note: The replica database is synchronized from the primary via PostgreSQL
-	// streaming replication. There may be a small delay (usually milliseconds)
-	// between writes and their visibility on the replica.
-	connManager, err := database.NewConnectionManager(cfg.WriteDB, cfg.ReadDB, logger.Default)
-	if err != nil {
-		log.Fatalf("Failed to connect to databases: %v", err)
+	log.Printf("Starting with %d shards on %s:%d+",
+		cfg.Sharding.ShardCount, cfg.Sharding.BaseHost, cfg.Sharding.BasePort)
+
+	// Create sharded database service
+	shardService := bootstrap.NewShardedDatabaseService(cfg.Sharding, cfg.WriteDB)
+
+	// Start shard service early to get the manager
+	shardCtx, shardCancel := context.WithTimeout(context.Background(), 30*time.Second)
+	if err := shardService.Start(shardCtx); err != nil {
+		shardCancel()
+		log.Fatalf("Failed to start shard service: %v", err)
 	}
+	shardCancel()
 
-	// ==========================================================================
-	// Database Migrations
-	// ==========================================================================
-	//
-	// Run pending database migrations before starting the server.
-	// This ensures the database schema is always up-to-date.
-	//
-	// Migrations are applied to the primary (write) database only.
-	// The replica will receive changes through PostgreSQL streaming replication.
-	migrationCtx, migrationCancel := context.WithTimeout(context.Background(), 60*time.Second)
-	defer migrationCancel()
-
-	if _, err := runner.RunLatest(migrationCtx, connManager.WriteDB()); err != nil {
-		log.Fatalf("Failed to run migrations: %v", err)
-	}
-
-	// ==========================================================================
-	// Service Registration
-	// ==========================================================================
-	//
-	// Services implement fiber.Service interface and are managed by Fiber's
-	// built-in lifecycle manager. Each service must implement:
-	//
-	//   - Start(ctx context.Context) error    → Initialize the service
-	//   - Terminate(ctx context.Context) error → Cleanup resources
-	//   - String() string                      → Service name for logging
-	//   - State(ctx context.Context) (string, error) → Current state
-	//
-	// Services are started in registration order and terminated in reverse order.
-
-	// DatabaseService wraps the connection manager and provides:
-	//   - Health checks during startup (Ping)
-	//   - Graceful connection closure during shutdown
-	dbService := bootstrap.NewDatabaseService(connManager)
-
-	// ApplicationService initializes the CQRS infrastructure:
-	//   - Creates command and query buses
-	//   - Registers all command handlers (CreateUser, UpdateUser, DeleteUser)
-	//   - Registers all query handlers (GetUser, ListUsers)
-	//   - Wires repositories with appropriate database connections
-	appService := bootstrap.NewApplicationService(connManager.WriteDB(), connManager.ReadDB())
+	// Create application service with sharding
+	appService := bootstrap.NewShardedApplicationService(shardService.ShardManager())
+	services := []fiber.Service{shardService, appService}
 
 	// ==========================================================================
 	// Fiber Application Setup
@@ -241,11 +191,7 @@ func main() {
 	//
 	app := fiber.New(fiber.Config{
 		// Register services for automatic lifecycle management.
-		// Order matters: DatabaseService starts first, terminates last.
-		Services: []fiber.Service{
-			dbService,  // Started 1st, terminated 2nd
-			appService, // Started 2nd, terminated 1st
-		},
+		Services: services,
 
 		// Performance tuning for high concurrency
 		Concurrency:       512 * 1024, // Max concurrent connections (512K)
@@ -295,9 +241,12 @@ func main() {
 	//     PUT    /:id        → UpdateUser (UserService)
 	//     DELETE /:id        → DeleteUser (UserService)
 	//
+	//   /api/v1/shards (only in sharded mode)
+	//     GET    /stats      → GetShardStats
+	//
 	// The UserService is passed to handlers, encapsulating all user business logic
 	// and CQRS operations (write to primary, read from replica).
-	routes.SetupRoutes(app, appService.UserService)
+	routes.SetupRoutes(app, appService.UserService, appService.ShardManager)
 
 	// ==========================================================================
 	// Server Startup

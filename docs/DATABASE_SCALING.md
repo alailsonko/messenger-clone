@@ -1,12 +1,24 @@
 # Database Scaling & Sharding Guide
 
-## 📊 Current State (6.87M users)
+## 📊 Current State (1M+ users across 4 shards)
 
-| Table | Total Size | Table Size | Index Size | Rows |
-|-------|------------|------------|------------|------|
-| users | 1,038 MB | 448 MB | 590 MB | 6.87M |
+| Shard | Users | Status |
+|-------|-------|--------|
+| Shard 0 | 233,831 | ✅ Primary + Replica |
+| Shard 1 | 249,883 | ✅ Primary + Replica |
+| Shard 2 | 259,295 | ✅ Primary + Replica |
+| Shard 3 | 259,363 | ✅ Primary + Replica |
+| **Total** | **1,002,372** | **Evenly distributed** |
 
-**Observation**: Indexes (590 MB) are larger than data (448 MB) - this is expected with multiple indexes.
+### Load Test Results
+
+| Concurrent Users | Throughput | Success Rate | Mean Response |
+|------------------|------------|--------------|---------------|
+| 1,000 | 384 req/sec | 100% | 2ms |
+| 5,000 | 7,783 req/sec | 99.7% | 514ms |
+| 10,000 | 6,245 req/sec | 95.0% | 1,250ms |
+
+**Observation**: Sharding with consistent hashing achieves near-perfect data distribution and handles 6K+ writes/sec with all replicas in sync.
 
 ---
 
@@ -36,7 +48,7 @@
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-You're currently at ~7M users with read replicas. Let's explore the next levels!
+You're currently at **1M+ users with 4-shard architecture and streaming replication**. Sharding is already implemented!
 
 ---
 
@@ -532,88 +544,53 @@ WHERE created_at > NOW() - INTERVAL '30 days';
 
 ## 5️⃣ Implementation Roadmap
 
-### Phase 1: Optimize Current Setup (Now - 10M users)
+### Phase 1: Optimize Current Setup ✅ COMPLETED
 - [x] Read replicas ✅
 - [x] Connection pooling at app level ✅
 - [x] Query optimization ✅
-- [ ] Add PgBouncer
-- [ ] Add Redis caching
+- [x] PgBouncer available (profile-based)
+- [x] Redis caching layer ✅
 
-### Phase 2: Partitioning (10M - 100M users)
-- [ ] Implement hash partitioning on users table
-- [ ] Automate partition creation
-- [ ] Set up partition maintenance jobs
+### Phase 2: Sharding ✅ COMPLETED
+- [x] Implemented consistent hashing with MD5 + 150 virtual nodes ✅
+- [x] 4-shard architecture with primaries and replicas ✅
+- [x] ShardManager for automatic routing ✅
+- [x] Parallel scatter-gather queries ✅
+- [x] Streaming replication for all shards ✅
 
-### Phase 3: Sharding (100M+ users)
-- [ ] Evaluate Citus vs application-level sharding
-- [ ] Design shard key strategy
-- [ ] Implement shard router
-- [ ] Handle cross-shard queries
+### Phase 3: Production Optimization (Future)
+- [ ] Add more shards as data grows (8, 16, etc.)
+- [ ] Implement read routing to replicas for read-heavy workloads
+- [ ] Add cross-shard query caching
+- [ ] Consider Citus for advanced distributed queries
 
 ---
 
-## 6️⃣ Quick Start: Add Partitioning to Your Project
+## 6️⃣ Quick Start: Run Sharded Environment
 
-Let me create a migration for hash partitioning:
+```bash
+# Start 4-shard cluster with replicas
+docker-compose up -d
 
-```go
-// migrations/20260129000000_partition_users_table.go
+# Verify all containers are healthy
+docker ps --format "table {{.Names}}\t{{.Status}}"
 
-package migrations
+# Run API with sharding enabled
+cd server
+SHARDING_ENABLED=true ./messenger-api
 
-import (
-    "gorm.io/gorm"
-)
+# Check shard stats
+curl http://localhost:8080/api/v1/shards/stats | jq
 
-func init() {
-    Migrations = append(Migrations, Migration{
-        Version:     "20260129000000",
-        Description: "Partition users table by hash",
-        Up: func(db *gorm.DB) error {
-            // This is a complex migration - backup first!
-            
-            // 1. Create new partitioned table
-            sql := `
-            -- Create new partitioned table
-            CREATE TABLE users_new (
-                id UUID NOT NULL DEFAULT uuidv7(),
-                created_at TIMESTAMPTZ DEFAULT NOW(),
-                updated_at TIMESTAMPTZ,
-                first_name VARCHAR(100) NOT NULL,
-                last_name VARCHAR(100) NOT NULL,
-                PRIMARY KEY (id)
-            ) PARTITION BY HASH (id);
-            
-            -- Create 16 partitions
-            CREATE TABLE users_p0 PARTITION OF users_new FOR VALUES WITH (MODULUS 16, REMAINDER 0);
-            CREATE TABLE users_p1 PARTITION OF users_new FOR VALUES WITH (MODULUS 16, REMAINDER 1);
-            CREATE TABLE users_p2 PARTITION OF users_new FOR VALUES WITH (MODULUS 16, REMAINDER 2);
-            CREATE TABLE users_p3 PARTITION OF users_new FOR VALUES WITH (MODULUS 16, REMAINDER 3);
-            CREATE TABLE users_p4 PARTITION OF users_new FOR VALUES WITH (MODULUS 16, REMAINDER 4);
-            CREATE TABLE users_p5 PARTITION OF users_new FOR VALUES WITH (MODULUS 16, REMAINDER 5);
-            CREATE TABLE users_p6 PARTITION OF users_new FOR VALUES WITH (MODULUS 16, REMAINDER 6);
-            CREATE TABLE users_p7 PARTITION OF users_new FOR VALUES WITH (MODULUS 16, REMAINDER 7);
-            CREATE TABLE users_p8 PARTITION OF users_new FOR VALUES WITH (MODULUS 16, REMAINDER 8);
-            CREATE TABLE users_p9 PARTITION OF users_new FOR VALUES WITH (MODULUS 16, REMAINDER 9);
-            CREATE TABLE users_p10 PARTITION OF users_new FOR VALUES WITH (MODULUS 16, REMAINDER 10);
-            CREATE TABLE users_p11 PARTITION OF users_new FOR VALUES WITH (MODULUS 16, REMAINDER 11);
-            CREATE TABLE users_p12 PARTITION OF users_new FOR VALUES WITH (MODULUS 16, REMAINDER 12);
-            CREATE TABLE users_p13 PARTITION OF users_new FOR VALUES WITH (MODULUS 16, REMAINDER 13);
-            CREATE TABLE users_p14 PARTITION OF users_new FOR VALUES WITH (MODULUS 16, REMAINDER 14);
-            CREATE TABLE users_p15 PARTITION OF users_new FOR VALUES WITH (MODULUS 16, REMAINDER 15);
-            
-            -- Create indexes
-            CREATE INDEX idx_users_new_name ON users_new (first_name, last_name);
-            CREATE INDEX idx_users_new_created ON users_new (created_at DESC);
-            `
-            return db.Exec(sql).Error
-        },
-        Down: func(db *gorm.DB) error {
-            return db.Exec("DROP TABLE IF EXISTS users_new CASCADE").Error
-        },
-    })
-}
+# Verify replication
+for i in 0 1 2 3; do
+  PRIMARY=$(docker exec shard-$i psql -U postgres -d messenger -t -c "SELECT COUNT(*) FROM users")
+  REPLICA=$(docker exec shard-$i-replica psql -U postgres -d messenger -t -c "SELECT COUNT(*) FROM users")
+  echo "Shard $i: PRIMARY=$PRIMARY REPLICA=$REPLICA"
+done
 ```
+
+See [SHARDING_GUIDE.md](SHARDING_GUIDE.md) for detailed implementation documentation.
 
 ---
 
@@ -626,12 +603,19 @@ func init() {
 
 ---
 
-## 🎯 Recommendation for Your Project
+## 🎯 Current Architecture Summary
 
-Given your current state (6.87M users, ~1GB):
+**Implemented and tested:**
 
-1. **Immediate**: Add PgBouncer + Redis caching
-2. **At 20M users**: Implement hash partitioning
-3. **At 100M+ users**: Consider Citus or application-level sharding
+- ✅ **4-shard PostgreSQL cluster** with consistent hashing (MD5 + 150 virtual nodes)
+- ✅ **Streaming replication** on all shards (primaries + hot standby replicas)
+- ✅ **1M+ users** evenly distributed across shards
+- ✅ **7,783 req/sec** throughput at 5K concurrent users
+- ✅ **99.7% success rate** under heavy load
+- ✅ **Replicas perfectly synced** during 6K+ writes/second
 
-**Partitioning should be your next step** - it's much simpler than sharding and will easily handle 100M+ users on a single server with good hardware.
+**Next steps for scaling:**
+
+1. **Add more shards** (8, 16) as data grows beyond 10M users per shard
+2. **Route reads to replicas** for read-heavy workloads
+3. **Consider Citus** for advanced distributed SQL features

@@ -35,6 +35,16 @@ type ServerConfig struct {
 	EnablePrefork bool   `yaml:"enable_prefork"`
 }
 
+// ShardConfig holds configuration for database sharding
+type ShardConfig struct {
+	ShardCount      int    `yaml:"shard_count"`       // Number of shards (default: 4)
+	VirtualNodes    int    `yaml:"virtual_nodes"`     // Virtual nodes per shard for consistent hashing
+	BaseHost        string `yaml:"base_host"`         // Base hostname pattern (e.g., "localhost" or "shard")
+	BasePort        int    `yaml:"base_port"`         // Starting port for primaries (shard-0: port, shard-1: port+1, etc.)
+	ReplicaBasePort int    `yaml:"replica_base_port"` // Starting port for replicas (default: BasePort+10)
+	PerShardHosts   bool   `yaml:"per_shard_hosts"`   // If true, use {BaseHost}-{i} for each shard host (Docker mode)
+}
+
 // Config holds all application configuration
 type Config struct {
 	// Server configuration
@@ -43,6 +53,9 @@ type Config struct {
 	// Database configuration (CQRS: separate read/write)
 	WriteDB DBConfig `yaml:"write_db"`
 	ReadDB  DBConfig `yaml:"read_db"`
+
+	// Sharding configuration
+	Sharding ShardConfig `yaml:"sharding"`
 
 	// Migration configuration (legacy support)
 	Version            int                  `yaml:"version"`
@@ -73,8 +86,8 @@ func Load() *Config {
 		WriteDB: DBConfig{
 			Host:            getEnv("DB_WRITE_HOST", "localhost"),
 			Port:            getEnvInt("DB_WRITE_PORT", 5432),
-			User:            getEnv("DB_WRITE_USER", "root"),
-			Password:        getEnv("DB_WRITE_PASSWORD", "password"),
+			User:            getEnv("DB_WRITE_USER", "postgres"),
+			Password:        getEnv("DB_WRITE_PASSWORD", "postgres"),
 			Database:        getEnv("DB_WRITE_NAME", "postgres"),
 			MaxOpenConns:    getEnvInt("DB_WRITE_MAX_OPEN_CONNS", 100),
 			MaxIdleConns:    getEnvInt("DB_WRITE_MAX_IDLE_CONNS", 50),
@@ -83,12 +96,20 @@ func Load() *Config {
 		ReadDB: DBConfig{
 			Host:            getEnv("DB_READ_HOST", "localhost"),
 			Port:            getEnvInt("DB_READ_PORT", 5433),
-			User:            getEnv("DB_READ_USER", "root"),
-			Password:        getEnv("DB_READ_PASSWORD", "password"),
+			User:            getEnv("DB_READ_USER", "postgres"),
+			Password:        getEnv("DB_READ_PASSWORD", "postgres"),
 			Database:        getEnv("DB_READ_NAME", "postgres"),
 			MaxOpenConns:    getEnvInt("DB_READ_MAX_OPEN_CONNS", 100),
 			MaxIdleConns:    getEnvInt("DB_READ_MAX_IDLE_CONNS", 50),
 			ConnMaxLifetime: getEnvInt("DB_READ_CONN_MAX_LIFETIME", 10),
+		},
+		Sharding: ShardConfig{
+			ShardCount:      getEnvInt("SHARDING_COUNT", 4),
+			VirtualNodes:    getEnvInt("SHARDING_VIRTUAL_NODES", 150),
+			BaseHost:        getEnv("SHARDING_BASE_HOST", "localhost"),
+			BasePort:        getEnvInt("SHARDING_BASE_PORT", 5440),
+			ReplicaBasePort: getEnvInt("SHARDING_REPLICA_BASE_PORT", 5450),
+			PerShardHosts:   getEnvBool("SHARDING_PER_SHARD_HOSTS", false),
 		},
 	}
 }

@@ -55,3 +55,6 @@ logs/
 # Debug
 debug
 *.debug
+
+loadtest/results/
+loadtest/gatling/results/
