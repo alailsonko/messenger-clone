@@ -109,7 +109,9 @@ import (
 	"github.com/alailsonko/messenger-clone/server/config"
 	"github.com/alailsonko/messenger-clone/server/internal/bootstrap"
 	"github.com/alailsonko/messenger-clone/server/internal/presentation/routes"
+	"github.com/bytedance/sonic"
 	"github.com/gofiber/fiber/v3"
+	_ "go.uber.org/automaxprocs" // Automatically set GOMAXPROCS to match container CPU quota
 )
 
 // main is the application entry point.
@@ -193,11 +195,27 @@ func main() {
 		// Register services for automatic lifecycle management.
 		Services: services,
 
+		// =====================================================================
+		// High-Performance JSON Encoder (Sonic)
+		// =====================================================================
+		// Sonic is 2-5x faster than encoding/json and supports SIMD acceleration.
+		// This significantly improves JSON serialization/deserialization throughput.
+		JSONEncoder: sonic.Marshal,
+		JSONDecoder: sonic.Unmarshal,
+
+		// =====================================================================
 		// Performance tuning for high concurrency
+		// =====================================================================
 		Concurrency:       512 * 1024, // Max concurrent connections (512K)
-		ReadBufferSize:    8192,       // 8KB read buffer
-		WriteBufferSize:   8192,       // 8KB write buffer
+		ReadBufferSize:    16384,      // 16KB read buffer (larger for batch requests)
+		WriteBufferSize:   16384,      // 16KB write buffer (larger JSON responses)
 		ReduceMemoryUsage: false,      // Don't trade memory for CPU
+
+		// Network optimizations
+		IdleTimeout:      30 * time.Second, // Close idle connections after 30s
+		ReadTimeout:      10 * time.Second, // Max time to read request
+		WriteTimeout:     10 * time.Second, // Max time to write response
+		DisableKeepalive: false,            // Keep connections alive for reuse
 
 		// ServicesStartupContextProvider returns a context for service startup.
 		//

@@ -75,7 +75,12 @@ func (s *ShardedDatabaseService) Start(ctx context.Context) error {
 			if s.config.PerShardHosts {
 				// Docker mode: each shard has its own hostname (e.g., pgbouncer-0, shard-0)
 				writeHost = fmt.Sprintf("%s-%d", s.config.BaseHost, i)
-				readHost = fmt.Sprintf("%s-%d-replica", s.config.BaseHost, i)
+				// Use separate ReplicaHost if configured (allows pgbouncer for writes, shard for reads)
+				replicaBaseHost := s.config.ReplicaHost
+				if replicaBaseHost == "" {
+					replicaBaseHost = s.config.BaseHost
+				}
+				readHost = fmt.Sprintf("%s-%d-replica", replicaBaseHost, i)
 				writePort = s.config.BasePort
 				readPort = s.config.ReplicaBasePort
 			} else {

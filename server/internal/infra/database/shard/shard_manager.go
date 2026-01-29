@@ -6,7 +6,9 @@
 package shard
 
 import (
+	"context"
 	"crypto/md5"
+	"database/sql"
 	"encoding/binary"
 	"fmt"
 	"hash/fnv"
@@ -138,39 +140,90 @@ func NewShardManager(configs []ShardConfig, virtualNodes int, log logger.Interfa
 		logger:       log,
 	}
 
-	// Initialize each shard
+	// Initialize each shard concurrently for faster startup
+	type shardResult struct {
+		shard *Shard
+		cfg   ShardConfig
+		err   error
+	}
+
+	results := make(chan shardResult, len(configs))
+	var wg sync.WaitGroup
+
 	for _, cfg := range configs {
-		shard, err := manager.createShard(cfg)
-		if err != nil {
+		wg.Add(1)
+		go func(c ShardConfig) {
+			defer wg.Done()
+			shard, err := manager.createShard(c)
+			results <- shardResult{shard: shard, cfg: c, err: err}
+		}(cfg)
+	}
+
+	// Wait for all shards to initialize
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
+
+	// Collect results
+	for result := range results {
+		if result.err != nil {
 			// Close any already-connected shards
 			manager.Close()
-			return nil, fmt.Errorf("failed to create shard %d (%s): %w", cfg.ID, cfg.Name, err)
+			return nil, fmt.Errorf("failed to create shard %d (%s): %w", result.cfg.ID, result.cfg.Name, result.err)
 		}
-		manager.shards[cfg.ID] = shard
-		manager.shardList = append(manager.shardList, shard)
+		manager.shards[result.cfg.ID] = result.shard
+		manager.shardList = append(manager.shardList, result.shard)
 
 		// Add virtual nodes to hash ring
 		for i := 0; i < virtualNodes; i++ {
-			virtualNodeKey := fmt.Sprintf("%s-vn%d", cfg.Name, i)
-			manager.hashRing.Add(virtualNodeKey, cfg.ID)
+			virtualNodeKey := fmt.Sprintf("%s-vn%d", result.cfg.Name, i)
+			manager.hashRing.Add(virtualNodeKey, result.cfg.ID)
 		}
 	}
 
 	return manager, nil
 }
 
+// warmupPool pre-establishes database connections to reduce latency on first requests
+func (sm *ShardManager) warmupPool(db *sql.DB, count int) {
+	if count <= 0 {
+		count = 10
+	}
+
+	ctx := context.Background()
+	var wg sync.WaitGroup
+	for i := 0; i < count; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			conn, err := db.Conn(ctx)
+			if err == nil {
+				// Execute a simple query to ensure the connection is truly established
+				conn.PingContext(ctx)
+				conn.Close() // Return to pool
+			}
+		}()
+	}
+	wg.Wait()
+}
+
 // createShard creates a single shard with its database connections
 func (sm *ShardManager) createShard(cfg ShardConfig) (*Shard, error) {
 	// Create write (primary) connection
+	// Optimized DSN for high throughput with PgBouncer transaction pooling
+	// default_query_exec_mode=simple_protocol disables pgx statement caching for PgBouncer compatibility
 	writeDSN := fmt.Sprintf(
-		"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable connect_timeout=5",
+		"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable connect_timeout=5 default_query_exec_mode=simple_protocol",
 		cfg.WriteHost, cfg.WritePort, cfg.WriteUser, cfg.WritePassword, cfg.WriteDatabase,
 	)
 
 	writeDB, err := gorm.Open(postgres.Open(writeDSN), &gorm.Config{
 		Logger:                 sm.logger,
-		SkipDefaultTransaction: true,
-		PrepareStmt:            true,
+		SkipDefaultTransaction: true,  // Skip transaction wrapper for single queries (2-3x faster)
+		PrepareStmt:            false, // Disabled for PgBouncer transaction pooling mode
+		QueryFields:            false, // Don't wrap SELECT * - use explicit column selection
+		CreateBatchSize:        1000,  // Batch inserts for better throughput
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to write database: %w", err)
@@ -198,19 +251,26 @@ func (sm *ShardManager) createShard(cfg ShardConfig) (*Shard, error) {
 	writeSQLDB.SetMaxOpenConns(maxOpen)
 	writeSQLDB.SetMaxIdleConns(maxIdle)
 	writeSQLDB.SetConnMaxLifetime(maxLifetime)
+	writeSQLDB.SetConnMaxIdleTime(5 * time.Minute) // Close idle connections after 5 min
+
+	// Warm up the connection pool with a small number of connections
+	// to reduce latency on first requests without exhausting connection limits
+	sm.warmupPool(writeSQLDB, 5)
 
 	// Create read (replica) connection
 	var readDB *gorm.DB
 	if cfg.ReadHost != "" {
+		// Read replicas connect directly to PostgreSQL (not through PgBouncer) but use simple protocol for consistency
 		readDSN := fmt.Sprintf(
-			"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable connect_timeout=5",
+			"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable connect_timeout=5 default_query_exec_mode=simple_protocol",
 			cfg.ReadHost, cfg.ReadPort, cfg.ReadUser, cfg.ReadPassword, cfg.ReadDatabase,
 		)
 
 		readDB, err = gorm.Open(postgres.Open(readDSN), &gorm.Config{
 			Logger:                 sm.logger,
-			SkipDefaultTransaction: true,
-			PrepareStmt:            true,
+			SkipDefaultTransaction: true,  // No transactions needed for reads
+			PrepareStmt:            false, // Disabled for PgBouncer transaction pooling mode
+			QueryFields:            false, // Use explicit column selection
 		})
 		if err != nil {
 			// Close write connection before returning error
@@ -228,6 +288,10 @@ func (sm *ShardManager) createShard(cfg ShardConfig) (*Shard, error) {
 		readSQLDB.SetMaxOpenConns(maxOpen)
 		readSQLDB.SetMaxIdleConns(maxIdle)
 		readSQLDB.SetConnMaxLifetime(maxLifetime)
+		readSQLDB.SetConnMaxIdleTime(5 * time.Minute)
+
+		// Warm up read connection pool with small number of connections
+		sm.warmupPool(readSQLDB, 5)
 	} else {
 		// No replica configured, use write DB for reads
 		readDB = writeDB

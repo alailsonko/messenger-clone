@@ -39,7 +39,8 @@ type ServerConfig struct {
 type ShardConfig struct {
 	ShardCount      int    `yaml:"shard_count"`       // Number of shards (default: 4)
 	VirtualNodes    int    `yaml:"virtual_nodes"`     // Virtual nodes per shard for consistent hashing
-	BaseHost        string `yaml:"base_host"`         // Base hostname pattern (e.g., "localhost" or "shard")
+	BaseHost        string `yaml:"base_host"`         // Base hostname pattern for writes (e.g., "pgbouncer" or "shard")
+	ReplicaHost     string `yaml:"replica_host"`      // Base hostname for replicas (e.g., "shard", defaults to BaseHost)
 	BasePort        int    `yaml:"base_port"`         // Starting port for primaries (shard-0: port, shard-1: port+1, etc.)
 	ReplicaBasePort int    `yaml:"replica_base_port"` // Starting port for replicas (default: BasePort+10)
 	PerShardHosts   bool   `yaml:"per_shard_hosts"`   // If true, use {BaseHost}-{i} for each shard host (Docker mode)
@@ -107,6 +108,7 @@ func Load() *Config {
 			ShardCount:      getEnvInt("SHARDING_COUNT", 4),
 			VirtualNodes:    getEnvInt("SHARDING_VIRTUAL_NODES", 150),
 			BaseHost:        getEnv("SHARDING_BASE_HOST", "localhost"),
+			ReplicaHost:     getEnv("SHARDING_REPLICA_HOST", ""), // Empty = use BaseHost
 			BasePort:        getEnvInt("SHARDING_BASE_PORT", 5440),
 			ReplicaBasePort: getEnvInt("SHARDING_REPLICA_BASE_PORT", 5450),
 			PerShardHosts:   getEnvBool("SHARDING_PER_SHARD_HOSTS", false),

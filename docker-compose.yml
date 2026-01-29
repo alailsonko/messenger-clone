@@ -3,6 +3,7 @@
 # =============================================================================
 #
 # 4-shard PostgreSQL cluster with streaming replication and PgBouncer pooling.
+# PgBouncer is enabled by default for connection pooling.
 #
 # Architecture:
 #   ┌─────────────────────────────────────────────────────────────────────┐
@@ -32,10 +33,9 @@
 #    └──────────┘   └──────────┘   └──────────┘   └──────────┘
 #
 # Usage:
-#   docker-compose up -d                    # Start shards + replicas + redis
+#   docker-compose up -d                    # Start shards + replicas + pgbouncer + redis
 #   docker-compose --profile api up -d      # Include API server with hot reload
 #   docker-compose --profile loadtest up -d # Include Gatling load test
-#   docker-compose --profile pooled up -d   # Include PgBouncer connection pooling
 #
 # Ports:
 #   API Server: 8080 (with hot reload via Air)
@@ -61,28 +61,42 @@ services:
       - SHARDING_ENABLED=true
       - SHARDING_COUNT=4
       - SHARDING_PER_SHARD_HOSTS=true
-      - SHARDING_BASE_HOST=shard
+      # =====================================================================
+      # Use PgBouncer for writes, direct shard replicas for reads
+      # PgBouncer handles write pooling; replicas have lighter load
+      # =====================================================================
+      - SHARDING_BASE_HOST=pgbouncer
+      - SHARDING_REPLICA_HOST=shard
       - SHARDING_BASE_PORT=5432
       - SHARDING_REPLICA_BASE_PORT=5432
       - DB_WRITE_USER=postgres
       - DB_WRITE_PASSWORD=postgres
       - DB_WRITE_NAME=messenger
-      - DB_WRITE_MAX_OPEN_CONNS=200
-      - DB_WRITE_MAX_IDLE_CONNS=100
+      # =====================================================================
+      # Connection Pool Tuning (per shard)
+      # With PgBouncer, we can use more connections (PgBouncer multiplexes)
+      # =====================================================================
+      - DB_WRITE_MAX_OPEN_CONNS=500
+      - DB_WRITE_MAX_IDLE_CONNS=250
       - DB_WRITE_CONN_MAX_LIFETIME=5
+      # =====================================================================
+      # Server Tuning
+      # =====================================================================
       - ENABLE_PREFORK=false
+      - GOGC=100
+      - GOMEMLIMIT=1GiB
     volumes:
       - ./server:/app
     ports:
       - "8080:8080"
     depends_on:
-      shard-0:
+      pgbouncer-0:
         condition: service_healthy
-      shard-1:
+      pgbouncer-1:
         condition: service_healthy
-      shard-2:
+      pgbouncer-2:
         condition: service_healthy
-      shard-3:
+      pgbouncer-3:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:8080/health"]
@@ -327,11 +341,13 @@ services:
       DB_PORT: 5432
       DB_USER: postgres
       DB_PASSWORD: postgres
-      POOL_MODE: session
+      POOL_MODE: transaction
       MAX_CLIENT_CONN: 10000
-      DEFAULT_POOL_SIZE: 100
-      MIN_POOL_SIZE: 10
-      MAX_DB_CONNECTIONS: 200
+      DEFAULT_POOL_SIZE: 200
+      MIN_POOL_SIZE: 50
+      MAX_DB_CONNECTIONS: 300
+      RESERVE_POOL_SIZE: 50
+      RESERVE_POOL_TIMEOUT: 3
       AUTH_TYPE: md5
     ports:
       - "6430:5432"
@@ -345,8 +361,6 @@ services:
       retries: 10
     networks:
       - sharded-network
-    profiles:
-      - pooled
 
   # ===========================================================================
   # PGBOUNCER 1 - Connection pooler for Shard 1
@@ -359,11 +373,13 @@ services:
       DB_PORT: 5432
       DB_USER: postgres
       DB_PASSWORD: postgres
-      POOL_MODE: session
+      POOL_MODE: transaction
       MAX_CLIENT_CONN: 10000
-      DEFAULT_POOL_SIZE: 100
-      MIN_POOL_SIZE: 10
-      MAX_DB_CONNECTIONS: 200
+      DEFAULT_POOL_SIZE: 200
+      MIN_POOL_SIZE: 50
+      MAX_DB_CONNECTIONS: 300
+      RESERVE_POOL_SIZE: 50
+      RESERVE_POOL_TIMEOUT: 3
       AUTH_TYPE: md5
     ports:
       - "6431:5432"
@@ -377,8 +393,6 @@ services:
       retries: 10
     networks:
       - sharded-network
-    profiles:
-      - pooled
 
   # ===========================================================================
   # PGBOUNCER 2 - Connection pooler for Shard 2
@@ -391,11 +405,13 @@ services:
       DB_PORT: 5432
       DB_USER: postgres
       DB_PASSWORD: postgres
-      POOL_MODE: session
+      POOL_MODE: transaction
       MAX_CLIENT_CONN: 10000
-      DEFAULT_POOL_SIZE: 100
-      MIN_POOL_SIZE: 10
-      MAX_DB_CONNECTIONS: 200
+      DEFAULT_POOL_SIZE: 200
+      MIN_POOL_SIZE: 50
+      MAX_DB_CONNECTIONS: 300
+      RESERVE_POOL_SIZE: 50
+      RESERVE_POOL_TIMEOUT: 3
       AUTH_TYPE: md5
     ports:
       - "6432:5432"
@@ -409,8 +425,6 @@ services:
       retries: 10
     networks:
       - sharded-network
-    profiles:
-      - pooled
 
   # ===========================================================================
   # PGBOUNCER 3 - Connection pooler for Shard 3
@@ -423,11 +437,13 @@ services:
       DB_PORT: 5432
       DB_USER: postgres
       DB_PASSWORD: postgres
-      POOL_MODE: session
+      POOL_MODE: transaction
       MAX_CLIENT_CONN: 10000
-      DEFAULT_POOL_SIZE: 100
-      MIN_POOL_SIZE: 10
-      MAX_DB_CONNECTIONS: 200
+      DEFAULT_POOL_SIZE: 200
+      MIN_POOL_SIZE: 50
+      MAX_DB_CONNECTIONS: 300
+      RESERVE_POOL_SIZE: 50
+      RESERVE_POOL_TIMEOUT: 3
       AUTH_TYPE: md5
     ports:
       - "6433:5432"
@@ -441,8 +457,6 @@ services:
       retries: 10
     networks:
       - sharded-network
-    profiles:
-      - pooled
 
   # ===========================================================================
   # Redis (for caching)
