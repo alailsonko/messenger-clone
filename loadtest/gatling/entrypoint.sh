@@ -1,11 +1,15 @@
 #!/bin/bash
 set -e
 
+# Default simulation class
+SIMULATION=${SIMULATION:-"messenger.UserSimulation"}
+
 echo "========================================"
 echo "  Gatling Load Test Runner"
 echo "========================================"
 echo "  Base URL:     ${BASE_URL}"
 echo "  Test Type:    ${TEST_TYPE}"
+echo "  Simulation:   ${SIMULATION}"
 echo "  Target Users: ${TARGET_USERS}"
 echo "  Duration:     ${TEST_DURATION}s"
 echo "========================================"
@@ -27,8 +31,9 @@ done
 
 # Run Gatling in batch mode (non-interactive)
 echo "Starting Gatling simulation..."
+echo "DEBUG: Running: gatling.sh -s ${SIMULATION} --run-mode local"
 exec ${GATLING_HOME}/bin/gatling.sh \
-    --simulation messenger.UserSimulation \
+    -s "${SIMULATION}" \
     --run-description "Messenger API Load Test - ${TEST_TYPE}" \
     --results-folder /results \
     --run-mode local

@@ -1,2 +1,57 @@
+# Dependencies
 vendor/
 server/vendor/
+node_modules/
+
+# Go binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+server/messenger-api
+server/migration-tool
+loadtest/bin/
+
+# Go test/build
+*.test
+*.out
+*.prof
+coverage.txt
+coverage.html
+
+# Air (hot reload)
+server/.air_tmp/
+server/tmp/
+.air_tmp/
+tmp/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+*.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+
+# Load test results (can be regenerated)
+loadtest/results/
+
+# Logs
+*.log
+logs/
+
+# Debug
+debug
+*.debug

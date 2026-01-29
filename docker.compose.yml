@@ -122,6 +122,66 @@ services:
       - messenger_net
 
   # ==========================================================================
+  # PgBouncer - Connection Pooling (Optional - use profile)
+  # ==========================================================================
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    container_name: messenger_pgbouncer
+    hostname: messenger_pgbouncer
+    environment:
+      DATABASE_URL: postgres://root:password@messenger_db_primary:5432/postgres
+      POOL_MODE: transaction
+      MAX_CLIENT_CONN: 2000
+      DEFAULT_POOL_SIZE: 100
+      MIN_POOL_SIZE: 20
+      RESERVE_POOL_SIZE: 25
+      RESERVE_POOL_TIMEOUT: 3
+      SERVER_IDLE_TIMEOUT: 60
+      LOG_CONNECTIONS: 0
+      LOG_DISCONNECTIONS: 0
+    ports:
+      - "6432:5432"
+    depends_on:
+      messenger_db_primary:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "localhost", "-p", "5432"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - messenger_net
+    profiles:
+      - pooling
+
+  # ==========================================================================
+  # Redis - Caching Layer (Optional - use profile)
+  # ==========================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: messenger_redis
+    hostname: messenger_redis
+    command: >
+      redis-server
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --appendonly yes
+      --appendfsync everysec
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - messenger_net
+    profiles:
+      - caching
+
+  # ==========================================================================
   # Load Testing Service (Gatling - Java-based)
   # ==========================================================================
   loadtest:
@@ -131,8 +191,11 @@ services:
     environment:
       - BASE_URL=http://messenger_server:8080
       - TEST_TYPE=${LOADTEST_TYPE:-load}
+      - SIMULATION=${LOADTEST_SIMULATION:-messenger.UserSimulation}
       - TARGET_USERS=${LOADTEST_USERS:-100}
       - TEST_DURATION=${LOADTEST_DURATION:-60}
+      - RAMP_DURATION=${LOADTEST_RAMP:-30}
+      - REQUESTS_PER_SECOND=${LOADTEST_RPS:-1000}
     volumes:
       - ./loadtest/results:/results
     depends_on:
@@ -146,6 +209,7 @@ services:
 volumes:
   db_data:
   db_replica_data:
+  redis_data:
 
 networks:
   messenger_net:
