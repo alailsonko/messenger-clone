@@ -31,8 +31,7 @@ func (d *DBConfig) DSN() string {
 
 // ServerConfig holds HTTP server configuration
 type ServerConfig struct {
-	Port          string `yaml:"port"`
-	EnablePrefork bool   `yaml:"enable_prefork"`
+	Port string `yaml:"port"`
 }
 
 // ShardConfig holds configuration for database sharding
@@ -81,8 +80,7 @@ type EnvConfig struct {
 func Load() *Config {
 	return &Config{
 		Server: ServerConfig{
-			Port:          getEnv("PORT", "8080"),
-			EnablePrefork: getEnvBool("ENABLE_PREFORK", true),
+			Port: getEnv("PORT", "8080"),
 		},
 		WriteDB: DBConfig{
 			Host:            getEnv("DB_WRITE_HOST", "localhost"),

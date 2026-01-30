@@ -44,9 +44,9 @@ package handlers
 import (
 	"strconv"
 
+	"github.com/alailsonko/messenger-clone/server/internal/bootstrap"
 	domaindto "github.com/alailsonko/messenger-clone/server/internal/domain/dto"
 	"github.com/alailsonko/messenger-clone/server/internal/domain/errors"
-	"github.com/alailsonko/messenger-clone/server/internal/domain/service"
 	"github.com/alailsonko/messenger-clone/server/internal/presentation/dto"
 	"github.com/gofiber/fiber/v3"
 )
@@ -60,26 +60,26 @@ import (
 //
 // All business logic is delegated to the UserService.
 type UserHandler struct {
-	// userService handles all user-related business operations.
-	// It abstracts the CQRS pattern internally (separate read/write repos).
-	userService service.UserService
+	// appService holds the application service which contains the UserService.
+	// This allows deferred initialization in prefork mode.
+	appService *bootstrap.ApplicationService
 }
 
-// NewUserHandler creates a new UserHandler with the given UserService.
+// NewUserHandler creates a new UserHandler with the given ApplicationService.
 //
 // Parameters:
-//   - userService: The application service for user operations
+//   - appService: The application service containing user operations
 //
 // Returns:
 //   - A new UserHandler instance
 //
 // Example:
 //
-//	userService := appservice.NewUserService(writeRepo, readRepo)
-//	handler := handlers.NewUserHandler(userService)
-func NewUserHandler(userService service.UserService) *UserHandler {
+//	appService := bootstrap.NewApplicationService(writeDB, readDB)
+//	handler := handlers.NewUserHandler(appService)
+func NewUserHandler(appService *bootstrap.ApplicationService) *UserHandler {
 	return &UserHandler{
-		userService: userService,
+		appService: appService,
 	}
 }
 
@@ -141,7 +141,7 @@ func (h *UserHandler) GetAllUsers(c fiber.Ctx) error {
 		offset = 0
 	}
 
-	users, err := h.userService.GetAllUsers(ctx, domaindto.PaginationData{
+	users, err := h.appService.UserService.GetAllUsers(ctx, domaindto.PaginationData{
 		Limit:  limit,
 		Offset: offset,
 	})
@@ -201,7 +201,7 @@ func (h *UserHandler) GetUserByID(c fiber.Ctx) error {
 	ctx := c.Context()
 	id := c.Params("id")
 
-	user, err := h.userService.GetUserByID(ctx, id)
+	user, err := h.appService.UserService.GetUserByID(ctx, id)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
@@ -268,7 +268,7 @@ func (h *UserHandler) CreateUser(c fiber.Ctx) error {
 		})
 	}
 
-	user, err := h.userService.CreateUser(ctx, domaindto.CreateUserData{
+	user, err := h.appService.UserService.CreateUser(ctx, domaindto.CreateUserData{
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
 	})
@@ -345,7 +345,7 @@ func (h *UserHandler) UpdateUser(c fiber.Ctx) error {
 		})
 	}
 
-	user, err := h.userService.UpdateUser(ctx, id, domaindto.UpdateUserData{
+	user, err := h.appService.UserService.UpdateUser(ctx, id, domaindto.UpdateUserData{
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
 	})
@@ -399,7 +399,7 @@ func (h *UserHandler) DeleteUser(c fiber.Ctx) error {
 	ctx := c.Context()
 	id := c.Params("id")
 
-	err := h.userService.DeleteUser(ctx, id)
+	err := h.appService.UserService.DeleteUser(ctx, id)
 	if err != nil {
 		if err == errors.ErrUserNotFound {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{

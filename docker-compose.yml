@@ -2,35 +2,35 @@
 # Docker Compose for Development with Sharding + PgBouncer
 # =============================================================================
 #
-# 4-shard PostgreSQL cluster with streaming replication and PgBouncer pooling.
+# 5-shard PostgreSQL cluster with streaming replication and PgBouncer pooling.
 # PgBouncer is enabled by default for connection pooling.
 #
 # Architecture:
-#   ┌─────────────────────────────────────────────────────────────────────┐
-#   │                       API Server (Hot Reload)                       │
-#   │                   SHARDING_ENABLED=true :8080                       │
-#   └─────────────────────────────────────────────────────────────────────┘
-#          │              │              │              │
-#          ▼              ▼              ▼              ▼
-#    ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐
-#    │PgBouncer │   │PgBouncer │   │PgBouncer │   │PgBouncer │
-#    │ Pool 0   │   │ Pool 1   │   │ Pool 2   │   │ Pool 3   │
-#    │  :6430   │   │  :6431   │   │  :6432   │   │  :6433   │
-#    └────┬─────┘   └────┬─────┘   └────┬─────┘   └────┬─────┘
-#         │              │              │              │
-#         ▼              ▼              ▼              ▼
-#    ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐
-#    │ Shard 0  │   │ Shard 1  │   │ Shard 2  │   │ Shard 3  │
-#    │ Primary  │   │ Primary  │   │ Primary  │   │ Primary  │
-#    │  :5440   │   │  :5441   │   │  :5442   │   │  :5443   │
-#    └────┬─────┘   └────┬─────┘   └────┬─────┘   └────┬─────┘
-#         │              │              │              │
-#         ▼              ▼              ▼              ▼
-#    ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐
-#    │ Shard 0  │   │ Shard 1  │   │ Shard 2  │   │ Shard 3  │
-#    │ Replica  │   │ Replica  │   │ Replica  │   │ Replica  │
-#    │  :5450   │   │  :5451   │   │  :5452   │   │  :5453   │
-#    └──────────┘   └──────────┘   └──────────┘   └──────────┘
+#   ┌────────────────────────────────────────────────────────────────────────────────┐
+#   │                       API Server (Prefork with 7 CPU cores)                    │
+#   │                   SHARDING_ENABLED=true :8080                                  │
+#   └────────────────────────────────────────────────────────────────────────────────┘
+#          │              │              │              │              │
+#          ▼              ▼              ▼              ▼              ▼
+#    ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐
+#    │PgBouncer │   │PgBouncer │   │PgBouncer │   │PgBouncer │   │PgBouncer │
+#    │ Pool 0   │   │ Pool 1   │   │ Pool 2   │   │ Pool 3   │   │ Pool 4   │
+#    │  :6430   │   │  :6431   │   │  :6432   │   │  :6433   │   │  :6434   │
+#    └────┬─────┘   └────┬─────┘   └────┬─────┘   └────┬─────┘   └────┬─────┘
+#         │              │              │              │              │
+#         ▼              ▼              ▼              ▼              ▼
+#    ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐
+#    │ Shard 0  │   │ Shard 1  │   │ Shard 2  │   │ Shard 3  │   │ Shard 4  │
+#    │ Primary  │   │ Primary  │   │ Primary  │   │ Primary  │   │ Primary  │
+#    │  :5440   │   │  :5441   │   │  :5442   │   │  :5443   │   │  :5444   │
+#    └────┬─────┘   └────┬─────┘   └────┬─────┘   └────┬─────┘   └────┬─────┘
+#         │              │              │              │              │
+#         ▼              ▼              ▼              ▼              ▼
+#    ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐
+#    │ Shard 0  │   │ Shard 1  │   │ Shard 2  │   │ Shard 3  │   │ Shard 4  │
+#    │ Replica  │   │ Replica  │   │ Replica  │   │ Replica  │   │ Replica  │
+#    │  :5450   │   │  :5451   │   │  :5452   │   │  :5453   │   │  :5454   │
+#    └──────────┘   └──────────┘   └──────────┘   └──────────┘   └──────────┘
 #
 # Usage:
 #   docker-compose up -d                    # Start shards + replicas + pgbouncer + redis
@@ -38,28 +38,28 @@
 #   docker-compose --profile loadtest up -d # Include Gatling load test
 #
 # Ports:
-#   API Server: 8080 (with hot reload via Air)
-#   PgBouncer: 6430-6433 (connection poolers)
-#   Primary shards: 5440-5443 (read/write)
-#   Replica shards: 5450-5453 (read-only)
+#   API Server: 8080 (with prefork)
+#   PgBouncer: 6430-6434 (connection poolers)
+#   Primary shards: 5440-5444 (read/write)
+#   Replica shards: 5450-5454 (read-only)
 #   Redis: 6379
 #
 # =============================================================================
 
 services:
   # ===========================================================================
-  # API SERVER (with hot reload for development)
+  # API SERVER (Production with Prefork for multi-core performance)
   # ===========================================================================
   messenger_server:
     build:
       context: ./server
-      target: dev
+      target: production
     container_name: messenger_server
     hostname: messenger_server
     environment:
       - PORT=8080
       - SHARDING_ENABLED=true
-      - SHARDING_COUNT=4
+      - SHARDING_COUNT=5
       - SHARDING_PER_SHARD_HOSTS=true
       # =====================================================================
       # Use PgBouncer for writes, direct shard replicas for reads
@@ -80,13 +80,20 @@ services:
       - DB_WRITE_MAX_IDLE_CONNS=250
       - DB_WRITE_CONN_MAX_LIFETIME=5
       # =====================================================================
-      # Server Tuning
+      # Go Runtime Tuning
       # =====================================================================
-      - ENABLE_PREFORK=false
-      - GOGC=100
-      - GOMEMLIMIT=1GiB
-    volumes:
-      - ./server:/app
+      - GOGC=50
+      - GOMEMLIMIT=4GiB
+      # Number of prefork processes (one per CPU core for max throughput)
+      - GOMAXPROCS=7
+    deploy:
+      resources:
+        limits:
+          cpus: '7'
+          memory: 5G
+        reservations:
+          cpus: '6'
+          memory: 4G
     ports:
       - "8080:8080"
     depends_on:
@@ -98,13 +105,14 @@ services:
         condition: service_healthy
       pgbouncer-3:
         condition: service_healthy
+      pgbouncer-4:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:8080/health"]
       interval: 5s
       timeout: 5s
       retries: 30
       start_period: 30s
-    command: ["air", "-c", ".air.toml"]
     networks:
       - sharded-network
     profiles:
@@ -459,6 +467,93 @@ services:
       - sharded-network
 
   # ===========================================================================
+  # SHARD 4 - PRIMARY
+  # ===========================================================================
+  shard-4:
+    image: postgres:16-alpine
+    container_name: shard-4
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: messenger
+    ports:
+      - "5444:5432"
+    volumes:
+      - shard4_data:/var/lib/postgresql/data
+      - ./database/postgres/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d messenger"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - sharded-network
+
+  # ===========================================================================
+  # SHARD 4 - REPLICA
+  # ===========================================================================
+  shard-4-replica:
+    image: postgres:16-alpine
+    container_name: shard-4-replica
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: messenger
+      PRIMARY_HOST: shard-4
+      PRIMARY_PORT: 5432
+      REPLICA_USER: replicator
+      REPLICA_PASSWORD: replica_password
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5454:5432"
+    volumes:
+      - shard4_replica_data:/var/lib/postgresql/data
+      - ./database/postgres/replica/replica-entrypoint.sh:/replica-entrypoint.sh:ro
+    entrypoint: ["/bin/bash", "/replica-entrypoint.sh"]
+    depends_on:
+      shard-4:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d messenger"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - sharded-network
+
+  # ===========================================================================
+  # PGBOUNCER 4 - Connection pooler for Shard 4
+  # ===========================================================================
+  pgbouncer-4:
+    image: edoburu/pgbouncer:1.21.0-p0
+    container_name: pgbouncer-4
+    environment:
+      DB_HOST: shard-4
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      POOL_MODE: transaction
+      MAX_CLIENT_CONN: 10000
+      DEFAULT_POOL_SIZE: 200
+      MIN_POOL_SIZE: 50
+      MAX_DB_CONNECTIONS: 300
+      RESERVE_POOL_SIZE: 50
+      RESERVE_POOL_TIMEOUT: 3
+      AUTH_TYPE: md5
+    ports:
+      - "6434:5432"
+    depends_on:
+      shard-4:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "localhost", "-p", "5432"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - sharded-network
+
+  # ===========================================================================
   # Redis (for caching)
   # ===========================================================================
   redis:
@@ -508,6 +603,8 @@ volumes:
   shard2_replica_data:
   shard3_data:
   shard3_replica_data:
+  shard4_data:
+  shard4_replica_data:
 
 # =============================================================================
 # Networks

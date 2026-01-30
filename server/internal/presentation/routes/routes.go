@@ -38,8 +38,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/alailsonko/messenger-clone/server/internal/domain/service"
-	"github.com/alailsonko/messenger-clone/server/internal/infra/database/shard"
+	"github.com/alailsonko/messenger-clone/server/internal/bootstrap"
 	persistrepo "github.com/alailsonko/messenger-clone/server/internal/persistence/repository"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/recover"
@@ -57,14 +56,14 @@ import (
 //
 // Parameters:
 //   - app: The Fiber application instance
-//   - userService: The user service for user-related operations
+//   - appService: The application service containing all dependencies
 //
 // Example:
 //
 //	app := fiber.New()
-//	userService := appservice.NewUserService(writeRepo, readRepo)
-//	routes.SetupRoutes(app, userService, nil)
-func SetupRoutes(app *fiber.App, userService service.UserService, shardManager *shard.ShardManager) {
+//	appService := bootstrap.NewApplicationService(writeDB, readDB)
+//	routes.SetupRoutes(app, appService)
+func SetupRoutes(app *fiber.App, appService *bootstrap.ApplicationService) {
 	// ==========================================================================
 	// Recovery Middleware - Prevents panics from crashing the server
 	// ==========================================================================
@@ -89,9 +88,11 @@ func SetupRoutes(app *fiber.App, userService service.UserService, shardManager *
 		response := fiber.Map{
 			"status": "ok",
 		}
-		if shardManager != nil {
-			response["shards"] = shardManager.ShardCount()
+		if appService.IsSharded() && appService.ShardManager != nil {
+			response["shards"] = appService.ShardManager.ShardCount()
 			response["mode"] = "sharded"
+		} else if appService.IsSharded() {
+			response["mode"] = "sharded-initializing"
 		} else {
 			response["mode"] = "single"
 		}
@@ -102,11 +103,12 @@ func SetupRoutes(app *fiber.App, userService service.UserService, shardManager *
 	api := app.Group("/api/v1")
 
 	// Setup all domain route groups
-	SetupUserRoutes(api, userService)
+	// Pass appService so handlers get the UserService dynamically (after Start)
+	SetupUserRoutes(api, appService)
 
 	// Shard statistics endpoint (only available in sharded mode)
-	if shardManager != nil {
-		SetupShardRoutes(api, shardManager)
+	if appService.IsSharded() {
+		SetupShardRoutes(api, appService)
 	}
 }
 
@@ -118,11 +120,16 @@ func SetupRoutes(app *fiber.App, userService service.UserService, shardManager *
 // Routes:
 //
 //	GET /api/v1/shards/stats → Get user distribution across shards
-func SetupShardRoutes(api fiber.Router, shardManager *shard.ShardManager) {
+func SetupShardRoutes(api fiber.Router, appService *bootstrap.ApplicationService) {
 	shards := api.Group("/shards")
 
 	// Get shard statistics (user distribution)
 	shards.Get("/stats", func(c fiber.Ctx) error {
+		shardManager := appService.ShardManager
+		if shardManager == nil {
+			return c.Status(503).JSON(fiber.Map{"error": "shard manager not ready"})
+		}
+
 		// Create a sharded repository just for stats
 		repo := persistrepo.NewShardedUserRepository(shardManager).(*persistrepo.ShardedUserRepository)
 

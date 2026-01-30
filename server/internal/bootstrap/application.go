@@ -81,6 +81,9 @@ type ApplicationService struct {
 	// readDB is the replica database connection for read operations (non-sharded mode)
 	readDB *gorm.DB
 
+	// shardService is a reference to the shard service for deferred initialization (prefork mode)
+	shardService *ShardedDatabaseService
+
 	// sharded indicates if sharding is enabled
 	sharded bool
 
@@ -136,6 +139,7 @@ func NewApplicationService(writeDB, readDB *gorm.DB) *ApplicationService {
 		ShardManager: nil,
 		writeDB:      writeDB,
 		readDB:       readDB,
+		shardService: nil,
 		sharded:      false,
 		state:        "initialized",
 	}
@@ -159,32 +163,15 @@ func NewApplicationService(writeDB, readDB *gorm.DB) *ApplicationService {
 //	shardService := bootstrap.NewShardedDatabaseService(cfg.Sharding, cfg.WriteDB)
 //	// ... start shardService ...
 //	appService := bootstrap.NewShardedApplicationService(shardService.ShardManager())
-func NewShardedApplicationService(shardManager *shard.ShardManager) *ApplicationService {
-	// ==========================================================================
-	// Sharded Repository Layer
-	// ==========================================================================
-	//
-	// Create sharded repository that routes operations to correct shard
-	// based on user ID using consistent hashing.
-
-	shardedUserRepo := persistrepo.NewShardedUserRepository(shardManager)
-
-	// ==========================================================================
-	// Application Service Layer
-	// ==========================================================================
-	//
-	// Create application service with sharded repository.
-	// Both read and write use the same sharded repository (it handles routing).
-
-	userService := appservice.NewUserService(shardedUserRepo, shardedUserRepo)
-
+func NewShardedApplicationService(shardService *ShardedDatabaseService) *ApplicationService {
 	return &ApplicationService{
-		UserService:  userService,
-		ShardManager: shardManager,
+		UserService:  nil, // Will be initialized in Start()
+		ShardManager: nil, // Will be set from shardService in Start()
 		writeDB:      nil,
 		readDB:       nil,
 		sharded:      true,
 		state:        "initialized",
+		shardService: shardService,
 	}
 }
 
@@ -226,6 +213,22 @@ func (s *ApplicationService) Start(ctx context.Context) error {
 	// Perform startup validation
 	done := make(chan error, 1)
 	go func() {
+		// For sharded mode, initialize services from shardService
+		if s.sharded && s.shardService != nil {
+			shardManager := s.shardService.ShardManager()
+			if shardManager == nil {
+				done <- fmt.Errorf("ShardManager not initialized - ensure ShardedDatabaseService started first")
+				return
+			}
+			s.ShardManager = shardManager
+
+			// Create sharded repository
+			shardedUserRepo := persistrepo.NewShardedUserRepository(shardManager)
+
+			// Create user service with sharded repository
+			s.UserService = appservice.NewUserService(shardedUserRepo, shardedUserRepo)
+		}
+
 		// Validate that all services are initialized
 		if s.UserService == nil {
 			done <- fmt.Errorf("UserService not initialized")

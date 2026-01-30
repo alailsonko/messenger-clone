@@ -10,6 +10,7 @@ import (
 
 	"github.com/alailsonko/messenger-clone/server/config"
 	"github.com/alailsonko/messenger-clone/server/internal/infra/database/shard"
+	"github.com/gofiber/fiber/v3"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -20,6 +21,9 @@ import (
 // - Initialization: Creates connections to all shards
 // - Health checks: Verifies all shards are accessible
 // - Graceful shutdown: Closes all connections cleanly
+//
+// In prefork mode, each child process creates its own ShardedDatabaseService.
+// Migrations only run in the parent process to avoid race conditions.
 type ShardedDatabaseService struct {
 	shardManager *shard.ShardManager
 	config       config.ShardConfig
@@ -210,7 +214,17 @@ func (s *ShardedDatabaseService) ShardManager() *shard.ShardManager {
 }
 
 // runMigrations creates the partitioned users table on all shards
+//
+// In prefork mode, this only runs in the parent process to avoid
+// concurrent migration conflicts. Child processes skip this step.
 func (s *ShardedDatabaseService) runMigrations(manager *shard.ShardManager) error {
+	// Skip migrations in child processes (prefork mode)
+	// The parent process will have already run migrations before forking
+	if fiber.IsChild() {
+		log.Println("[ShardedDatabaseService] Child process - skipping migrations (parent already ran them)")
+		return nil
+	}
+
 	log.Println("[ShardedDatabaseService] Running migrations on all shards...")
 
 	for i := 0; i < s.config.ShardCount; i++ {

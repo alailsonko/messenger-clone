@@ -1,44 +1,59 @@
-.PHONY: build run clean
+# =============================================================================
+# Load Test Makefile - Gatling Load Testing
+# =============================================================================
+#
+# This Makefile is for running Gatling load tests via Docker Compose.
+# For standalone Go-based load testing, use the commands below.
+#
+# Preferred: Use the main Makefile commands from the project root:
+#   make loadtest          - Standard load test
+#   make loadtest-10k      - 10K concurrent users
+#   make loadtest-crud     - Full CRUD operations
+#   make loadtest-help     - Show all options
+#
+# =============================================================================
 
-# Build the load test binary
-build:
-	go build -o bin/loadtest ./cmd/loadtest
+.PHONY: help smoke load stress crud clean
 
-# Run tests
-run: build
-	./bin/loadtest -c 100 -d 30s
+# Default target
+help:
+	@echo "Load Test Commands (run from project root recommended):"
+	@echo ""
+	@echo "  make smoke    - Quick smoke test (10 users)"
+	@echo "  make load     - Standard load test (100 users)"
+	@echo "  make stress   - Stress test (500 users)"
+	@echo "  make crud     - CRUD operations test"
+	@echo "  make clean    - Clean results"
+	@echo ""
+	@echo "Or use Docker Compose from project root:"
+	@echo "  cd .. && make loadtest-help"
 
-# Full CRUD test with 200 workers for 1 minute
-stress: build
-	./bin/loadtest -c 200 -d 1m -t all
+# Quick smoke test
+smoke:
+	@echo "Running smoke test..."
+	cd .. && LOADTEST_TYPE=smoke LOADTEST_USERS=10 LOADTEST_DURATION=30 \
+		docker compose run --rm loadtest
 
-# Read-only test (highest throughput)
-read: build
-	./bin/loadtest -c 500 -d 30s -t read
+# Standard load test
+load:
+	@echo "Running load test (100 users)..."
+	cd .. && LOADTEST_TYPE=load LOADTEST_USERS=100 LOADTEST_DURATION=60 \
+		docker compose run --rm loadtest
 
-# Create-only test  
-create: build
-	./bin/loadtest -c 100 -d 30s -t create
+# Stress test
+stress:
+	@echo "Running stress test (500 users)..."
+	cd .. && LOADTEST_TYPE=stress LOADTEST_USERS=500 LOADTEST_DURATION=120 \
+		docker compose run --rm loadtest
 
-# Test maximum concurrent connections
-concurrent: build
-	./bin/loadtest -c 1000 -t concurrent
+# CRUD test
+crud:
+	@echo "Running CRUD test..."
+	cd .. && LOADTEST_SIMULATION=messenger.UserSimulation LOADTEST_TYPE=load \
+		LOADTEST_USERS=1000 LOADTEST_DURATION=60 \
+		docker compose run --rm loadtest
 
-# Breakpoint test - keep increasing until failure
-breakpoint: build
-	@echo "Testing 100 workers..."
-	./bin/loadtest -c 100 -d 10s -t read || true
-	@echo "\nTesting 500 workers..."
-	./bin/loadtest -c 500 -d 10s -t read || true
-	@echo "\nTesting 1000 workers..."
-	./bin/loadtest -c 1000 -d 10s -t read || true
-	@echo "\nTesting 2000 workers..."
-	./bin/loadtest -c 2000 -d 10s -t read || true
-
+# Clean results
 clean:
-	rm -rf bin/
-
-# Custom URL
-URL ?= http://localhost:8080
-run-custom: build
-	./bin/loadtest -url $(URL) -c 100 -d 30s
+	@echo "Cleaning load test results..."
+	rm -rf gatling/results/*
