@@ -263,7 +263,11 @@ messenger-clone/
 │           ├── CreateUserSimulation.scala
 │           └── UserSimulation.scala
 │
-├── docs/                       # Documentation
+├── docs/                       # 📖 Documentation
+│   ├── INDEX.md                # Documentation index
+│   ├── ARCHITECTURE.md         # Complete system overview
+│   ├── MIGRATIONS.md           # Database migrations guide
+│   ├── FOREIGN_KEYS.md         # Relations in sharded DBs
 │   ├── DATABASE_SCALING.md     # Database scaling guide
 │   ├── PARTITIONING_GUIDE.md   # Table partitioning guide
 │   ├── PERFORMANCE_TUNING.md   # Performance optimization
@@ -418,13 +422,28 @@ make logs-all
 | `shard-0-replica` to `shard-4-replica` | 5450-5454 | Read replicas |
 | `redis` | 6379 | Cache (optional) |
 
-## 📚 Additional Documentation
+## 📚 Documentation
 
-- [Database Scaling Guide](docs/DATABASE_SCALING.md)
-- [Sharding Implementation](docs/SHARDING_GUIDE.md)
-- [Table Partitioning](docs/PARTITIONING_GUIDE.md)
-- [Performance Tuning](docs/PERFORMANCE_TUNING.md)
-- [Load Test Instructions](loadtest/LOADTEST_INSTRUCTIONS.md)
+**Start Here:** [docs/INDEX.md](docs/INDEX.md) - Complete documentation index
+
+| Topic | Guide | Description |
+|-------|-------|-------------|
+| 🏗️ **Architecture** | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Complete system overview, use cases, who uses this |
+| 🔀 **Sharding** | [SHARDING_GUIDE.md](docs/SHARDING_GUIDE.md) | How we distribute data across databases |
+| 🔄 **Migrations** | [MIGRATIONS.md](docs/MIGRATIONS.md) | Database schema versioning explained |
+| 🔗 **Foreign Keys** | [FOREIGN_KEYS.md](docs/FOREIGN_KEYS.md) | Relationships in distributed databases |
+| ⚡ **Performance** | [PERFORMANCE_TUNING.md](docs/PERFORMANCE_TUNING.md) | How we achieved 100% success rate |
+| 📊 **Scaling** | [DATABASE_SCALING.md](docs/DATABASE_SCALING.md) | Comprehensive scaling strategies |
+| 📦 **Partitioning** | [PARTITIONING_GUIDE.md](docs/PARTITIONING_GUIDE.md) | PostgreSQL table partitioning |
+| 🧪 **Load Testing** | [LOADTEST_INSTRUCTIONS.md](loadtest/LOADTEST_INSTRUCTIONS.md) | Running performance tests |
+
+### Learning Paths
+
+**Beginner:** ARCHITECTURE → MIGRATIONS → FOREIGN_KEYS
+
+**Scaling:** DATABASE_SCALING → SHARDING_GUIDE → PARTITIONING_GUIDE
+
+**Performance:** PERFORMANCE_TUNING → DATABASE_SCALING → SHARDING_GUIDE
 
 ## 🤝 Contributing
 
